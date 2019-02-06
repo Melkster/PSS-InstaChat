@@ -1,7 +1,7 @@
 {
   "name": "InstaChat",
   "version": "0.0.1",
-  "description": "PSS",
+  "description": "The effortless chat app",
   "main": "server/app.js",
   "scripts": {
     "start": "cd server && nodemon app.js"
