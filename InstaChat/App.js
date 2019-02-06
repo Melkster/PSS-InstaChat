@@ -4,7 +4,7 @@ import {Alert,Button,StyleSheet, Text, View} from 'react-native';
 export default class App extends React.Component {
 
     onPressCreate() {
-        Alert.alert('This should create a new chatroom')
+        Alert.alert('This should create a chatroom')
     }
 
     onPressJoin() {
