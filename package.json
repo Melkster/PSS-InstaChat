@@ -11,5 +11,14 @@
   "dependencies": {
     "express": "^4.16.4",
     "socket.io": "^2.2.0"
+  },
+  "devDependencies": {
+    "nodemon": "^1.18.9"
+  },
+  "prettier": {
+    "useTabs": false,
+    "printWidth": 160,
+    "tabWidth": 4,
+    "singleQuote": false
   }
 }
