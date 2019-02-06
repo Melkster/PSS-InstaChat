@@ -1,5 +1,5 @@
 run:
-	node server/app.js
+	npm start
 
 install:
 	npm install

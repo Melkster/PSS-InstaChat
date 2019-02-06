@@ -2,9 +2,9 @@
   "name": "InstaChat",
   "version": "0.0.1",
   "description": "PSS",
-  "main": "app.js",
+  "main": "server/app.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "cd server && nodemon app.js"
   },
   "author": "Axel Nygårds, Melker Österberg",
   "license": "ISC",
