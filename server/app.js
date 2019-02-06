@@ -2,15 +2,17 @@ var app = require("express")();
 var http = require("http").Server(app);
 var io = require("socket.io")(http);
 
-app.get("/", function(req, res) {
-    res.sendfile("index.html");
+const port = 3000;
+
+app.get("/", (req, res) => {
+    res.sendFile(__dirname + "/index.html");
 });
 
 users = [];
 
-io.on("connection", function(socket) {
+io.on("connection", socket => {
     console.log("A user connected");
-    socket.on("setUsername", function(data) {
+    socket.on("setUsername", data => {
         console.log(data);
 
         if (users.indexOf(data) > -1) {
@@ -21,12 +23,12 @@ io.on("connection", function(socket) {
         }
     });
 
-    socket.on("msg", function(data) {
+    socket.on("msg", data => {
         //Send message to everyone
         io.sockets.emit("newmsg", data);
     });
 });
 
-http.listen(3000, function() {
-    console.log("listening on localhost:3000");
+http.listen(port, () => {
+    console.log(`Listening on localhost:${port}`);
 });
