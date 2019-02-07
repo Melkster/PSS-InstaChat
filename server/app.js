@@ -27,7 +27,7 @@ io.on("connection", socket => {
         io.sockets.emit("message", data);
     });
 
-    socket.on("disconnect", (foo, bar) => {
+    socket.on("disconnect", () => {
         console.log(`A user disconnected, socket ID ${socket.id}`);
     });
 });
