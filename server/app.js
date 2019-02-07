@@ -1,6 +1,6 @@
-var app = require("express")();
-var http = require("http").Server(app);
-var io = require("socket.io")(http);
+const app = require("express")();
+const http = require("http").Server(app);
+const io = require("socket.io")(http);
 
 const port = 3000;
 
@@ -8,7 +8,8 @@ app.get("/", (req, res) => {
     res.sendFile(__dirname + "/index.html");
 });
 
-users = [];
+var users = [];
+var messages = [];
 
 io.on("connection", socket => {
     console.log(`A user connected, socket ID ${socket.id}`);
@@ -24,6 +25,8 @@ io.on("connection", socket => {
     });
 
     socket.on("message", data => {
+        data.time = new Date(); // Adds time received to message
+        messages.push(data);
         io.sockets.emit("message", data);
     });
 
