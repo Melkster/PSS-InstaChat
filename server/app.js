@@ -23,9 +23,13 @@ io.on("connection", socket => {
         }
     });
 
-    socket.on("msg", data => {
+    socket.on("message", data => {
         //Send message to everyone
-        io.sockets.emit("newmsg", data);
+        io.sockets.emit("message", data);
+    });
+
+    socket.on("disconnect", () => {
+        console.log("A user disconnected");
     });
 });
 
