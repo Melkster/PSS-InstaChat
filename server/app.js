@@ -11,25 +11,24 @@ app.get("/", (req, res) => {
 users = [];
 
 io.on("connection", socket => {
-    console.log("A user connected");
-    socket.on("setUsername", data => {
-        console.log(data);
+    console.log(`A user connected, socket ID ${socket.id}`);
+    socket.on("setUsername", username => {
+        console.log(username);
 
-        if (users.indexOf(data) > -1) {
-            socket.emit("userExists", data + " username is taken! Try some other username.");
+        if (users.indexOf(username) > -1) {
+            socket.emit("userExists", username + " username is taken! Try some other username.");
         } else {
-            users.push(data);
-            socket.emit("userSet", { username: data });
+            users.push(username);
+            socket.emit("userSet", { username: username });
         }
     });
 
     socket.on("message", data => {
-        //Send message to everyone
         io.sockets.emit("message", data);
     });
 
-    socket.on("disconnect", () => {
-        console.log("A user disconnected");
+    socket.on("disconnect", (foo, bar) => {
+        console.log(`A user disconnected, socket ID ${socket.id}`);
     });
 });
 
