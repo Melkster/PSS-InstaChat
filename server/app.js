@@ -13,14 +13,20 @@ var messages = [];
 
 io.on("connection", socket => {
     console.log(`A user connected, socket ID ${socket.id}`);
+
     socket.on("setUsername", username => {
         console.log(username);
 
         if (users.indexOf(username) > -1) {
-            socket.emit("userExists", username + " username is taken! Try some other username.");
+            socket.emit("error", username + " username is taken! Try some other username.");
         } else {
             users.push(username);
             socket.emit("userSet", { username: username });
+        }
+
+        // After a new user joins, send them all previous messages
+        for (message of messages) {
+            socket.emit("message", message);
         }
     });
 
