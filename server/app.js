@@ -18,7 +18,7 @@ io.on("connection", socket => {
         console.log(username);
 
         if (users.indexOf(username) > -1) {
-            socket.emit("error", username + " username is taken! Try some other username.");
+            socket.emit("err", username + " username is taken! Try some other username.");
         } else {
             users.push(username);
             socket.emit("userSet", { username: username });
