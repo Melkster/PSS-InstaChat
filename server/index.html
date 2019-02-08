@@ -13,7 +13,7 @@
          socket.emit('setUsername', document.getElementById('name').value);
       };
 
-      socket.on('error', function(data) {
+      socket.on('err', function(data) {
          document.getElementById('error-container').innerHTML = data;
       });
 
