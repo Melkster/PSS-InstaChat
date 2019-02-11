@@ -61,16 +61,25 @@ class HomeScreen extends React.Component {
 }
 
 class ChatScreen extends React.Component {
+    constructor(props) {
+        super(props);
+        this.state = { message: '' }
+        this.submitMessage = this.submitMessage.bind(this);
+    }
+
     submitMessage() {
-       Alert.alert('Sending message to server');
+        // THIS IS WHERE A MESSAGE SHOULD BE SENT TO SERVER
+        alert('Sending: \"' + this.state.message + '\" to server');
     }
 
     render() {
         return (
+            //<View><Text>{this.state.message}</Text></View>
             <View style={{ flex: 1, alignItems: "center", justifyContent: "center" }}>
                 <TextInput
                     style={{height: 40}}
                     placeholder="Type your message!"
+                    onChangeText={(message) => this.setState({message})}
                 />
                 <TouchableOpacity
                     style = {styles.submitButton}
