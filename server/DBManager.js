@@ -2,10 +2,35 @@
 const fs = require('fs');
 const sqlite3 = require('sqlite3').verbose();
 
+var globaldb;
+
 class DBManager {
 
     initDatabase() {
+        let firstboot = false;
+        if (fs.existsSync("./db/global.db")) {
+            firstboot = false;
+        } else {
+            firstboot = true;
+        }
+
+        globaldb = new sqlite3.Database('./db/global.db', (err) => {
+            if (err) {
+                console.error(err.message);
+                return false;
+            } else {
+                console.log('Connected to global database.');
+            }
+        });
         
+        if(firstboot == true) {
+            globaldb.serialize(() => {
+                globaldb.run('CREATE TABLE GlobalUsers(USERHASH INT     PRIMARY KEY      NOT NULL        );')      })
+                .run('CREATE TABLE GlobalChats(CHATHASH INT     PRIMARY KEY      NOT NULL);')
+                .run('INSERT INTO GlobalUsers (USERHASH) VALUES(0);');
+        }
+
+        return true;
     }
 
     deinitDatabase() {

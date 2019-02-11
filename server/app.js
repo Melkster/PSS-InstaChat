@@ -10,6 +10,7 @@ app.get("/", (req, res) => {
 });
 
 const database = new DBManager();
+database.initDatabase();
 var users = [];
 var messages = [];
 
