@@ -1,9 +1,11 @@
-/** Interface to database which manages chats and users */
-class UserManager {
+/** Interface to the database which manages chats and users */
+const fs = require('fs');
+const sqlite3 = require('sqlite3').verbose();
+
+class DBManager {
+
     initDatabase() {
-        // SQL queries to initialize global database
-        // return: true if initialized successfully, otherwise false
-        // TODO
+        
     }
 
     deinitDatabase() {
@@ -64,4 +66,4 @@ class UserManager {
     }
 }
 
-module.exports = UserManager;
+module.exports = DBManager;
