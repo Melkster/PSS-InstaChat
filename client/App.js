@@ -92,11 +92,6 @@ class ChatScreen extends React.Component {
     }
 }
 
-/*function add(a, b) {
-        return a + b;
-}
-const add_lambda = (a, b) => a + b;*/
-
 const AppNavigator = createStackNavigator(
     {
         Home: HomeScreen,
