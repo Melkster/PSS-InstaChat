@@ -1,35 +1,38 @@
 /** Interface to the database which manages chats and users */
-const fs = require('fs');
-const sqlite3 = require('sqlite3').verbose();
-const crypto = require('crypto');
+const fs = require("fs");
+const sqlite3 = require("sqlite3").verbose();
+const crypto = require("crypto");
 
-var globaldb;
+var globalDB;
 
 class DBManager {
-
     initDatabase() {
-        let firstboot = false;
+        let firstBoot = false;
         if (fs.existsSync("./db/global.db")) {
-            firstboot = false;
+            firstBoot = false;
         } else {
-            firstboot = true;
+            firstBoot = true;
         }
 
-        globaldb = new sqlite3.Database('./db/global.db', (err) => {
+        globalDB = new sqlite3.Database("./db/global.db", err => {
             if (err) {
                 console.error(err.message);
                 return false;
             } else {
-                console.log('Connected to global database.');
+                console.log("Connected to global database.");
             }
         });
-        
-        if(firstboot == true) {
-            globaldb.serialize(() => {
-                globaldb.run('CREATE TABLE GlobalUsers(USERHASH INT     PRIMARY KEY      NOT NULL        );')      
-                .run('CREATE TABLE GlobalChats(CHATHASH INT     PRIMARY KEY      NOT NULL);')
-                .run('INSERT INTO GlobalUsers (USERHASH) VALUES(0);')});
+
+        if (firstBoot == true) {
+            globalDB.serialize(() => {
+                globalDB
+                    .run("CREATE TABLE GlobalUsers(USERHASH INT     PRIMARY KEY      NOT NULL        );")
+                    .run("CREATE TABLE GlobalChats(CHATHASH INT     PRIMARY KEY      NOT NULL);")
+                    .run("INSERT INTO GlobalUsers (USERHASH) VALUES(0);");
+            });
         }
+
+        console.log(DBManager.createUser());
 
         return true;
     }
@@ -39,7 +42,7 @@ class DBManager {
         // return: true if deinitialized successfully, otherwise false
         // low priority
     }
-    
+
     createChat(chatName) {
         // SQL query to create chat with `chatName`
         // return: chatID if created successfully, otherwise false
@@ -52,25 +55,24 @@ class DBManager {
         // low priority
     }
 
-    createUser() {
+    static createUser() {
         var success = false;
-        var userid;
+        var userID;
         var tries = 0;
-        while(success == false) {
+        while (success == false) {
             success = true;
-            userid = DBManager.sRandomBigValue();
-            globaldb.run('INSERT INTO GlobalUsers (USERHASH) VALUES(?);', [userid], (err) => {
-                if(err) {
+            userID = DBManager.sRandomBigValue();
+            globalDB.run("INSERT INTO GlobalUsers (USERHASH) VALUES(?);", [userID], err => {
+                if (err) {
                     success = false;
-                    if(tries > 16) {
+                    if (tries > 16) {
                         return false;
                     }
                     tries++;
-                } 
+                }
             });
         }
-        return userid;
-        //    globaldb.run('INSERT INTO GlobalUsers (USERHASH) VALUES(?);', [userhash]);
+        return userID;
     }
 
     deleteUser(userID) {
@@ -84,7 +86,7 @@ class DBManager {
         // return: true if user was added successfully, otherwise false
         // TODO
     }
-    
+
     removeUser(userID, chatID) {
         // SQL query to remove user with `userID` from chat with `chatID`
         // return: true if user was removed successfully, otherwise false
@@ -112,19 +114,19 @@ class DBManager {
 
     static sRandomBigValue() {
         var array = crypto.randomBytes(32);
-        var stringarray = [];
-        for (var i = 0; i < array.length; i++) { 
-            stringarray.push(DBManager.U8ToHexString(array[i]));
+        var stringArray = [];
+        for (var i = 0; i < array.length; i++) {
+            stringArray.push(DBManager.U8ToHexString(array[i]));
         }
-        return stringarray.join("");
+        return stringArray.join("");
     }
 
     static U8ToHexString(byte) {
         var string = "";
-        var hinybble = byte >> 4;
-        var lonybble = byte - (hinybble << 4);
-        string = hinybble.toString(16);
-        return string.concat(lonybble.toString(16));
+        var hiNybble = byte >> 4;
+        var loNybble = byte - (hiNybble << 4);
+        string = hiNybble.toString(16);
+        return string.concat(loNybble.toString(16));
     }
 }
 
