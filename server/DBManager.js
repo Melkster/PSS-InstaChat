@@ -32,8 +32,6 @@ class DBManager {
             });
         }
 
-        console.log(DBManager.createUser());
-
         return true;
     }
 
@@ -55,7 +53,7 @@ class DBManager {
         // low priority
     }
 
-    static createUser() {
+    createUser() {
         var success = false;
         var userID;
         var tries = 0;
@@ -82,9 +80,21 @@ class DBManager {
     }
 
     addUser(userID, userName, chatID) {
-        // SQL query to create user with `userName` to chat with `chatID`
+        // SQL query to add user with `userName` and `userID` to chat with `chatID`
         // return: true if user was added successfully, otherwise false
         // TODO
+    }
+
+    checkUser(userID, chatID) {
+        // SQL query to check if user with `userID` exists in chat with `chatID`
+        // (used to make sure users only post messages in chats they are actually in)
+        // TODO
+    }
+
+    verifyUser(userID, userName, chatID) {
+        // SQL query to verify that user with `userName` in chat with `chatID`
+        // actually has `userID` (used for authorization when user reconnects)
+        // low priority
     }
 
     removeUser(userID, chatID) {
