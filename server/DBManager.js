@@ -239,12 +239,14 @@ class DBManager {
     checkUser(userID, chatID) {
         // SQL query to check if user with `userID` exists in chat with `chatID`
         // (used to make sure users only post messages in chats they are actually in)
+        // return: true if user exists in chatID, otherwise false
         // TODO
     }
 
     verifyUser(userID, userName, chatID) {
-        // SQL query to verify that user with `userName` in chat with `chatID`
+        // SQL query to verify that user with `userName` in chat `chatID`
         // actually has `userID` (used for authorization when user reconnects)
+        // return: true if userName and userID match a user in chatID, otherwise false
         // low priority
     }
 
@@ -261,7 +263,7 @@ class DBManager {
     }
 
     addMessage(message, userID, chatID) {
-        // Adds `messages` from user `userID` to chat with `chatID`
+        // Adds `message` from user `userID` to chat with `chatID`
         // TODO
     }
 
