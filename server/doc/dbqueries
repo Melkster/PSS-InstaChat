@@ -6,7 +6,8 @@ CREATE TABLE Global.GlobalUsers(
        USERHASH INT     PRIMARY KEY      NOT NULL        
 );
 CREATE TABLE Global.GlobalChats(
-       CHATHASH INT     PRIMARY KEY      NOT NULL        
+       CHATHASH INT     PRIMARY KEY      NOT NULL,
+       CHATNAME TEXT                     NOT NULL
 );
 
 INSERT INTO Global.GlobalUsers (USERHASH)

@@ -4,10 +4,12 @@ const sqlite3 = require("sqlite3").verbose();
 const crypto = require("crypto");
 
 var globalDB;
+var chatDBs = {};
 
 class DBManager {
     initDatabase() {
         let firstBoot = false;
+        let success = true;
         if (fs.existsSync("./db/global.db")) {
             firstBoot = false;
         } else {
@@ -17,7 +19,7 @@ class DBManager {
         globalDB = new sqlite3.Database("./db/global.db", err => {
             if (err) {
                 console.error(err.message);
-                return false;
+                wasError = true;
             } else {
                 console.log("Connected to global database.");
             }
@@ -26,13 +28,19 @@ class DBManager {
         if (firstBoot == true) {
             globalDB.serialize(() => {
                 globalDB
-                    .run("CREATE TABLE GlobalUsers(USERHASH INT     PRIMARY KEY      NOT NULL        );")
-                    .run("CREATE TABLE GlobalChats(CHATHASH INT     PRIMARY KEY      NOT NULL);")
+                    .run("CREATE TABLE GlobalUsers (USERHASH INT     PRIMARY KEY      NOT NULL);")
+                    .run("CREATE TABLE GlobalChats (CHATHASH INT     PRIMARY KEY      NOT NULL, CHATNAME TEXT    NOT NULL);")
                     .run("INSERT INTO GlobalUsers (USERHASH) VALUES(0);");
             });
         }
 
-        return true;
+        //console.log(DBManager.createChat("potato"));
+
+        if (success == true) {
+            return true;
+        } else {
+            return false;
+        }
     }
 
     deinitDatabase() {
@@ -41,10 +49,66 @@ class DBManager {
         // low priority
     }
 
-    createChat(chatName) {
-        // SQL query to create chat with `chatName`
-        // return: chatID if created successfully, otherwise false
-        // TODO
+    static createChat(chatName) {
+        var success = false;
+        var chatID;
+        var tries = 0;
+        while (success == false) {
+            success = true;
+            chatID = DBManager.sRandomBigValue();
+            globalDB.run("INSERT INTO GlobalChats (CHATHASH) VALUES(?, ?);", [chatID, chatName], err => {
+                if (err) {
+                    success = false;
+                    if (tries > 16) {
+                        return false;
+                    }
+                    tries++;
+                }
+            });
+        }
+
+        let newChatDB = new sqlite3.Database("./db/" + chatID + ".db", err => {
+            if (err) {
+                console.error(err.message);
+                success = false;
+            } else {
+                console.log("Created database for chat " + chatID + ".");
+            }
+        });
+
+        newChatDB.run("ATTACH './db/global.db' as 'Global';", err => {
+            if (err) {
+                console.error(err.message);
+                success = false;
+                return false;
+            }
+        });
+
+        newChatDB.run("PRAGMA foreign_keys = ON;", err => {
+            if (err) {
+                console.error(err.message);
+                success = false;
+                return false;
+            }
+        });
+
+        newChatDB.run(
+            "CREATE TABLE Users(USERHASH         INT     UNIQUE  NOT NULL, NAME             TEXT            NOT NULL, ONLINE           INT             NOT NULL, LASTONLINE       INT             NOT NULL, FOREIGN KEY(USERHASH) REFERENCES GlobalUsers(USERHASH));",
+            err => {
+                if (err) {
+                    console.error(err.message);
+                    success = false;
+                    return false;
+                }
+            }
+        );
+
+        if (success == true) {
+            chatDBs[chatID] = newChatDB;
+            return chatID;
+        } else {
+            return false;
+        }
     }
 
     removeChat(chatID) {
@@ -70,7 +134,11 @@ class DBManager {
                 }
             });
         }
-        return userID;
+        if (success == true) {
+            return userID;
+        } else {
+            return false;
+        }
     }
 
     deleteUser(userID) {
