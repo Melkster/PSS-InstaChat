@@ -49,14 +49,14 @@ class DBManager {
         // low priority
     }
 
-    static createChat(chatName) {
+    createChat(chatName) {
         var success = false;
         var chatID;
         var tries = 0;
         while (success == false) {
             success = true;
             chatID = DBManager.sRandomBigValue();
-            globalDB.run("INSERT INTO GlobalChats (CHATHASH) VALUES(?, ?);", [chatID, chatName], err => {
+            globalDB.run("INSERT INTO GlobalChats (CHATHASH, CHATNAME) VALUES(?, ?);", [chatID, chatName], err => {
                 if (err) {
                     success = false;
                     if (tries > 16) {
