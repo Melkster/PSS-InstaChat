@@ -1,5 +1,5 @@
 import React from "react";
-import { Alert, Button, View, Text, TextInput, TouchableOpacity} from "react-native";
+import { AsyncStorage, Alert, Button, View, Text, TextInput, TouchableOpacity} from "react-native";
 import { createStackNavigator, createAppContainer } from "react-navigation";
 
 const styles = ({
@@ -25,6 +25,16 @@ const styles = ({
 
 class HomeScreen extends React.Component {
 
+    state = {
+        'name': ''
+    }
+    componentDidMount = () => AsyncStorage.getItem('name').then((value) => this.setState({ 'name': value }))
+
+    setName = (value) => {
+        AsyncStorage.setItem('name', value);
+        this.setState({ 'name': value });
+    }
+
     onPressCreate() {
         Alert.alert('This should create a chatroom')
     }
@@ -35,7 +45,17 @@ class HomeScreen extends React.Component {
 
     render() {
         return (
+
             <View style={styles.container}>
+                <Text style={{fontSize:20, fontWeight:'bold'}}>InstaChat</Text>
+                <View style={styles.buttonContainer}>
+                    <TextInput style={{padding: 10, height: 40, borderColor: 'gray', borderWidth: 1}}
+                               placeholder='Enter your nickname'
+                               onChangeText = {this.setName}/>
+                    <Text>
+                        Your nickname is: {this.state.name}
+                    </Text>
+                </View>
                 <View style={styles.buttonContainer}>
                     <Button
                         onPress={this.onPressCreate}
