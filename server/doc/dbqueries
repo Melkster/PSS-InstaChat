@@ -52,8 +52,7 @@ VALUES
 CREATE TABLE {CHATHASH}.Messages(
        USERHASH         INT     UNIQUE  NOT NULL,
        MESSAGE  TEXT,
-       TIME     INT            NOT NULL,
-       FOREIGN KEY(USERHASH) REFERENCES Users(USERHASH)
+       TIME     INT            NOT NULL
 );
 
 

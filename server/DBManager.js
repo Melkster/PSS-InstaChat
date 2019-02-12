@@ -3,6 +3,8 @@ const fs = require("fs");
 const sqlite3 = require("sqlite3").verbose();
 const crypto = require("crypto");
 
+//var date = new Date();
+
 var globalDB;
 var chatDBs = {};
 
@@ -28,13 +30,32 @@ class DBManager {
         if (firstBoot == true) {
             globalDB.serialize(() => {
                 globalDB
-                    .run("CREATE TABLE GlobalUsers (USERHASH INT     PRIMARY KEY      NOT NULL);")
-                    .run("CREATE TABLE GlobalChats (CHATHASH INT     PRIMARY KEY      NOT NULL, CHATNAME TEXT    NOT NULL);")
-                    .run("INSERT INTO GlobalUsers (USERHASH) VALUES(0);");
+                    .run("CREATE TABLE GlobalUsers (USERHASH INT     PRIMARY KEY      NOT NULL);", err => {
+                        if (err) {
+                            console.error(err.message);
+                            success = false;
+                        }
+                    })
+                    .run("CREATE TABLE GlobalChats (CHATHASH INT     PRIMARY KEY      NOT NULL, CHATNAME TEXT    NOT NULL);", err => {
+                        if (err) {
+                            console.error(err.message);
+                            success = false;
+                        }
+                    })
+                    .run("INSERT INTO GlobalUsers (USERHASH) VALUES(0);", err => {
+                        if (err) {
+                            console.error(err.message);
+                            success = false;
+                        }
+                    });
             });
         }
 
-        //console.log(DBManager.createChat("potato"));
+        /*let user = DBManager.createUser();
+        console.log("Created user " + user);
+        let chat = DBManager.createChat("potato");
+        let newuser = DBManager.addUser(user, "Mr. Person", chat);
+        console.log("Added user " + newuser + " to chat " + chat);*/
 
         if (success == true) {
             return true;
@@ -67,6 +88,10 @@ class DBManager {
             });
         }
 
+        if (success == false) {
+            return false;
+        }
+
         let newChatDB = new sqlite3.Database("./db/" + chatID + ".db", err => {
             if (err) {
                 console.error(err.message);
@@ -76,6 +101,10 @@ class DBManager {
             }
         });
 
+        if (success == false) {
+            return false;
+        }
+
         newChatDB.run("ATTACH './db/global.db' as 'Global';", err => {
             if (err) {
                 console.error(err.message);
@@ -84,24 +113,26 @@ class DBManager {
             }
         });
 
-        newChatDB.run("PRAGMA foreign_keys = ON;", err => {
-            if (err) {
-                console.error(err.message);
-                success = false;
-                return false;
-            }
+        newChatDB.serialize(() => {
+            newChatDB
+                .run(
+                    "CREATE TABLE Users(USERHASH         INT     UNIQUE  NOT NULL, NAME             TEXT            NOT NULL, ONLINE           INT             NOT NULL, LASTONLINE       INT             NOT NULL);",
+                    err => {
+                        if (err) {
+                            console.error("111: " + err.message);
+                            success = false;
+                            return false;
+                        }
+                    }
+                )
+                .run('INSERT INTO Users    VALUES(0, "Server", 1, (?));', [Date.now()], err => {
+                    if (err) {
+                        console.error("119: " + err.message);
+                        success = false;
+                        return false;
+                    }
+                });
         });
-
-        newChatDB.run(
-            "CREATE TABLE Users(USERHASH         INT     UNIQUE  NOT NULL, NAME             TEXT            NOT NULL, ONLINE           INT             NOT NULL, LASTONLINE       INT             NOT NULL, FOREIGN KEY(USERHASH) REFERENCES GlobalUsers(USERHASH));",
-            err => {
-                if (err) {
-                    console.error(err.message);
-                    success = false;
-                    return false;
-                }
-            }
-        );
 
         if (success == true) {
             chatDBs[chatID] = newChatDB;
@@ -134,6 +165,7 @@ class DBManager {
                 }
             });
         }
+
         if (success == true) {
             return userID;
         } else {
@@ -148,9 +180,60 @@ class DBManager {
     }
 
     addUser(userID, userName, chatID) {
-        // SQL query to add user with `userName` and `userID` to chat with `chatID`
-        // return: true if user was added successfully, otherwise false
-        // TODO
+        var success = true;
+
+        if (chatDBs[chatID] == undefined) {
+            console.error("Error: Chat " + chatID + " does not exist");
+            return false;
+        }
+
+        globalDB.get("SELECT * FROM GlobalUsers WHERE USERHASH = (?)", [userID], (err, row) => {
+            if (err) {
+                console.error("176: " + err.message);
+                success = false;
+                return false;
+            }
+            if (row == undefined) {
+                console.error("Error: User " + userID + " does not exist");
+                success = false;
+                return false;
+            }
+        });
+
+        if (success == false) {
+            return false;
+        }
+
+        chatDBs[chatID].get("SELECT * FROM Users WHERE USERHASH = (?)", [userID], (err, row) => {
+            if (err) {
+                console.error(err.message);
+                success = false;
+                return false;
+            }
+            if (row != undefined) {
+                console.error("Error: User " + userID + " is already a member of chat " + chatID);
+                success = false;
+                return false;
+            }
+        });
+
+        if (success == false) {
+            return false;
+        }
+
+        chatDBs[chatID].run("INSERT INTO Users    VALUES((?), (?), 1, (?));", [userID, userName, Date.now()], err => {
+            if (err) {
+                console.error(err.message);
+                success = false;
+                return false;
+            }
+        });
+
+        if (success == true) {
+            return userID;
+        } else {
+            return false;
+        }
     }
 
     checkUser(userID, chatID) {
