@@ -3,8 +3,6 @@ const fs = require("fs");
 const sqlite3 = require("sqlite3").verbose();
 const crypto = require("crypto");
 
-//var date = new Date();
-
 var globalDB;
 var chatDBs = {};
 
@@ -26,36 +24,38 @@ class DBManager {
                 console.log("Connected to global database.");
             }
         });
+        globalDB.serialize();
 
         if (firstBoot == true) {
-            globalDB.serialize(() => {
-                globalDB
-                    .run("CREATE TABLE GlobalUsers (USERHASH INT     PRIMARY KEY      NOT NULL);", err => {
-                        if (err) {
-                            console.error(err.message);
-                            success = false;
-                        }
-                    })
-                    .run("CREATE TABLE GlobalChats (CHATHASH INT     PRIMARY KEY      NOT NULL, CHATNAME TEXT    NOT NULL);", err => {
-                        if (err) {
-                            console.error(err.message);
-                            success = false;
-                        }
-                    })
-                    .run("INSERT INTO GlobalUsers (USERHASH) VALUES(0);", err => {
-                        if (err) {
-                            console.error(err.message);
-                            success = false;
-                        }
-                    });
-            });
+            globalDB
+                .run("CREATE TABLE GlobalUsers (USERHASH INT     PRIMARY KEY      NOT NULL);", err => {
+                    if (err) {
+                        console.error(err.message);
+                        success = false;
+                    }
+                })
+                .run("CREATE TABLE GlobalChats (CHATHASH INT     PRIMARY KEY      NOT NULL, CHATNAME TEXT    NOT NULL);", err => {
+                    if (err) {
+                        console.error(err.message);
+                        success = false;
+                    }
+                })
+                .run("INSERT INTO GlobalUsers (USERHASH) VALUES(0);", err => {
+                    if (err) {
+                        console.error(err.message);
+                        success = false;
+                    }
+                });
         }
 
-        /*let user = DBManager.createUser();
+        /*let user = this.createUser();
         console.log("Created user " + user);
-        let chat = DBManager.createChat("potato");
-        let newuser = DBManager.addUser(user, "Mr. Person", chat);
-        console.log("Added user " + newuser + " to chat " + chat);*/
+        let chat = this.createChat("potato");
+        let newuser = this.addUser(user, "Mr. Person", chat);
+        console.log("Added user " + newuser + " to chat " + chat);
+        this.getAllUsers(chat, console.log);
+        this.addMessage("Hi!", user, chat);
+        this.getMessages(chat, console.log);*/
 
         if (success == true) {
             return true;
@@ -100,6 +100,7 @@ class DBManager {
                 console.log("Created database for chat " + chatID + ".");
             }
         });
+        newChatDB.serialize();
 
         if (success == false) {
             return false;
@@ -119,7 +120,7 @@ class DBManager {
                     "CREATE TABLE Users(USERHASH         INT     UNIQUE  NOT NULL, NAME             TEXT            NOT NULL, ONLINE           INT             NOT NULL, LASTONLINE       INT             NOT NULL);",
                     err => {
                         if (err) {
-                            console.error("111: " + err.message);
+                            console.error(err.message);
                             success = false;
                             return false;
                         }
@@ -127,7 +128,24 @@ class DBManager {
                 )
                 .run('INSERT INTO Users    VALUES(0, "Server", 1, (?));', [Date.now()], err => {
                     if (err) {
-                        console.error("119: " + err.message);
+                        console.error(err.message);
+                        success = false;
+                        return false;
+                    }
+                })
+                .run(
+                    "CREATE TABLE Messages(     USERHASH         INT     UNIQUE  NOT NULL,       MESSAGE  TEXT,       TIME     INT            NOT NULL);",
+                    err => {
+                        if (err) {
+                            console.error(err.message);
+                            success = false;
+                            return false;
+                        }
+                    }
+                )
+                .run("INSERT INTO Messages    VALUES(0, 'Chat \"" + chatName + "\" created.', (?));", [Date.now()], err => {
+                    if (err) {
+                        console.error(err.message);
                         success = false;
                         return false;
                     }
@@ -184,21 +202,15 @@ class DBManager {
 
         if (chatDBs[chatID] == undefined) {
             console.error("Error: Chat " + chatID + " does not exist");
+            success = false;
             return false;
         }
 
-        globalDB.get("SELECT * FROM GlobalUsers WHERE USERHASH = (?)", [userID], (err, row) => {
-            if (err) {
-                console.error("176: " + err.message);
-                success = false;
-                return false;
-            }
-            if (row == undefined) {
-                console.error("Error: User " + userID + " does not exist");
-                success = false;
-                return false;
-            }
-        });
+        if (success == false) {
+            return false;
+        }
+
+        success = this.checkUser(userID, chatID);
 
         if (success == false) {
             return false;
@@ -237,10 +249,32 @@ class DBManager {
     }
 
     checkUser(userID, chatID) {
-        // SQL query to check if user with `userID` exists in chat with `chatID`
-        // (used to make sure users only post messages in chats they are actually in)
-        // return: true if user exists in chatID, otherwise false
-        // TODO
+        var success = true;
+
+        if (chatDBs[chatID] == undefined) {
+            console.error("Error: Chat " + chatID + " does not exist");
+            success = false;
+            return false;
+        }
+
+        if (success == false) {
+            return false;
+        }
+
+        globalDB.get("SELECT * FROM GlobalUsers WHERE USERHASH = (?)", [userID], (err, row) => {
+            if (err) {
+                console.error(err.message);
+                success = false;
+                return false;
+            }
+            if (row == undefined) {
+                console.error("Error: User " + userID + " does not exist");
+                success = false;
+                return false;
+            }
+        });
+
+        return success;
     }
 
     verifyUser(userID, userName, chatID) {
@@ -256,21 +290,70 @@ class DBManager {
         // low priority
     }
 
-    getAllUsers(chatID) {
-        // SQL query to retreive all users with from chat with `chatID`
-        // return: a list with all users
-        // TODO
+    getAllUsers(chatID, callback) {
+        var success = true;
+
+        if (chatDBs[chatID] == undefined) {
+            console.error("Error: Chat " + chatID + " does not exist");
+            success = false;
+            return false;
+        }
+
+        if (success == false) {
+            return false;
+        }
+
+        chatDBs[chatID].all("SELECT * FROM Users", callback);
+
+        return success;
     }
 
     addMessage(message, userID, chatID) {
-        // Adds `message` from user `userID` to chat with `chatID`
-        // TODO
+        var success = true;
+
+        if (chatDBs[chatID] == undefined) {
+            console.error("Error: Chat " + chatID + " does not exist");
+            success = false;
+            return false;
+        }
+
+        if (success == false) {
+            return false;
+        }
+
+        success = this.checkUser(userID, chatID);
+
+        if (success == false) {
+            return false;
+        }
+
+        chatDBs[chatID].run("INSERT INTO Messages (USERHASH, MESSAGE, TIME) VALUES ((?), (?), (?));", [userID, message, Date.now()], err => {
+            if (err) {
+                console.error(err.message);
+                success = false;
+                return false;
+            }
+        });
+
+        return success;
     }
 
-    getMessages(chatID) {
-        // SQL query to retreive chat history for chat with `chatID`
-        // return: list of messages for chat with `chatID`
-        // TODO
+    getMessages(chatID, callback) {
+        var success = true;
+
+        if (chatDBs[chatID] == undefined) {
+            console.error("Error: Chat " + chatID + " does not exist");
+            success = false;
+            return false;
+        }
+
+        if (success == false) {
+            return false;
+        }
+
+        chatDBs[chatID].all("SELECT * FROM Messages", callback);
+
+        return success;
     }
 
     /* Utility functions below */
