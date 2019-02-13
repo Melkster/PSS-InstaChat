@@ -19,12 +19,16 @@ class DBManager {
         globalDB = new sqlite3.Database("./db/global.db", err => {
             if (err) {
                 console.error(err.message);
-                wasError = true;
+                success = false;
             } else {
                 console.log("Connected to global database.");
             }
         });
         globalDB.serialize();
+
+        if (success == false) {
+            return false;
+        }
 
         if (firstBoot == true) {
             globalDB
