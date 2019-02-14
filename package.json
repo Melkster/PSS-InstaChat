@@ -1,24 +1,25 @@
 {
-  "name": "InstaChat",
-  "version": "0.0.1",
-  "description": "The effortless chat app",
-  "main": "server/app.js",
-  "scripts": {
-    "start": "cd server && nodemon app.js"
-  },
-  "author": "Axel Nygårds, Melker Österberg",
-  "license": "ISC",
-  "dependencies": {
-    "express": "^4.16.4",
-    "socket.io": "^2.2.0"
-  },
-  "devDependencies": {
-    "nodemon": "^1.18.9"
-  },
-  "prettier": {
-    "useTabs": false,
-    "printWidth": 160,
-    "tabWidth": 4,
-    "singleQuote": false
-  }
+    "name": "InstaChat",
+    "version": "0.0.1",
+    "description": "The effortless chat app",
+    "main": "server/app.js",
+    "scripts": {
+        "start": "cd server && nodemon app.js"
+    },
+    "author": "Axel Nygårds, Melker Österberg, Robert Markovski",
+    "license": "ISC",
+    "dependencies": {
+        "express": "^4.16.4",
+        "socket.io": "^2.2.0",
+        "sqlite3": ""
+    },
+    "devDependencies": {
+        "nodemon": "^1.18.9"
+    },
+    "prettier": {
+        "useTabs": false,
+        "printWidth": 160,
+        "tabWidth": 4,
+        "singleQuote": false
+    }
 }

@@ -1,6 +1,7 @@
 const app = require("express")();
 const http = require("http").Server(app);
 const io = require("socket.io")(http);
+const DBManager = require("./DBManager.js");
 
 const port = 3000;
 
@@ -8,6 +9,8 @@ app.get("/", (req, res) => {
     res.sendFile(__dirname + "/index.html");
 });
 
+const database = new DBManager();
+database.initDatabase();
 var users = [];
 var messages = [];
 
