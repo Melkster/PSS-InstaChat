@@ -55,12 +55,11 @@ io.on("connection", socket => {
         }
     });
 
-    // Use the following to transmit the message:
-    // io.to(data.chatID).emit("message", data);
     socket.on("message", data => {
-        data.time = new Date(); // Adds time received to message
-        messages.push(data);
-        io.sockets.emit("message", data);
+        // TODO: change userID to userName
+        // data.time = new Date(); // Adds time received to message
+        database.addMessage(data.message, data.userid, data.chatid);
+        io.to(data.chatID).emit("message", data);
     });
 
     socket.on("disconnect", () => {

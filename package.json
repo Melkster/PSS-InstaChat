@@ -2,7 +2,7 @@
     "name": "InstaChat",
     "version": "0.0.1",
     "description": "The effortless chat app",
-    "main": "server/server.js",
+    "main": "client/server.js",
     "scripts": {
         "start": "cd server && nodemon server.js"
     },
