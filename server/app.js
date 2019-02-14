@@ -34,9 +34,8 @@ io.on("connection", socket => {
     });
 
     socket.on("message", data => {
-        data.time = new Date(); // Adds time received to message
-        messages.push(data);
-        io.sockets.emit("message", data);
+        database.addMessage(data.message, data.userid, data.chatid);
+        //io.sockets.emit("message", data);
     });
 
     socket.on("disconnect", () => {
