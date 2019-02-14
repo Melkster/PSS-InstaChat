@@ -164,6 +164,88 @@ class DBManager {
         }
     }
 
+    createChat_debug(chatName, chatID) {
+        var success = false;
+        success = true;
+        globalDB.run("INSERT INTO GlobalChats (CHATHASH, CHATNAME) VALUES(?, ?);", [chatID, chatName], err => {
+            if (err) {
+                success = false;
+                return false;
+            }
+        });
+
+        if (success == false) {
+            return false;
+        }
+
+        let newChatDB = new sqlite3.Database("./db/" + chatID + ".db", err => {
+            if (err) {
+                console.error(err.message);
+                success = false;
+            } else {
+                console.log("Created database for chat " + chatID + ".");
+            }
+        });
+        newChatDB.serialize();
+
+        if (success == false) {
+            return false;
+        }
+
+        newChatDB.run("ATTACH './db/global.db' as 'Global';", err => {
+            if (err) {
+                console.error(err.message);
+                success = false;
+                return false;
+            }
+        });
+
+        newChatDB.serialize(() => {
+            newChatDB
+                .run(
+                    "CREATE TABLE Users(USERHASH         INT     UNIQUE  NOT NULL, NAME             TEXT            NOT NULL, ONLINE           INT             NOT NULL, LASTONLINE       INT             NOT NULL);",
+                    err => {
+                        if (err) {
+                            console.error(err.message);
+                            success = false;
+                            return false;
+                        }
+                    }
+                )
+                .run('INSERT INTO Users    VALUES(0, "Server", 1, (?));', [Date.now()], err => {
+                    if (err) {
+                        console.error(err.message);
+                        success = false;
+                        return false;
+                    }
+                })
+                .run(
+                    "CREATE TABLE Messages(     USERHASH         INT     UNIQUE  NOT NULL,       MESSAGE  TEXT,       TIME     INT            NOT NULL);",
+                    err => {
+                        if (err) {
+                            console.error(err.message);
+                            success = false;
+                            return false;
+                        }
+                    }
+                )
+                .run("INSERT INTO Messages    VALUES(0, 'Chat \"" + chatName + "\" created.', (?));", [Date.now()], err => {
+                    if (err) {
+                        console.error(err.message);
+                        success = false;
+                        return false;
+                    }
+                });
+        });
+
+        if (success == true) {
+            chatDBs[chatID] = newChatDB;
+            return chatID;
+        } else {
+            return false;
+        }
+    }
+
     removeChat(chatID) {
         // SQL query to remove chat with `chatID`
         // return: true if removed successfully, otherwise false
@@ -187,6 +269,23 @@ class DBManager {
                 }
             });
         }
+
+        if (success == true) {
+            return userID;
+        } else {
+            return false;
+        }
+    }
+
+    createUser_debug(userID) {
+        var success = false;
+        success = true;
+        globalDB.run("INSERT INTO GlobalUsers (USERHASH) VALUES(?);", [userID], err => {
+            if (err) {
+                success = false;
+                return false;
+            }
+        });
 
         if (success == true) {
             return userID;
