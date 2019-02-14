@@ -23,6 +23,7 @@ const styles = StyleSheet.create({
     messageContainer: {
         flexDirection: 'row',
         padding: 10,
+        //transform: [{ scaleX: -1 }, { scaleY: -1 }],
     },
     textContainer: {
         flexDirection: 'column',
@@ -32,6 +33,7 @@ const styles = StyleSheet.create({
         borderRadius: 5,
         paddingHorizontal: 10,
         paddingVertical: 5,
+        //transform: [{ scaleX: -1 }, { scaleY: -1 }],
     },
     textContainerLeft: {
         alignItems: 'flex-start',

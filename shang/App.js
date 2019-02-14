@@ -1,37 +1,40 @@
 import React, {Component} from 'react';
-import {StyleSheet, Text, View, TextInput, TouchableHighlight, FlatList, Keyboard} from 'react-native';
+import {StyleSheet, Text, View, TextInput, TouchableHighlight, FlatList, Keyboard, KeyboardAvoidingView} from 'react-native';
 
 import ChatItem from './ChatItem.js';
+import messagesList from './MessagesList';
 
 type Props = {};
+
 export default class App extends Component<Props> {
   constructor() {
     super();
     this.state = {
-        messages: [
-            {
-                id: 1,
-                text: 'Hello World.',
-                author: {
-                    id: 1,
-                    username: 'Computer',
-                }
-            },
-            {
-                id: 2,
-                text: 'Hi',
-                author: {
-                    id: 2,
-                    username: 'Shang',
-                }
-            },
-        ]
+        newText:'',
     }
   }
+
   // After user press the "Send" button, TextInput will be clear.
   _onSendButtonPressed() {
-    this.textInput.clear();
-    Keyboard.dismiss();
+    if (this.state.newText.length != 0) {
+        const newMessage = {
+            id: 2,
+            text: this.state.newText,
+            author: {
+                id: 2,
+                username: 'Shang',
+            }
+        };
+        messagesList.reverse().push(newMessage);
+        messagesList.reverse()
+        this.setState( (prevState) => { return {newText: ''}; } );
+        this.textInput.clear();
+        Keyboard.dismiss();
+        this.refs.flatList.scrollToEnd();
+    }
+    else {
+        Keyboard.dismiss();
+    }
   }
 
   renderChatItem({item}) {
@@ -43,14 +46,18 @@ export default class App extends Component<Props> {
 
   render() {
     return (
+
       <View style={styles.container}>
         <Text style={styles.welcome}>Welcome to React Native!</Text>
 
         <FlatList
+            ref={"flatList"}
             inverted
-            data = {this.state.messages}
+            //data = {this.state.messages}
+            data = {messagesList}
             renderItem={this.renderChatItem}
             keyExtractor={this.keyExtractor}
+            ListFooterComponent={this.renderFooter}
         />
 
         <View style={styles.messageBar}>
@@ -59,6 +66,7 @@ export default class App extends Component<Props> {
                 //onFocus="this.placeholder = ''"
                 //onBlur="this.placeholder = 'enter your text'"
                 ref={input => {this.textInput = input;}}
+                onChangeText = { (text) => this.setState( {newText: text} ) }
             />
 
             <TouchableHighlight style={styles.sendButton}
@@ -69,6 +77,7 @@ export default class App extends Component<Props> {
         </View>
 
       </View>
+
     );
   }
 }
