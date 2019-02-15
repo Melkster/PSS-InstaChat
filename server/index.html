@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+<!--  Mock client for testing interaction with the server -->
 <html>
    <head>
       <title>Hello world</title>
@@ -8,6 +9,14 @@
    <script>
       var socket = io();
       var user;
+      var localUserID;
+      var chatID = 1337;
+
+      socket.emit('identificaiton', null);
+
+      socket.on('identificaiton', userID => {
+         localUserID = userID;
+      });
 
       function setUsername() {
          socket.emit('setUsername', document.getElementById('name').value);
@@ -25,12 +34,20 @@
             <button type = "button" name = "button" onclick = "sendMessage()">Send</button>
             <div id = "message-container"></div>
          `;
+
+         socket.emit('createChat', "CoolChatName");
+         console.log(chatID);
+         socket.emit('joinChat', localUserID, user, chatID);
       });
 
       function sendMessage() {
          var content = document.getElementById('message').value;
          if (content) {
-            socket.emit('message', {message: content, user: user});
+            socket.emit('message', {
+               message: content,
+               userID: localUserID,
+               chatID: chatID
+            });
          }
       }
 

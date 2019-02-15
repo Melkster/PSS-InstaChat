@@ -2,9 +2,9 @@
     "name": "InstaChat",
     "version": "0.0.1",
     "description": "The effortless chat app",
-    "main": "server/app.js",
+    "main": "client/server.js",
     "scripts": {
-        "start": "cd server && nodemon app.js"
+        "start": "cd server && nodemon server.js"
     },
     "author": "Axel Nygårds, Melker Österberg, Robert Markovski",
     "license": "ISC",
