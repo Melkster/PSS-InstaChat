@@ -13,7 +13,12 @@ import styles from './styles';
 class HomeScreen extends React.Component {
 
     state = {
-        'name': ''
+        'name': '',
+        'userId': 'h7h7h7', // change this to whatever
+        'chats': [
+            {'ChatID': 'ABC123'},
+            {'ChatID': 'DEF345'}
+            ]
     }
 
     componentDidMount = () => AsyncStorage.getItem('name').then((value) => this.setState({'name': value}))
@@ -68,13 +73,18 @@ class HomeScreen extends React.Component {
                 <View style={styles.buttonContainer}>
                     <Button
                         title="Go to Chats"
-                        onPress={() => this.props.navigation.navigate('Chats')}
+                        onPress={() => this.props.navigation.navigate('Chats', {
+                            name: this.state.name,
+                            chatId: this.state.chats[0].ChatID})
+                        }
                     />
                 </View>
                 <View style={styles.buttonContainer}>
                     <Button
                         title="Info"
-                        onPress={() => this.props.navigation.navigate('Info')}
+                        onPress={() => this.props.navigation.navigate('Info', {
+                            currentState: this.state })
+                        }
                     />
                 </View>
             </View>
@@ -161,14 +171,18 @@ class ChatScreen extends React.Component {
         return <ChatItem message={item}/>
         //return <Text>{item.text}</Text>
     }
-
     keyExtractor = (item, index) => index.toString();
 
+
     render() {
+        const { navigation } = this.props;
+        const name = navigation.getParam('name', 'unknown');
+        const chatId = navigation.getParam('chatId', 'unknown');
+
         return (
             // maybe better fix than to hardcode 90
             <KeyboardAvoidingView style={styles.container} keyboardVerticalOffset={90} behavior="padding">
-                <Text style={styles.welcome}>Welcome to the chatroom!</Text>
+                <Text style={styles.welcome}>Welcome to {chatId}, {name}!</Text>
 
                 <FlatList
                     ref={"flatList"}
@@ -207,10 +221,27 @@ class InfoScreen extends React.Component {
         super(props);
     }
 
+    printChats = (chats) => {
+        var s = '';
+        for(var i = 0; i < chats.length; i++) {
+            s = s + chats[i].ChatID + "\n";
+        }
+        return s;
+
+    };
+
     render() {
+        const { navigation } = this.props;
+        const state = navigation.getParam('currentState', 'unknown');
         return (
             <View style={{flex: 1, alignItems: "center", justifyContent: "center"}}>
-                <Text>This is where localy saved info should later be displayed, for debugging purposes</Text>
+                <Text style={{fontSize:20}}> Current Info:{"\n" }</Text>
+                <Text>Name: { state.name+"\n\n" }
+                userId: { state.userId+"\n\n" }
+                Current chats: { '\n' + this.printChats(state.chats) }
+                </Text>
+
+
             </View>
         );
     }
