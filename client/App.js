@@ -6,8 +6,8 @@ import {
 import {createStackNavigator, createAppContainer} from "react-navigation";
 
 
-import ChatItem from './ChatItem.js';
-import messagesList from './MessagesList';
+import ChatScreen from './ChatScreen';
+import InfoScreen from './InfoScreen';
 import styles from './styles';
 
 class HomeScreen extends React.Component {
@@ -124,128 +124,6 @@ class HomeScreen extends React.Component {
         );
     }
 }*/
-
-// SHANGS CHATROOM
-/*
-message format:
-{
-    UserID: h7h7h7
-    ChatID: ABC123
-    message: 'hello'
-}
- */
-class ChatScreen extends React.Component {
-    constructor() {
-        super();
-        this.state = {
-            newText: '',
-        }
-    }
-
-    // After user press the "Send" button, TextInput will be clear.
-    // This is probably where we want to send the message 'newText' to the server later
-    _onSendButtonPressed() {
-        if (this.state.newText.length != 0) {
-            const newMessage = {
-                id: 2,
-                text: this.state.newText,
-                author: {
-                    id: 2,
-                    username: 'Shang',
-                }
-            };
-            messagesList.reverse().push(newMessage);
-            messagesList.reverse()
-            this.setState((prevState) => {
-                return {newText: ''};
-            });
-            this.textInput.clear();
-            Keyboard.dismiss();
-            this.refs.flatList.scrollToEnd();
-        } else {
-            Keyboard.dismiss();
-        }
-    }
-
-    renderChatItem({item}) {
-        return <ChatItem message={item}/>
-        //return <Text>{item.text}</Text>
-    }
-    keyExtractor = (item, index) => index.toString();
-
-
-    render() {
-        const { navigation } = this.props;
-        const name = navigation.getParam('name', 'unknown');
-        const chatId = navigation.getParam('chatId', 'unknown');
-
-        return (
-            // maybe better fix than to hardcode 90
-            <KeyboardAvoidingView style={styles.container} keyboardVerticalOffset={90} behavior="padding">
-                <Text style={styles.welcome}>Welcome to {chatId}, {name}!</Text>
-
-                <FlatList
-                    ref={"flatList"}
-                    inverted
-                    //data = {this.state.messages}
-                    data={messagesList}
-                    renderItem={this.renderChatItem}
-                    keyExtractor={this.keyExtractor}
-                    ListFooterComponent={this.renderFooter}
-                />
-
-                <View style={styles.messageBar}>
-                    <TextInput style={styles.messageBox}
-                               placeholder="Enter message"
-                               ref={input => {
-                                   this.textInput = input;
-                               }}
-                               onChangeText={(text) => this.setState({newText: text})}
-                    />
-
-                    <TouchableHighlight style={styles.sendButton}
-                                        onPress={this._onSendButtonPressed.bind(this)}
-                    >
-                        <Text style={{color: 'white'}}>Send</Text>
-                    </TouchableHighlight>
-                </View>
-
-            </KeyboardAvoidingView>
-
-        );
-    }
-}
-
-class InfoScreen extends React.Component {
-    constructor(props) {
-        super(props);
-    }
-
-    printChats = (chats) => {
-        var s = '';
-        for(var i = 0; i < chats.length; i++) {
-            s = s + chats[i].ChatID + "\n";
-        }
-        return s;
-
-    };
-
-    render() {
-        const { navigation } = this.props;
-        const state = navigation.getParam('currentState', 'unknown');
-        return (
-            <View style={{flex: 1, alignItems: "center", justifyContent: "center"}}>
-                <Text style={{fontSize:20}}> Current Info:{"\n" }</Text>
-                <Text>Name: { state.name+"\n\n" }
-                userId: { state.userId+"\n\n" }
-                Current chats: { '\n' + this.printChats(state.chats) }
-                </Text>
-
-
-            </View>
-        );
-    }
-}
 
 const AppNavigator = createStackNavigator(
     {
