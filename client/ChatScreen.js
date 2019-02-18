@@ -6,7 +6,7 @@ import {
 import styles from './styles';
 import ChatItem from './ChatItem.js';
 import messagesList from './MessagesList';
-
+import socket from './socket';
 // SHANGS CHATROOM
 /*
 message format:
@@ -24,11 +24,13 @@ class ChatScreen extends React.Component {
         }
     }
 
+    
+
     // After user press the "Send" button, TextInput will be clear.
     // This is probably where we want to send the message 'newText' to the server later
     _onSendButtonPressed() {
         if (this.state.newText.length != 0) {
-            const newMessage = {
+            const messageWrapper = {
                 id: 2,
                 text: this.state.newText,
                 author: {
@@ -36,7 +38,7 @@ class ChatScreen extends React.Component {
                     username: 'Shang',
                 }
             };
-            messagesList.reverse().push(newMessage);
+            messagesList.reverse().push(messageWrapper);
             messagesList.reverse()
             this.setState((prevState) => {
                 return {newText: ''};
@@ -44,6 +46,7 @@ class ChatScreen extends React.Component {
             this.textInput.clear();
             Keyboard.dismiss();
             this.refs.flatList.scrollToEnd();
+            socket.emit('message', messageWrapper);
         } else {
             Keyboard.dismiss();
         }
@@ -60,6 +63,11 @@ class ChatScreen extends React.Component {
         const { navigation } = this.props;
         const name = navigation.getParam('name', 'unknown');
         const chatId = navigation.getParam('chatId', 'unknown');
+        
+        socket.on("message", data => {
+            // TODO: Recieves the message when another user sends it, needs to handle it 
+            console.log(data);
+        });
 
         return (
             // maybe better fix than to hardcode 90

@@ -58,8 +58,10 @@ io.on("connection", socket => {
     socket.on("message", data => {
         // TODO: change userID to userName
         // data.time = new Date(); // Adds time received to message
+        console.log(data);
         database.addMessage(data.message, data.userid, data.chatid);
-        io.to(data.chatID).emit("message", data);
+        //socket.emit('message', "hej");
+        socket.to(data.chatID).emit("message", data);
     });
 
     socket.on("disconnect", () => {
