@@ -6,6 +6,7 @@ import {
 import {createStackNavigator, createAppContainer} from "react-navigation";
 
 
+import ChatSelect from './ChatSelect';
 import ChatScreen from './ChatScreen';
 import InfoScreen from './InfoScreen';
 import styles from './styles';
@@ -14,10 +15,10 @@ class HomeScreen extends React.Component {
 
     state = {
         'name': '',
-        'userId': 'h7h7h7', // change this to whatever
+        'userID': 'h7h7h7', // change this to whatever
         'chats': [
-            {'ChatID': 'ABC123'},
-            {'ChatID': 'DEF345'}
+            {'name': 'BestChat', 'ChatID': 'ABC123'},
+            {'name': 'CoolChat', 'ChatID': 'DEF345'}
             ]
     }
 
@@ -74,11 +75,19 @@ class HomeScreen extends React.Component {
                     <Button
                         title="Go to Chats"
                         onPress={() => this.props.navigation.navigate('Chats', {
+                            currentState: this.state })
+                        }
+                    />
+                </View>
+{/*                <View style={styles.buttonContainer}>
+                    <Button
+                        title="Chatroom"
+                        onPress={() => this.props.navigation.navigate('Chatroom', {
                             name: this.state.name,
                             chatId: this.state.chats[0].ChatID})
                         }
                     />
-                </View>
+                </View>*/}
                 <View style={styles.buttonContainer}>
                     <Button
                         title="Info"
@@ -129,7 +138,8 @@ const AppNavigator = createStackNavigator(
     {
         Home: HomeScreen,
         //MessageToServer: MessageToServer,
-        Chats: ChatScreen,
+        Chats: ChatSelect,
+        Chatroom: ChatScreen,
         Info: InfoScreen
     },
     {

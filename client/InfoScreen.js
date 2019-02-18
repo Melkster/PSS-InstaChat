@@ -2,6 +2,7 @@ import React from "react";
 import {
     View, Text
 } from "react-native";
+
 class InfoScreen extends React.Component {
     constructor(props) {
         super(props);
@@ -23,7 +24,7 @@ class InfoScreen extends React.Component {
             <View style={{flex: 1, alignItems: "center", justifyContent: "center"}}>
                 <Text style={{fontSize:20}}> Current Info:{"\n" }</Text>
                 <Text>Name: { state.name+"\n\n" }
-                    userId: { state.userId+"\n\n" }
+                    userId: { state.userID+"\n\n" }
                     Current chats: { '\n' + this.printChats(state.chats) }
                 </Text>
 
