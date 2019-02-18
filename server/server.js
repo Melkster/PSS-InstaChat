@@ -18,6 +18,12 @@ io.on("connection", socket => {
 
     console.log(`A user connected, socket ID ${socket.id}`);
 
+    /**
+     * On an `identification` event, the server expects two arguments from the
+     * client: `userID` and `chatIDs`. If the client has no `userID` it should
+     * set `userID = null`, and the server will respond with an `identificaiton`
+     * event containing a `userID`.
+     */
     socket.on("identificaiton", (userID, chatIDs) => {
         if (userID == null) {
             userID = DBManager.sRandomBigValue(); // generate new userID here
@@ -32,12 +38,20 @@ io.on("connection", socket => {
         }
     });
 
+    /**
+     * For the client to join a chat, use the `joinChat` event. Provide a
+     * `userID`, `userName` and the `chatID` of the chat to join. If there was
+     * a problem joining the chat, the server will respond with an `err` event
+     * and an error message. Otherwise, the server will respond with the
+     * `chatID` of the joined chat.
+     */
     socket.on("joinChat", (userID, userName, chatID) => {
         result = database.addUser(userID, userName, chatID);
         if (result == false) {
             socket.emit("err", `Could not join chat with chat ID "${chatID}"`);
         } else {
             socket.join(chatID);
+            socket.emit("joinChat", chatID);
             console.log(`User with userID ${userID} joined chat ${chatID}`);
         }
     });
@@ -46,6 +60,12 @@ io.on("connection", socket => {
         // TODO
     });
 
+    /**
+     * To create a chat, use the `createChat` event. Provide the name of the
+     * chat; `chatName`. If a problem occurred, the server will respond with
+     * an `err` event and an error message. Otherwise, the server will respond
+     * with the `chatID` of the created chat.
+     */
     socket.on("createChat", chatName => {
         chatID = database.createChat(chatName);
         if (chatID == false) {
@@ -55,11 +75,31 @@ io.on("connection", socket => {
         }
     });
 
+    /**
+     * A client can send a message using the `message` event. The message should
+     * be a JSON object with the following structure:
+     * ```
+     * {
+     *    userID: *userID*,
+     *    chatID: *chatID*,
+     *    message: *message*,
+     *    time: *time*
+     * }
+     * ```
+     * If the message could not be stored in the database, the server will
+     * respond with an `err` event.
+     */
     socket.on("message", data => {
-        // TODO: change userID to userName
+        // TODO: will probably have to parse `data` to a JSON object
+        // TODO: check that all fields in the object exist
+        // TODO: change userID to userName before transmitting message
         // data.time = new Date(); // Adds time received to message
-        database.addMessage(data.message, data.userid, data.chatid);
-        io.to(data.chatID).emit("message", data);
+        result = database.addMessage(data.message, data.userid, data.chatid);
+        if (result == false) {
+            socket.emit("err", `Could not send message`);
+        } else {
+            io.to(data.chatID).emit("message", data);
+        }
     });
 
     socket.on("disconnect", () => {
