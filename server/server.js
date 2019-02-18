@@ -41,8 +41,9 @@ io.on("connection", socket => {
     /**
      * For the client to join a chat, use the `joinChat` event. Provide a
      * `userID`, `userName` and the `chatID` of the chat to join. If there was
-     * a problem joining the chat, the server will respond with an `err` event.
-     * Otherwise, the server will respond with the `userID` of the joined chat.
+     * a problem joining the chat, the server will respond with an `err` event
+     * and an error message. Otherwise, the server will respond with the
+     * `chatID` of the joined chat.
      */
     socket.on("joinChat", (userID, userName, chatID) => {
         result = database.addUser(userID, userName, chatID);
@@ -50,6 +51,7 @@ io.on("connection", socket => {
             socket.emit("err", `Could not join chat with chat ID "${chatID}"`);
         } else {
             socket.join(chatID);
+            socket.emit("joinChat", chatID);
             console.log(`User with userID ${userID} joined chat ${chatID}`);
         }
     });
@@ -58,6 +60,12 @@ io.on("connection", socket => {
         // TODO
     });
 
+    /**
+     * To create a chat, use the `createChat` event. Provide the name of the
+     * chat; `chatName`. If a problem occurred, the server will respond with
+     * an `err` event and an error message. Otherwise, the server will respond
+     * with the `chatID` of the created chat.
+     */
     socket.on("createChat", chatName => {
         chatID = database.createChat(chatName);
         if (chatID == false) {
