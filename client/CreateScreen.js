@@ -5,6 +5,9 @@ import {
 } from "react-native";
 import styles from './styles';
 import chatRoomsList from './ChatRoomsList';
+import socket from './socket';
+//import console = require("console");
+//import console = require("console");
 
 class CreateScreen extends React.Component {
     constructor(props) {
@@ -35,6 +38,14 @@ class CreateScreen extends React.Component {
                 chatId: this.state.chatID,
                 chatName: this.state.chatRoomName,
             })
+
+            // Sends a request to the server to create a chat with the namn this.state.chatRoomName
+            socket.emit('createChat', this.state.chatRoomName);
+            
+            // Receives the chatID from the server
+            socket.on('createChat', chatID => {
+                // TODO: Create the new chat with the received chatID
+            });
         } else {
             Keyboard.dismiss();
         }
