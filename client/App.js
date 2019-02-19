@@ -5,12 +5,18 @@ import {
 } from "react-native";
 import {createStackNavigator, createAppContainer} from "react-navigation";
 
-
 import ChatSelect from './ChatSelect';
 import ChatScreen from './ChatScreen';
 import InfoScreen from './InfoScreen';
 import CreateScreen from './CreateScreen';
 import styles from './styles';
+
+// Ignores yellow warnings, showed up when going to view with websockets.
+console.ignoredYellowBox = ["Remote debugger"];
+import { YellowBox } from "react-native";
+YellowBox.ignoreWarnings([
+    "Unrecognized WebSocket connection option(s) `agent`, `perMessageDeflate`, `pfx`, `key`, `passphrase`, `cert`, `ca`, `ciphers`, `rejectUnauthorized`. Did you mean to put these under `headers`?"
+]);
 
 class HomeScreen extends React.Component {
 
