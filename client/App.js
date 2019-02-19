@@ -27,10 +27,8 @@ class HomeScreen extends React.Component {
         'chats': []
     }
 
-    /*
-    This section is performed every time the application starts, it tries to load saved information
-    and if that information is not found, the information is requested from the server
-    */
+    /* This section is performed every time the application starts, it tries to load saved information
+    and if that information is not found, the information is requested from the server */
     componentDidMount = () => {
         AsyncStorage.getItem('name').then((value) => this.setState({'name': value}));
         AsyncStorage.getItem('userID').then((value) => {
@@ -50,16 +48,14 @@ class HomeScreen extends React.Component {
             }
         });
         AsyncStorage.getItem('chats').then((value) => {
-            if(value === null) {
-                // then we dont need to do anything
-            } else {
+            if(value !== null) {
                 this.setState({'chats': value});
                 socket.emit('identificaiton', this.state.chats);
             }
         });
-    }
+    };
 
-    // send as handle to infoscreen
+    /* This function is sent to the infoscreen, there you can choose to forget the current stored info*/
     removeInfo = () => {
         AsyncStorage.removeItem('name');
         AsyncStorage.removeItem('userID');
@@ -74,15 +70,15 @@ class HomeScreen extends React.Component {
         // An example of how information can be stored in client
         AsyncStorage.setItem('name', value);
         this.setState({'name': value});
-    }
+    };
 
     onPressCreate() {
         Alert.alert('This should create a chatroom')
-    }
+    };
 
     onPressJoin() {
         Alert.alert('This should join a chatroom')
-    }
+    };
 
     render() {
         return (
