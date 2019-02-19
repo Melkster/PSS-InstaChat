@@ -55,10 +55,20 @@ class DBManager {
         /*let user = this.createUser();
         console.log("Created user " + user);
         let chat = this.createChat("potato");
-        let newuser = this.addUser(user, "Mr. Person", chat);
+        let newuser = this.addUser(user, "Mr. Person", chat, console.log);
+        var cb = function(err, result) {
+            console.log("callback");
+            if (err) {
+                console.error(err);
+            }
+            console.log("result: " + result);
+        };
         console.log("Added user " + newuser + " to chat " + chat);
-        this.getAllUsers(chat, console.log);
         this.addMessage("Hi!", user, chat);
+        console.log("this.checkUser(" + user + ", " + chat + "): " + this.checkUser(user, chat, cb));
+        console.log("this.verifyUser(" + 0 + ', "Mr. Server", ' + chat + "): " + this.verifyUser(0, "Mr. Server", chat, cb));
+        console.log("this.verifyUser(" + 0 + ', "Server", ' + chat + "): " + this.verifyUser(0, "Server", chat, cb));
+        this.getAllUsers(chat, console.log);
         this.getMessages(chat, console.log);*/
 
         if (success == true) {
@@ -301,130 +311,72 @@ class DBManager {
     }
 
     addUser(userID, userName, chatID, callback) {
-        var success = true;
-
         if (chatDBs[chatID] == undefined) {
             console.error("Error: Chat " + chatID + " does not exist");
             success = false;
             return false;
-        }
-
-        if (success == false) {
-            return false;
-        }
-
-        success = this.checkUser(userID, chatID);
-
-        if (success == false) {
-            return false;
-        }
-
-        chatDBs[chatID].get("SELECT * FROM Users WHERE USERHASH = (?)", [userID], (err, row) => {
-            if (err) {
-                console.error(err.message);
-                success = false;
-                return false;
-            }
-            if (row != undefined) {
-                console.error("Error: User " + userID + " is already a member of chat " + chatID);
-                success = false;
-                return false;
-            }
-        });
-
-        if (success == false) {
-            return false;
-        }
-
-        chatDBs[chatID].run("INSERT INTO Users    VALUES((?), (?), 1, (?));", [userID, userName, Date.now()], err => {
-            if (err) {
-                console.error(err.message);
-                success = false;
-                return false;
-            }
-        });
-
-        if (success == true) {
-            globalDB.get("SELECT * FROM GlobalChats WHERE CHATHASH == (?)", [userID], callback);
-            return true;
         } else {
-            return false;
+            this.checkUser(userID, chatID, function(err, status) {
+                if (status == true) {
+                    chatDBs[chatID].get("SELECT * FROM Users WHERE USERHASH = (?)", [userID], (err, row) => {
+                        if (err) {
+                            console.error(err.message);
+                            return false;
+                        }
+                        return row
+                            ? console.error("Error: User " + userID + " is already a member of chat " + chatID)
+                            : chatDBs[chatID].run("INSERT INTO Users    VALUES((?), (?), 1, (?));", [userID, userName, Date.now()], err => {
+                                  if (err) {
+                                      console.error(err.message);
+                                      return false;
+                                  } else {
+                                      globalDB.get("SELECT * FROM GlobalChats WHERE CHATHASH == (?)", [userID], callback);
+                                  }
+                              });
+                    });
+                }
+            });
         }
     }
 
-    checkUser(userID, chatID) {
-        var success = true;
-
+    checkUser(userID, chatID, callback) {
         if (chatDBs[chatID] == undefined) {
             console.error("Error: Chat " + chatID + " does not exist");
-            success = false;
-            return false;
+            return callback(Error("DBM_ERROR: Chat " + chatID + " does not exist"), false);
+        } else {
+            globalDB.get("SELECT * FROM GlobalUsers WHERE USERHASH = (?)", [userID], function(err, row) {
+                if (err) {
+                    console.error(err.message);
+                    return callback(err, false);
+                }
+                return row ? callback(null, true) : callback(Error("DBM_ERROR: User " + userID + " does not exist"), false);
+            });
         }
-
-        if (success == false) {
-            return false;
-        }
-
-        globalDB.get("SELECT * FROM GlobalUsers WHERE USERHASH = (?)", [userID], (err, row) => {
-            if (err) {
-                console.error(err.message);
-                success = false;
-                return false;
-            }
-            if (row == undefined) {
-                console.error("Error: User " + userID + " does not exist");
-                success = false;
-                return false;
-            }
-        });
-
-        return success;
     }
 
-    verifyUser(userID, userName, chatID) {
-        var success = true;
-
+    verifyUser(userID, userName, chatID, callback) {
         if (chatDBs[chatID] == undefined) {
             console.error("Error: Chat " + chatID + " does not exist");
-            success = false;
-            return false;
+            return callback(Error("DBM_ERROR: Chat " + chatID + " does not exist"), false);
+        } else {
+            globalDB.get("SELECT * FROM GlobalUsers WHERE USERHASH = (?)", [userID], (err, row) => {
+                if (err) {
+                    console.error(err.message);
+                    return callback(err, false);
+                }
+                return row
+                    ? chatDBs[chatID].get("SELECT * FROM Users WHERE USERHASH = (?)", [userID], (err, row) => {
+                          if (err) {
+                              console.error(err.message);
+                              return callback(err, false);
+                          }
+                          return row
+                              ? callback(null, row.NAME == userName)
+                              : callback(Error("DBM_ERROR: User  " + userID + " does not exist in chat " + chatID), false);
+                      })
+                    : callback(Error("DBM_ERROR: User " + userID + " does not exist"), false);
+            });
         }
-
-        if (success == false) {
-            return false;
-        }
-
-        globalDB.get("SELECT * FROM GlobalUsers WHERE USERHASH = (?)", [userID], (err, row) => {
-            if (err) {
-                console.error(err.message);
-                success = false;
-                return false;
-            }
-            if (row == undefined) {
-                console.error("Error: User " + userID + " does not exist");
-                success = false;
-                return false;
-            }
-        });
-
-        if (success == false) {
-            return false;
-        }
-
-        chatDBs[chatID].get("SELECT * FROM Users WHERE NAME = (?)", [userName], (err, row) => {
-            if (err) {
-                console.error(err.message);
-                success = false;
-                return false;
-            }
-            if (row == undefined) {
-                console.error('Error: User name "' + userName + '" does not exist in chat ' + chatID);
-                success = false;
-                return false;
-            }
-        });
-
-        return success;
     }
 
     removeUser(userID, chatID) {
@@ -464,15 +416,16 @@ class DBManager {
             return false;
         }
 
-        success = this.checkUser(userID, chatID);
-
-        if (success == false) {
-            return false;
-        }
-
-        chatDBs[chatID].run("INSERT INTO Messages (USERHASH, MESSAGE, TIME) VALUES ((?), (?), (?));", [userID, message, Date.now()], err => {
-            if (err) {
-                console.error(err.message);
+        this.checkUser(userID, chatID, function(err, result) {
+            if (result == true) {
+                chatDBs[chatID].run("INSERT INTO Messages (USERHASH, MESSAGE, TIME) VALUES ((?), (?), (?));", [userID, message, Date.now()], err => {
+                    if (err) {
+                        console.error(err.message);
+                        success = false;
+                        return false;
+                    }
+                });
+            } else {
                 success = false;
                 return false;
             }
