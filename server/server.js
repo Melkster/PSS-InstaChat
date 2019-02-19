@@ -28,6 +28,7 @@ io.on("connection", socket => {
         if (userID == null) {
             userID = DBManager.sRandomBigValue(); // generate new userID here
             socket.emit("identificaiton", userID);
+            console.log("Sending new id to client");
             // TODO: should users be saved in the database if they haven't joined any chat room?
         } else {
             if (chatIDs != null && chatIDs.length > 0) {

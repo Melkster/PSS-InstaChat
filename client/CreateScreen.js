@@ -19,6 +19,11 @@ class CreateScreen extends React.Component {
         const { navigation } = this.props;
         const state = navigation.getParam('currentState', 'unknown');
 
+        // Here we need to update the current state.chats (not ChatRoomsList?)
+        // and also update AsyncStorage so that the newly added chatroom is permanently stored
+        // Communication is required with the server, the server expects the chatroom name
+        // and returns a chatID.
+
         if (this.state.chatRoomName.length != 0) {
             const chatRoom = {
                 name: this.state.chatRoomName,

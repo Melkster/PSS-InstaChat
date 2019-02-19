@@ -19,7 +19,7 @@ class ChatSelect extends React.Component {
                 <Text style={styles.headline}>Chatselect</Text>
                 <ScrollView>
                     {
-                        chatRoomsList.map((item, index) => (
+                        state.chats.map((item, index) => (
                             <View key = {item.ChatID} style={styles.buttonContainer}>
                                 <Button
                                     title={item.name}

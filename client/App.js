@@ -9,6 +9,7 @@ import ChatSelect from './ChatSelect';
 import ChatScreen from './ChatScreen';
 import InfoScreen from './InfoScreen';
 import CreateScreen from './CreateScreen';
+import socket from './socket';
 import styles from './styles';
 
 // Ignores yellow warnings, showed up when going to view with websockets.
@@ -21,15 +22,53 @@ YellowBox.ignoreWarnings([
 class HomeScreen extends React.Component {
 
     state = {
-        'name': '',
-        'userID': 'h7h7h7', // change this to whatever
-        'chats': [
-            {'name': 'BestChat', 'ChatID': 'ABC123'},
-            {'name': 'CoolChat', 'ChatID': 'DEF345'}
-            ]
+        'name': null,
+        'userID': null, // the server should give this
+        'chats': []
     }
 
-    componentDidMount = () => AsyncStorage.getItem('name').then((value) => this.setState({'name': value}))
+    /*
+    This section is performed every time the application starts, it tries to load saved information
+    and if that information is not found, the information is requested from the server
+    */
+    componentDidMount = () => {
+        AsyncStorage.getItem('name').then((value) => this.setState({'name': value}));
+        AsyncStorage.getItem('userID').then((value) => {
+            if(value === null) {
+                socket.emit('identificaiton', null);
+                socket.on('identificaiton', (value) => {
+                    if (value == null) {
+                        alert('Server returned null');
+                    } else {
+                        alert('Received ' + value + ' from server');
+                        AsyncStorage.setItem('userID', value);
+                        this.setState({'userID': value});
+                    }
+                });
+            } else {
+                this.setState({'userID': value});
+            }
+        });
+        AsyncStorage.getItem('chats').then((value) => {
+            if(value === null) {
+                // then we dont need to do anything
+            } else {
+                this.setState({'chats': value});
+                socket.emit('identificaiton', this.state.chats);
+            }
+        });
+    }
+
+    // send as handle to infoscreen
+    removeInfo = () => {
+        AsyncStorage.removeItem('name');
+        AsyncStorage.removeItem('userID');
+        AsyncStorage.removeItem('chats');
+        this.state.name = null;
+        this.state.userID = null;
+        this.state.chats = [];
+        alert('Please restart the app');
+    };
 
     setName = (value) => {
         // An example of how information can be stored in client
@@ -74,12 +113,6 @@ class HomeScreen extends React.Component {
                         title="Join"
                     />
                 </View>
-{/*                <View style={styles.buttonContainer}>
-                    <Button
-                        title="Send message (just for testing)"
-                        onPress={() => this.props.navigation.navigate('MessageToServer')}
-                    />
-                </View>*/}
                 <View style={styles.buttonContainer}>
                     <Button
                         title="Go to Chats"
@@ -88,20 +121,11 @@ class HomeScreen extends React.Component {
                         }
                     />
                 </View>
-{/*                <View style={styles.buttonContainer}>
-                    <Button
-                        title="Chatroom"
-                        onPress={() => this.props.navigation.navigate('Chatroom', {
-                            name: this.state.name,
-                            chatId: this.state.chats[0].ChatID})
-                        }
-                    />
-                </View>*/}
                 <View style={styles.buttonContainer}>
                     <Button
                         title="Info"
                         onPress={() => this.props.navigation.navigate('Info', {
-                            currentState: this.state })
+                            currentState: this.state, removeFunc: this.removeInfo})
                         }
                     />
                 </View>
@@ -111,42 +135,9 @@ class HomeScreen extends React.Component {
     }
 }
 
-/*class MessageToServer extends React.Component {
-    constructor(props) {
-        super(props);
-        this.state = {message: ''}
-        this.submitMessage = this.submitMessage.bind(this);
-    }
-
-    submitMessage() {
-        // THIS IS WHERE A MESSAGE SHOULD BE SENT TO SERVER
-        alert('Sending: \"' + this.state.message + '\" to server');
-    }
-
-    render() {
-        return (
-            //<View><Text>{this.state.message}</Text></View>
-            <View style={{flex: 1, alignItems: "center", justifyContent: "center"}}>
-                <TextInput
-                    style={styles.textInput}
-                    placeholder="Type your message!"
-                    onChangeText={(message) => this.setState({message})}
-                />
-                <TouchableOpacity
-                    style={styles.submitButton}
-                    onPress={this.submitMessage}
-                >
-                    <Text style={styles.submitButtonText}> Submit </Text>
-                </TouchableOpacity>
-            </View>
-        );
-    }
-}*/
-
 const AppNavigator = createStackNavigator(
     {
         Home: HomeScreen,
-        //MessageToServer: MessageToServer,
         Create: CreateScreen,
         Chats: ChatSelect,
         Chatroom: ChatScreen,

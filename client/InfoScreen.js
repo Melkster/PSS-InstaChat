@@ -1,7 +1,8 @@
 import React from "react";
 import {
-    View, Text
+    AsyncStorage, Button, View, Text
 } from "react-native";
+import styles from './styles';
 
 class InfoScreen extends React.Component {
     constructor(props) {
@@ -20,6 +21,7 @@ class InfoScreen extends React.Component {
     render() {
         const { navigation } = this.props;
         const state = navigation.getParam('currentState', 'unknown');
+        const removeFunc = navigation.getParam('removeFunc', 'unknown');
         return (
             <View style={{flex: 1, alignItems: "center", justifyContent: "center"}}>
                 <Text style={{fontSize:20}}> Current Info:{"\n" }</Text>
@@ -28,6 +30,12 @@ class InfoScreen extends React.Component {
                     Current chats: { '\n' + this.printChats(state.chats) }
                 </Text>
 
+                <View style={styles.buttonContainer}>
+                    <Button
+                        onPress={removeFunc}
+                        title="Forget everything"
+                    />
+                </View>
 
             </View>
         );
