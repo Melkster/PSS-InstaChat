@@ -9,6 +9,7 @@ import {createStackNavigator, createAppContainer} from "react-navigation";
 import ChatSelect from './ChatSelect';
 import ChatScreen from './ChatScreen';
 import InfoScreen from './InfoScreen';
+import CreateScreen from './CreateScreen';
 import styles from './styles';
 
 class HomeScreen extends React.Component {
@@ -55,7 +56,9 @@ class HomeScreen extends React.Component {
                 </View>
                 <View style={styles.buttonContainer}>
                     <Button
-                        onPress={this.onPressCreate}
+                        onPress={() => this.props.navigation.navigate('Create', {
+                            currentState: this.state })
+                        }
                         title="Create"
                     />
                 </View>
@@ -138,6 +141,7 @@ const AppNavigator = createStackNavigator(
     {
         Home: HomeScreen,
         //MessageToServer: MessageToServer,
+        Create: CreateScreen,
         Chats: ChatSelect,
         Chatroom: ChatScreen,
         Info: InfoScreen

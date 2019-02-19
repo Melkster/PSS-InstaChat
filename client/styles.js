@@ -51,5 +51,26 @@ const styles = StyleSheet.create({
         paddingHorizontal: 3,
         backgroundColor: 'black'
     },
+    createScreenView: {
+        flex: 1,
+        alignItems: 'center',
+        justifyContent: 'center',
+        flexDirection: 'column',
+    },
+    chatRoomName: {
+        borderWidth: 2,
+        borderColor: 'black',
+        width: 300,
+        height: 50,
+        paddingHorizontal: 10,
+        marginVertical: 50,
+    },
+    chatRoomNameSubmit: {
+        width: 150,
+        height: 50,
+        backgroundColor: 'black',
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
 });
 export default styles;

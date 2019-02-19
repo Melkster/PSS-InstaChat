@@ -3,6 +3,7 @@ import {
     Button, View, Text, ScrollView
 } from "react-native";
 import styles from './styles';
+import chatRoomsList from './ChatRoomsList';
 
 class ChatSelect extends React.Component {
     constructor(props) {
@@ -18,13 +19,14 @@ class ChatSelect extends React.Component {
                 <Text style={styles.headline}>Chatselect</Text>
                 <ScrollView>
                     {
-                        state.chats.map((item, index) => (
+                        chatRoomsList.map((item, index) => (
                             <View key = {item.ChatID} style={styles.buttonContainer}>
                                 <Button
                                     title={item.name}
                                     onPress={() => this.props.navigation.navigate('Chatroom', {
                                         name: state.name,
-                                        chatId: item.ChatID})
+                                        chatId: item.ChatID,
+                                        chatName: item.name,})
                                     }
                                 />
                             </View>
