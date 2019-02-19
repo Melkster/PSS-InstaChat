@@ -345,7 +345,7 @@ class DBManager {
         });
 
         if (success == true) {
-            globalDB.one("SELECT * FROM GlobalChats WHERE CHATHASH == (?)", [userID], callback);
+            globalDB.get("SELECT * FROM GlobalChats WHERE CHATHASH == (?)", [userID], callback);
             return true;
         } else {
             return false;
@@ -382,10 +382,49 @@ class DBManager {
     }
 
     verifyUser(userID, userName, chatID) {
-        // SQL query to verify that user with `userName` in chat `chatID`
-        // actually has `userID` (used for authorization when user reconnects)
-        // return: true if userName and userID match a user in chatID, otherwise false
-        // low priority
+        var success = true;
+
+        if (chatDBs[chatID] == undefined) {
+            console.error("Error: Chat " + chatID + " does not exist");
+            success = false;
+            return false;
+        }
+
+        if (success == false) {
+            return false;
+        }
+
+        globalDB.get("SELECT * FROM GlobalUsers WHERE USERHASH = (?)", [userID], (err, row) => {
+            if (err) {
+                console.error(err.message);
+                success = false;
+                return false;
+            }
+            if (row == undefined) {
+                console.error("Error: User " + userID + " does not exist");
+                success = false;
+                return false;
+            }
+        });
+
+        if (success == false) {
+            return false;
+        }
+
+        chatDBs[chatID].get("SELECT * FROM Users WHERE NAME = (?)", [userName], (err, row) => {
+            if (err) {
+                console.error(err.message);
+                success = false;
+                return false;
+            }
+            if (row == undefined) {
+                console.error('Error: User name "' + userName + '" does not exist in chat ' + chatID);
+                success = false;
+                return false;
+            }
+        });
+
+        return success;
     }
 
     removeUser(userID, chatID) {
