@@ -1,11 +1,12 @@
 import React from "react";
 import {
     Keyboard, TouchableHighlight, View,
-    Text, TextInput, FlatList, KeyboardAvoidingView
+    Text, TextInput, FlatList, KeyboardAvoidingView, Picker
 } from "react-native";
 import styles from './styles';
 import ChatItem from './ChatItem.js';
 import messagesList from './MessagesList';
+import chatRoomsList from './ChatRoomsList';
 
 // SHANGS CHATROOM
 /*
@@ -17,10 +18,13 @@ message format:
 }
  */
 class ChatScreen extends React.Component {
-    constructor() {
-        super();
+    constructor(props) {
+        super(props);
         this.state = {
             newText: '',
+            username: this.props.navigation.getParam('name', 'unknown'),
+            chatId: this.props.navigation.getParam('chatId', 'unknown'),
+            pickerValue: this.props.navigation.getParam('chatName', 'unknown'), // Make sure the drop-down list will select the right chatroom's name
         }
     }
 
@@ -33,7 +37,7 @@ class ChatScreen extends React.Component {
                 text: this.state.newText,
                 author: {
                     id: 2,
-                    username: 'Shang',
+                    username: this.state.username,
                 }
             };
             messagesList.reverse().push(newMessage);
@@ -49,6 +53,15 @@ class ChatScreen extends React.Component {
         }
     }
 
+    onPickerValueChange = (itemValue, itemIndex) => {
+        this.setState(
+            {
+                pickerValue: itemValue,
+                chatId: chatRoomsList[itemIndex].ChatID,
+            },
+        );
+    }
+
     renderChatItem({item}) {
         return <ChatItem message={item}/>
         //return <Text>{item.text}</Text>
@@ -57,14 +70,23 @@ class ChatScreen extends React.Component {
 
 
     render() {
-        const { navigation } = this.props;
-        const name = navigation.getParam('name', 'unknown');
-        const chatId = navigation.getParam('chatId', 'unknown');
+        //const { navigation } = this.props;
+        //const name = navigation.getParam('name', 'unknown');
+        //const chatId = navigation.getParam('chatId', 'unknown');
 
         return (
             // maybe better fix than to hardcode 90
-            <KeyboardAvoidingView style={styles.container} keyboardVerticalOffset={90} behavior="padding">
-                <Text style={styles.welcome}>Welcome to {chatId}, {name}!</Text>
+            <KeyboardAvoidingView style={styles.container} keyboardVerticalOffset={85} behavior="padding">
+                <Picker
+                    mode="dropdown"
+                    selectedValue = {this.state.pickerValue}
+                    //onValueChange = { (itemValue, itemIndex) => this.setState( {pickerValue: itemValue} ) }
+                    onValueChange = { (itemValue, itemIndex) => this.onPickerValueChange(itemValue, itemIndex) }
+                >
+                {chatRoomsList.map( (item, index) => {return( <Picker.Item label={item.name} value={item.name} key={index} />)} )}
+                </Picker>
+
+                <Text style={styles.welcome}>Welcome to {this.state.chatId}, {this.state.username}!</Text>
 
                 <FlatList
                     ref={"flatList"}
