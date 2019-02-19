@@ -300,7 +300,7 @@ class DBManager {
         // low priority
     }
 
-    addUser(userID, userName, chatID) {
+    addUser(userID, userName, chatID, callback) {
         var success = true;
 
         if (chatDBs[chatID] == undefined) {
@@ -345,7 +345,8 @@ class DBManager {
         });
 
         if (success == true) {
-            return userID;
+            globalDB.one("SELECT * FROM GlobalChats WHERE CHATHASH == (?)", [userID], callback);
+            return true;
         } else {
             return false;
         }

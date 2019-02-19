@@ -46,12 +46,19 @@ io.on("connection", socket => {
      * `chatID` of the joined chat.
      */
     socket.on("joinChat", (userID, userName, chatID) => {
-        result = database.addUser(userID, userName, chatID);
+        result = database.addUser(userID, userName, chatID, (err, row) => {
+            if (err) {
+                console.error(err.message);
+                success = false;
+                return false;
+            } else {
+                socket.emit("joinChat", row.CHATHASH);
+            }
+        });
         if (result == false) {
             socket.emit("err", `Could not join chat with chat ID "${chatID}"`);
         } else {
             socket.join(chatID);
-            socket.emit("joinChat", chatID);
             console.log(`User with userID ${userID} joined chat ${chatID}`);
         }
     });
