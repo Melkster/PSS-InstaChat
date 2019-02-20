@@ -12,9 +12,9 @@
       var localUserID;
       var chatID = 1337;
 
-      socket.emit('identificaiton', null);
+      socket.emit('identification', null);
 
-      socket.on('identificaiton', userID => {
+      socket.on('identification', userID => {
          localUserID = userID;
       });
 
