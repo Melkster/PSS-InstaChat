@@ -1,10 +1,10 @@
 {
-    "name": "InstaChat",
-    "version": "0.0.1",
+    "name": "instaserver",
     "description": "The effortless chat app",
     "main": "server/server.js",
     "scripts": {
-        "start": "cd server && nodemon server.js"
+        "install": "mkdir -p db",
+        "start": "nodemon server.js"
     },
     "author": "Axel Nygårds, Melker Österberg, Robert Markovski",
     "license": "ISC",
