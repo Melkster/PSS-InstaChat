@@ -25,6 +25,13 @@ class CreateScreen extends React.Component {
         // and returns a chatID.
 
         if (this.state.chatRoomName.length != 0) {
+            socket.emit("createChat", this.state.chatRoomName);
+
+            socket.on("createChat", chatID => {
+                this.state.chatID = chatID;
+                console.log(`Created chat with id '${chatID}'`);
+            });
+
             const chatRoom = {
                 name: this.state.chatRoomName,
                 ChatID: this.state.chatID,
