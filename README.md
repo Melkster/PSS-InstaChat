@@ -2,14 +2,15 @@
 The effortless chat app.
 
 ## Usage
+The following commands should all be executed in this project's root directory.
+
+To set everything up, run `make install`.
 
 ### Client
-*\*TODO\**
+To start the client, run `make run_client`.
 
 ### Server
-To set everything up, run `npm install`
-
-To start the server, run `npm start`.
+To start the server, run `make run_server`.
 
 ## Dependencies
 - [node.js](https://nodejs.org/)
