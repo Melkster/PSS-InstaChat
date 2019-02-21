@@ -46,13 +46,13 @@ io.on("connection", socket => {
      * `chatID` of the joined chat.
      */
     socket.on("joinChat", (userID, userName, chatID) => {
-        result = database.addUser(userID, userName, chatID, (err, row) => {
+        result = database.addUser(userID, userName, chatID, (err, name) => {
             if (err) {
                 console.error(err.message);
                 success = false;
                 return false;
             } else {
-                socket.emit("joinChat", row.CHATHASH);
+                socket.emit("joinChat", name);
             }
         });
         if (result == false) {

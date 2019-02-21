@@ -312,25 +312,28 @@ class DBManager {
 
     addUser(userID, userName, chatID, callback) {
         if (chatDBs[chatID] == undefined) {
-            console.error("Error: Chat " + chatID + " does not exist");
+            //console.error("Error: Chat " + chatID + " does not exist");
             success = false;
-            return false;
+            return callback(err, false);
         } else {
             this.checkUser(userID, chatID, function(err, status) {
                 if (status == true) {
                     chatDBs[chatID].get("SELECT * FROM Users WHERE USERHASH = (?)", [userID], (err, row) => {
                         if (err) {
-                            console.error(err.message);
-                            return false;
+                            return callback(err, false);
                         }
                         return row
-                            ? console.error("Error: User " + userID + " is already a member of chat " + chatID)
+                            ? callback(Error("DBM_ERROR: User " + userID + " is already a member of chat " + chatID))
                             : chatDBs[chatID].run("INSERT INTO Users    VALUES((?), (?), 1, (?));", [userID, userName, Date.now()], err => {
                                   if (err) {
-                                      console.error(err.message);
-                                      return false;
+                                      return callback(err, false);
                                   } else {
-                                      globalDB.get("SELECT * FROM GlobalChats WHERE CHATHASH == (?)", [userID], callback);
+                                      globalDB.get("SELECT * FROM GlobalChats WHERE CHATHASH == (?)", [userID], function(err, row) {
+                                          if (err) {
+                                              return callback(err, false);
+                                          }
+                                          return callback(null, row.CHATNAME);
+                                      });
                                   }
                               });
                     });
