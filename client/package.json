@@ -2,7 +2,7 @@
   "name": "instachat",
   "main": "node_modules/expo/AppEntry.js",
   "scripts": {
-    "start": "expo start --tunnel",
+    "start": "expo start",
     "android": "expo start --android",
     "ios": "expo start --ios",
     "eject": "expo eject"
@@ -17,6 +17,12 @@
   },
   "devDependencies": {
     "babel-preset-expo": "^5.0.0"
+  },
+  "prettier": {
+    "useTabs": false,
+    "printWidth": 160,
+    "tabWidth": 4,
+    "singleQuote": false
   },
   "private": true
 }
