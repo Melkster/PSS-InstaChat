@@ -100,13 +100,13 @@ io.on("connection", socket => {
         if (!messageWrapper.hasOwnProperty("message")) {
             socket.emit("err", "The message sent contains no 'message' field");
         } else if (!messageWrapper.hasOwnProperty("chatID")) {
-            socket.emit("err", "The message sent has no userID")
+            socket.emit("err", "The message sent has no userID");
         } else if (!messageWrapper.hasOwnProperty("author")) {
-            socket.emit("err", "The message sent has no author")
+            socket.emit("err", "The message sent has no author");
         } else if (!messageWrapper.author.hasOwnProperty("userID")) {
-            socket.emit("err", "The message sent has no userID")
+            socket.emit("err", "The message sent has no userID");
         } else if (!messageWrapper.author.hasOwnProperty("username")) {
-            socket.emit("err", "The message sent has no username")
+            socket.emit("err", "The message sent has no username");
         } else {
             console.log(`Received message: '${messageWrapper.message}' from userID ${messageWrapper.author.userID}`);
             result = database.addMessage(messageWrapper.message, messageWrapper.author.userID, messageWrapper.chatID);
