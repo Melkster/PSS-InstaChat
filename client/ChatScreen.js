@@ -36,10 +36,10 @@ class ChatScreen extends React.Component {
     _onSendButtonPressed() {
         if (this.state.newText.length != 0) {
             const messageWrapper = {
-                id: 2,
-                text: this.state.newText,
+                chatID: 2,
+                message: this.state.newText,
                 author: {
-                    id: 2,
+                    userID: 2,
                     username: this.state.username,
                 }
             };
@@ -51,7 +51,7 @@ class ChatScreen extends React.Component {
             this.textInput.clear();
             Keyboard.dismiss();
             this.refs.flatList.scrollToEnd();
-            socket.emit('message', messageWrapper);
+            socket.emit("message", JSON.stringify(messageWrapper));
         } else {
             Keyboard.dismiss();
         }
