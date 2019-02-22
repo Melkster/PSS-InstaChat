@@ -90,7 +90,7 @@ class DBManager {
         var tries = 0;
         while (success == false) {
             success = true;
-            chatID = DBManager.sRandomBigValue();
+            chatID = DBManager.sRandomBigValue(6);
             globalDB.run("INSERT INTO GlobalChats (CHATHASH, CHATNAME) VALUES(?, ?);", [chatID, chatName], err => {
                 if (err) {
                     success = false;
@@ -268,7 +268,7 @@ class DBManager {
         var tries = 0;
         while (success == false) {
             success = true;
-            userID = DBManager.sRandomBigValue();
+            userID = DBManager.sRandomBigValue(6);
             globalDB.run("INSERT INTO GlobalUsers (USERHASH) VALUES(?);", [userID], err => {
                 if (err) {
                     success = false;
