@@ -6,6 +6,7 @@ import {
 import {createStackNavigator, createAppContainer} from "react-navigation";
 
 import ChatSelect from './ChatSelect';
+import JoinScreen from './JoinScreen';
 import ChatScreen from './ChatScreen';
 import InfoScreen from './InfoScreen';
 import CreateScreen from './CreateScreen';
@@ -105,8 +106,10 @@ class HomeScreen extends React.Component {
                 </View>
                 <View style={styles.buttonContainer}>
                     <Button
-                        onPress={this.onPressJoin}
                         title="Join"
+                        onPress={() => this.props.navigation.navigate('Join', {
+                            currentState: this.state })
+                        }
                     />
                 </View>
                 <View style={styles.buttonContainer}>
@@ -135,6 +138,7 @@ const AppNavigator = createStackNavigator(
     {
         Home: HomeScreen,
         Create: CreateScreen,
+        Join: JoinScreen,
         Chats: ChatSelect,
         Chatroom: ChatScreen,
         Info: InfoScreen
