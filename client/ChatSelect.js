@@ -20,7 +20,7 @@ class ChatSelect extends React.Component {
                 <ScrollView>
                     {
                         state.chats.map((item, index) => (
-                            <View key = {item.ChatID} style={styles.buttonContainer}>
+                            <View key = {item.chatID} style={styles.buttonContainer}>
                                 <Button
                                     title={item.name}
                                     onPress={() => this.props.navigation.navigate('Chatroom', {

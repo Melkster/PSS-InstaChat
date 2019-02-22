@@ -24,8 +24,8 @@ class ChatScreen extends React.Component {
         this.state = {
             newText: '',
             username: this.props.navigation.getParam('name', 'unknown'),
-            chatId: this.props.navigation.getParam('chatId', 'unknown'),
-            pickerValue: this.props.navigation.getParam('chatName', 'unknown'), // Make sure the drop-down list will select the right chatroom's name
+            chatID: this.props.navigation.getParam('chatID', 'unknown'),
+            chatName: this.props.navigation.getParam('chatName', 'unknown'), // Make sure the drop-down list will select the right chatroom's name
         }
     }
 
@@ -96,7 +96,7 @@ class ChatScreen extends React.Component {
                 {chatRoomsList.map( (item, index) => {return( <Picker.Item label={item.name} value={item.name} key={index} />)} )}
                 </Picker>
 
-                <Text style={styles.welcome}>Welcome to {this.state.chatId}, {this.state.username}!</Text>
+                <Text style={styles.welcome}>Welcome to {this.state.chatName} ({this.state.chatID}), {this.state.username}!</Text>
 
                 <FlatList
                     ref={"flatList"}
