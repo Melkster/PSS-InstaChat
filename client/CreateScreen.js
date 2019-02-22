@@ -28,8 +28,10 @@ class CreateScreen extends React.Component {
         // and returns a chatID.
 
         if (this.state.chatRoomName.length != 0) {
+            // Sends a request to the server to create a chat with the namn this.state.chatRoomName
             socket.emit("createChat", this.state.chatRoomName);
 
+            // Receives the chatID from the server
             socket.on("createChat", chatID => {
                 this.state.chatID = chatID;
                 console.log(`Created chat with id '${chatID}'`);
@@ -50,14 +52,6 @@ class CreateScreen extends React.Component {
                 chatId: this.state.chatID,
                 chatName: this.state.chatRoomName,
             })
-
-            // Sends a request to the server to create a chat with the namn this.state.chatRoomName
-            socket.emit('createChat', this.state.chatRoomName);
-            
-            // Receives the chatID from the server
-            socket.on('createChat', chatID => {
-                // TODO: Create the new chat with the received chatID
-            });
         } else {
             Keyboard.dismiss();
         }
