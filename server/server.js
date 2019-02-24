@@ -79,7 +79,7 @@ io.on("connection", socket => {
             socket.emit("err", `Could not create chat "${chatName}"`);
         } else {
             socket.emit("createChat", chatID);
-            console.log(`Created chat '${chatName}'`)
+            console.log(`Created chat '${chatName}'`);
         }
     });
 
@@ -101,29 +101,35 @@ io.on("connection", socket => {
      * respond with an `err` event.
      */
     socket.on("message", messageWrapper => {
-        // TODO: change userID to userName before transmitting message
         // messageWrapper.time = new Date(); // Adds time received to message
         messageWrapper = JSON.parse(messageWrapper);
 
-        if (!messageWrapper.hasOwnProperty("message")) {
-            socket.emit("err", "The message sent contains no 'message' field");
-        } else if (!messageWrapper.hasOwnProperty("chatID")) {
-            socket.emit("err", "The message sent has no userID");
-        } else if (!messageWrapper.hasOwnProperty("author")) {
-            socket.emit("err", "The message sent has no author");
-        } else if (!messageWrapper.author.hasOwnProperty("userID")) {
-            socket.emit("err", "The message sent has no userID");
-        } else if (!messageWrapper.author.hasOwnProperty("username")) {
-            socket.emit("err", "The message sent has no username");
-        } else {
-            console.log(`Received message: '${messageWrapper.message}' from userID ${messageWrapper.author.userID}`);
-            result = database.addMessage(messageWrapper.message, messageWrapper.author.userID, messageWrapper.chatID);
-            if (result == false) {
-                socket.emit("err", `Could not store message in server database`);
+        database.checkUser(messageWrapper.userID, messageWrapper.chatID, (err, username) => {
+            if (err) {
+                socket.emit("err", err);
+                console.log(err);
             } else {
-                io.to(messageWrapper.chatID).emit("message", messageWrapper);
+                if (!messageWrapper.hasOwnProperty("message")) {
+                    socket.emit("err", "The message sent contains no 'message' field");
+                } else if (!messageWrapper.hasOwnProperty("chatID")) {
+                    socket.emit("err", "The message sent has no userID");
+                } else if (!messageWrapper.hasOwnProperty("userID")) {
+                    socket.emit("err", "The message sent has no userID");
+                } else if (!messageWrapper.hasOwnProperty("username")) {
+                    socket.emit("err", "The message sent has no username");
+                } else {
+                    console.log(`Received message: '${messageWrapper.message}' from userID ${messageWrapper.author.userID}`);
+                    result = database.addMessage(messageWrapper.message, messageWrapper.author.userID, messageWrapper.chatID);
+                    if (result == false) {
+                        socket.emit("err", `Could not store message in server database`);
+                    } else {
+                        messageWrapper.username = username;
+                        delete messageWrapper.userID;
+                        io.to(messageWrapper.chatID).emit("message", messageWrapper);
+                    }
+                }
             }
-        }
+        });
     });
 
     socket.on("disconnect", () => {
