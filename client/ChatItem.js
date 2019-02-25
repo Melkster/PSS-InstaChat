@@ -1,17 +1,24 @@
 import React, {Component} from 'react';
 import {StyleSheet, Text, View} from 'react-native';
 
+
+// username;
+// chatID:
+// message:
+// time:
+
+
 class ChatItem extends Component {
     render() {
         const message = this.props.message;
-        const isMyMessage = message.author.id == 2;
+        const isMyMessage = message.author.id == 2; // needs fix
         const textContainerExtra = isMyMessage ? styles.textContainerRight : styles.textContainerLeft;
         return (
             <View style={styles.messageContainer} >
 
                 <View style={[styles.textContainer, textContainerExtra]} >
-                    <Text style={styles.sender} >{message.author.username}</Text>
-                    <Text style={styles.message} >{message.text}</Text>
+                    <Text style={styles.sender} >{message.username}</Text>
+                    <Text style={styles.message} >{message.message}</Text>
                 </View>
 
             </View>

@@ -34,14 +34,14 @@ class HomeScreen extends React.Component {
         AsyncStorage.getItem('name').then((value) => this.setState({'name': value}));
         AsyncStorage.getItem('chats').then((value) => {
             if(value !== null) {
-                this.setState({'chats': value});
+                this.setState({'chats': JSON.parse(value)});
             }
         });
         AsyncStorage.getItem('userID').then((value) => {
             socket.emit('identification', value, this.chats);
             socket.on('identification', (value) => {
                 if (value == null) {
-                    alert('Server returned null');
+                    alert('Server returned. null');
                 } else {
                     alert('Received ' + value + ' from server');
                     AsyncStorage.setItem('userID', value);

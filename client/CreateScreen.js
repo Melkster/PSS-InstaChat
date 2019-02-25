@@ -1,13 +1,11 @@
 import React from "react";
 import {
-    Keyboard, TouchableHighlight, View,
+    AsyncStorage, Keyboard, TouchableHighlight, View,
     Text, TextInput, FlatList, KeyboardAvoidingView, Picker
 } from "react-native";
 import styles from './styles';
 import chatRoomsList from './ChatRoomsList';
 import socket from './socket';
-//import console = require("console");
-//import console = require("console");
 
 class CreateScreen extends React.Component {
     constructor(props) {
@@ -30,9 +28,10 @@ class CreateScreen extends React.Component {
                 const chatRoom = {
                     name: chatRoomName,
                     chatID: chatID
-                }
+                };
                 state.chats.push(chatRoom);
-                // Async Storage here
+                // Store the new chatroom in permanent memory
+                AsyncStorage.setItem('chats', JSON.stringify(state.chats));
                 this.props.navigation.navigate('Chatroom', {
                     name: state.name,
                     chatID: chatID,
