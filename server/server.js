@@ -121,7 +121,7 @@ io.on("connection", socket => {
             if (result == false) {
                 socket.emit("err", `Could not store message in server database`);
             } else {
-                io.to(messageWrapper.chatID).emit("message", messageWrapper);
+                io.to(messageWrapper.chatID).emit("message", JSON.stringify(messageWrapper));
             }
         }
     });
