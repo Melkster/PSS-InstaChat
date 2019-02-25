@@ -32,19 +32,19 @@ class DBManager {
 
         if (firstBoot == true) {
             globalDB
-                .run("CREATE TABLE GlobalUsers (USERHASH INT     PRIMARY KEY      NOT NULL);", err => {
+                .run("CREATE TABLE GlobalUsers (userID INT     PRIMARY KEY      NOT NULL);", err => {
                     if (err) {
                         console.error(err.message);
                         success = false;
                     }
                 })
-                .run("CREATE TABLE GlobalChats (CHATHASH INT     PRIMARY KEY      NOT NULL, CHATNAME TEXT    NOT NULL);", err => {
+                .run("CREATE TABLE GlobalChats (chatID INT     PRIMARY KEY      NOT NULL, chatName TEXT    NOT NULL);", err => {
                     if (err) {
                         console.error(err.message);
                         success = false;
                     }
                 })
-                .run("INSERT INTO GlobalUsers (USERHASH) VALUES(0);", err => {
+                .run("INSERT INTO GlobalUsers (userID) VALUES(0);", err => {
                     if (err) {
                         console.error(err.message);
                         success = false;
@@ -91,7 +91,7 @@ class DBManager {
         while (success == false) {
             success = true;
             chatID = DBManager.sRandomBigValue(6);
-            globalDB.run("INSERT INTO GlobalChats (CHATHASH, CHATNAME) VALUES(?, ?);", [chatID, chatName], err => {
+            globalDB.run("INSERT INTO GlobalChats (chatID, chatName) VALUES(?, ?);", [chatID, chatName], err => {
                 if (err) {
                     success = false;
                     if (tries > 16) {
@@ -131,7 +131,7 @@ class DBManager {
         newChatDB.serialize(() => {
             newChatDB
                 .run(
-                    "CREATE TABLE Users(USERHASH         INT     UNIQUE  NOT NULL, NAME             TEXT            NOT NULL, ONLINE           INT             NOT NULL, LASTONLINE       INT             NOT NULL);",
+                    "CREATE TABLE Users(userID         INT     UNIQUE  NOT NULL, userName             TEXT            NOT NULL, online           INT             NOT NULL, lastOnline       INT             NOT NULL);",
                     err => {
                         if (err) {
                             console.error(err.message);
@@ -148,7 +148,7 @@ class DBManager {
                     }
                 })
                 .run(
-                    "CREATE TABLE Messages(     USERHASH         INT     UNIQUE  NOT NULL,       MESSAGE  TEXT,       TIME     INT            NOT NULL);",
+                    "CREATE TABLE Messages(     userID         INT     UNIQUE  NOT NULL,       message  TEXT,       time     INT            NOT NULL);",
                     err => {
                         if (err) {
                             console.error(err.message);
@@ -177,7 +177,7 @@ class DBManager {
     createChat_debug(chatName, chatID) {
         var success = false;
         success = true;
-        globalDB.run("INSERT INTO GlobalChats (CHATHASH, CHATNAME) VALUES(?, ?);", [chatID, chatName], err => {
+        globalDB.run("INSERT INTO GlobalChats (chatID, chatName) VALUES(?, ?);", [chatID, chatName], err => {
             if (err) {
                 success = false;
                 return false;
@@ -213,7 +213,7 @@ class DBManager {
         newChatDB.serialize(() => {
             newChatDB
                 .run(
-                    "CREATE TABLE Users(USERHASH         INT     UNIQUE  NOT NULL, NAME             TEXT            NOT NULL, ONLINE           INT             NOT NULL, LASTONLINE       INT             NOT NULL);",
+                    "CREATE TABLE Users(userID         INT     UNIQUE  NOT NULL, userName             TEXT            NOT NULL, online           INT             NOT NULL, lastOnline       INT             NOT NULL);",
                     err => {
                         if (err) {
                             console.error(err.message);
@@ -230,7 +230,7 @@ class DBManager {
                     }
                 })
                 .run(
-                    "CREATE TABLE Messages(     USERHASH         INT     UNIQUE  NOT NULL,       MESSAGE  TEXT,       TIME     INT            NOT NULL);",
+                    "CREATE TABLE Messages(     userID         INT     UNIQUE  NOT NULL,       message  TEXT,       time     INT            NOT NULL);",
                     err => {
                         if (err) {
                             console.error(err.message);
@@ -269,7 +269,7 @@ class DBManager {
         while (success == false) {
             success = true;
             userID = DBManager.sRandomBigValue(6);
-            globalDB.run("INSERT INTO GlobalUsers (USERHASH) VALUES(?);", [userID], err => {
+            globalDB.run("INSERT INTO GlobalUsers (userID) VALUES(?);", [userID], err => {
                 if (err) {
                     success = false;
                     if (tries > 16) {
@@ -290,7 +290,7 @@ class DBManager {
     createUser_debug(userID) {
         var success = false;
         success = true;
-        globalDB.run("INSERT INTO GlobalUsers (USERHASH) VALUES(?);", [userID], err => {
+        globalDB.run("INSERT INTO GlobalUsers (userID) VALUES(?);", [userID], err => {
             if (err) {
                 success = false;
                 return false;
@@ -318,7 +318,7 @@ class DBManager {
         } else {
             this.checkUser(userID, chatID, function(err, status) {
                 if (status == true) {
-                    chatDBs[chatID].get("SELECT * FROM Users WHERE USERHASH = (?)", [userID], (err, row) => {
+                    chatDBs[chatID].get("SELECT * FROM Users WHERE userID = (?)", [userID], (err, row) => {
                         if (err) {
                             return callback(err, false);
                         }
@@ -328,11 +328,11 @@ class DBManager {
                                   if (err) {
                                       return callback(err, false);
                                   } else {
-                                      globalDB.get("SELECT * FROM GlobalChats WHERE CHATHASH == (?)", [userID], function(err, row) {
+                                      globalDB.get("SELECT * FROM GlobalChats WHERE chatID == (?)", [chatID], function(err, row) {
                                           if (err) {
                                               return callback(err, false);
                                           }
-                                          return callback(null, row.CHATNAME);
+                                          return callback(null, row.chatName);
                                       });
                                   }
                               });
@@ -347,7 +347,7 @@ class DBManager {
             console.error("Error: Chat " + chatID + " does not exist");
             return callback(Error("DBM_ERROR: Chat " + chatID + " does not exist"), false);
         } else {
-            globalDB.get("SELECT * FROM GlobalUsers WHERE USERHASH = (?)", [userID], function(err, row) {
+            globalDB.get("SELECT * FROM GlobalUsers WHERE userID = (?)", [userID], function(err, row) {
                 if (err) {
                     console.error(err.message);
                     return callback(err, false);
@@ -362,19 +362,19 @@ class DBManager {
             console.error("Error: Chat " + chatID + " does not exist");
             return callback(Error("DBM_ERROR: Chat " + chatID + " does not exist"), false);
         } else {
-            globalDB.get("SELECT * FROM GlobalUsers WHERE USERHASH = (?)", [userID], (err, row) => {
+            globalDB.get("SELECT * FROM GlobalUsers WHERE userID = (?)", [userID], (err, row) => {
                 if (err) {
                     console.error(err.message);
                     return callback(err, false);
                 }
                 return row
-                    ? chatDBs[chatID].get("SELECT * FROM Users WHERE USERHASH = (?)", [userID], (err, row) => {
+                    ? chatDBs[chatID].get("SELECT * FROM Users WHERE userID = (?)", [userID], (err, row) => {
                           if (err) {
                               console.error(err.message);
                               return callback(err, false);
                           }
                           return row
-                              ? callback(null, row.NAME == userName)
+                              ? callback(null, row.userName == userName)
                               : callback(Error("DBM_ERROR: User  " + userID + " does not exist in chat " + chatID), false);
                       })
                     : callback(Error("DBM_ERROR: User " + userID + " does not exist"), false);
@@ -421,7 +421,7 @@ class DBManager {
 
         this.checkUser(userID, chatID, function(err, result) {
             if (result == true) {
-                chatDBs[chatID].run("INSERT INTO Messages (USERHASH, MESSAGE, TIME) VALUES ((?), (?), (?));", [userID, message, Date.now()], err => {
+                chatDBs[chatID].run("INSERT INTO Messages (userID, message, time) VALUES ((?), (?), (?));", [userID, message, Date.now()], err => {
                     if (err) {
                         console.error(err.message);
                         success = false;
@@ -462,8 +462,6 @@ class DBManager {
             .randomBytes(Math.ceil((len * 3) / 4))
             .toString("base64") // convert to base64 format
             .slice(0, len); // return required number of characters
-        //.replace(/\+/g, '0') // replace '+' with '0'
-        //.replace(/\//g, '0') // replace '/' with '0'
     }
 }
 
