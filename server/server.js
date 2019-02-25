@@ -55,7 +55,6 @@ io.on("connection", socket => {
         result = database.addUser(userID, userName, chatID, (err, name) => {
             if (err) {
                 console.error(err.message);
-                success = false;
                 return false;
             } else {
                 socket.emit("joinChat", name);
@@ -80,13 +79,15 @@ io.on("connection", socket => {
      * with the `chatID` of the created chat.
      */
     socket.on("createChat", chatName => {
-        chatID = database.createChat(chatName);
-        if (chatID == false) {
-            socket.emit("err", `Could not create chat "${chatName}"`);
-        } else {
-            socket.emit("createChat", chatID);
-            console.log(`Created chat '${chatName}'`);
-        }
+        database.createChat(chatName, function(err, chatID) {
+            if (err) {
+                console.error(err);
+                socket.emit("err", `Could not create chat "${chatName}"`);
+            } else {
+                socket.emit("createChat", chatID);
+                console.log(`Created chat '${chatName}'`);
+            }
+        });
     });
 
     /**
@@ -123,12 +124,14 @@ io.on("connection", socket => {
             socket.emit("err", "The message sent has no username");
         } else {
             console.log(`Received message: '${messageWrapper.message}' from userID ${messageWrapper.author.userID}`);
-            result = database.addMessage(messageWrapper.message, messageWrapper.author.userID, messageWrapper.chatID);
-            if (result == false) {
-                socket.emit("err", `Could not store message in server database`);
-            } else {
-                io.to(messageWrapper.chatID).emit("message", messageWrapper);
-            }
+            database.addMessage(messageWrapper.message, messageWrapper.author.userID, messageWrapper.chatID, function(err, status) {
+                if (err) {
+                    console.error(err);
+                    socket.emit("err", `Could not store message in server database`);
+                } else {
+                    io.to(messageWrapper.chatID).emit("message", messageWrapper);
+                }
+            });
         }
     });
 
