@@ -33,7 +33,7 @@ class CreateScreen extends React.Component {
                 // Store the new chatroom in permanent memory
                 AsyncStorage.setItem('chats', JSON.stringify(state.chats));
                 this.props.navigation.navigate('Chatroom', {
-                    name: state.name,
+                    currentState: state,
                     chatID: chatID,
                     chatName: chatRoomName
                 })
