@@ -10,47 +10,62 @@ import socket from './socket';
 class CreateScreen extends React.Component {
     constructor(props) {
         super(props);
-        this.state = { 'chatRoomName' : '' };
+        this.state = {
+            chatRoomName: '',
+            currentState: this.props.navigation.getParam('currentState', 'unknown'),
+        }
     }
 
-    onSubmitButtonPressed(chatRoomName, state) {
+    onSubmitButtonPressed() {
 
         // Here we need to update the current state.chats (not ChatRoomsList?)
         // and also update AsyncStorage so that the newly added chatroom is permanently stored
         // Communication is required with the server, the server expects the chatroom name
         // and returns a chatID.
-        if (chatRoomName.length != 0) {
+        if (this.state.chatRoomName.length != 0) {
+            console.log('submit pressed:' + this.state.chatRoomName);
             // Sends a request to the server to create a chat with the namn this.state.chatRoomName
-            socket.emit("createChat", chatRoomName);
+            socket.emit("createChat", this.state.chatRoomName);
 
             // Receives the chatID from the server
-            socket.on("createChat", chatID => {
+            socket.once("createChat", chatID => {
                 console.log(`Received chatID: '${chatID}'`);
-                const chatRoom = {
-                    name: chatRoomName,
+                var chatRoom = {
+                    name: this.state.chatRoomName,
                     chatID: chatID
                 };
-                state.chats.push(chatRoom);
-                // Store the new chatroom in permanent memory
-                AsyncStorage.setItem('chats', JSON.stringify(state.chats));
+                this.state.currentState.chats.push(chatRoom);
+                AsyncStorage.setItem('chats', JSON.stringify(this.state.currentState.chats));
                 this.props.navigation.navigate('Chatroom', {
-                    currentState: state,
-                    chatID: chatID,
-                    chatName: chatRoomName
+                    currentState: this.state.currentState,
+                    chatID: chatID, // from server
+                    chatName: this.state.chatRoomName
                 })
             });
         }
     }
 
     setName = (value) => {
+        console.log('changing state');
         this.setState({'chatRoomName': value});
+        console.log('to: '+this.state.chatRoomName);
+    };
+
+    printChats = (chats) => {
+        var s = '';
+        for(var i = 0; i < chats.length; i++) {
+            s = s + chats[i].name + '(' + chats[i].chatID + ')' + "\n";
+        }
+        return s;
+
     };
 
     render() {
-        const { navigation } = this.props;
-        const state = navigation.getParam('currentState', 'unknown');
         return (
             <View style={styles.createScreenView}>
+                <Text>
+                    Current chats: { '\n' + this.printChats(this.state.currentState.chats) }
+                </Text>
                 <TextInput
                     style={styles.chatRoomName}
                     placeholder="Enter Chatroom Name"
@@ -59,7 +74,7 @@ class CreateScreen extends React.Component {
 
                 <TouchableHighlight
                     style={styles.chatRoomNameSubmit}
-                    onPress={() => this.onSubmitButtonPressed(this.state.chatRoomName, state)}
+                    onPress={this.onSubmitButtonPressed.bind(this)}
                 >
                     <Text style={{color: 'white'}}>Submit</Text>
                 </TouchableHighlight>

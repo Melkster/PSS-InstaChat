@@ -30,6 +30,7 @@ class ChatScreen extends React.Component {
             this.textInput.clear();
             Keyboard.dismiss();
             this.refs.flatList.scrollToEnd();
+            console.log('Sending ' + JSON.stringify(messageWrapper) + ' to server.');
             socket.emit("message", JSON.stringify(messageWrapper));
         } else {
             Keyboard.dismiss();
@@ -58,9 +59,12 @@ class ChatScreen extends React.Component {
         socket.emit("fetchMessages", this.state.chatID);
 
         socket.on("message", data => {
-            // TODO: Recieves the message when another user sends it, needs to handle it 
             console.log(data);
             messages.push(data);
+        });
+
+        socket.on("err", err => {
+            console.log(err);
         });
 
         return (
