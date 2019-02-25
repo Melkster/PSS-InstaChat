@@ -118,8 +118,8 @@ io.on("connection", socket => {
                 } else if (!messageWrapper.hasOwnProperty("username")) {
                     socket.emit("err", "The message sent has no username");
                 } else {
-                    console.log(`Received message: '${messageWrapper.message}' from userID ${messageWrapper.author.userID}`);
-                    result = database.addMessage(messageWrapper.message, messageWrapper.author.userID, messageWrapper.chatID);
+                    console.log(`Received message: '${messageWrapper.message}' from userID ${messageWrapper.userID}`);
+                    result = database.addMessage(messageWrapper.message, messageWrapper.userID, messageWrapper.chatID);
                     if (result == false) {
                         socket.emit("err", `Could not store message in server database`);
                     } else {
