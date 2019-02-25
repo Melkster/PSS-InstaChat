@@ -10,7 +10,13 @@ app.get("/", (req, res) => {
 });
 
 const database = new DBManager();
-database.initDatabase();
+database.initDatabase(function(err, status) {
+    if (err) {
+        console.error(err);
+    } else {
+        console.log("Database manager initialized successfully.");
+    }
+});
 
 io.on("connection", socket => {
     // TODO: redownload history when user enters a chat
@@ -79,7 +85,7 @@ io.on("connection", socket => {
             socket.emit("err", `Could not create chat "${chatName}"`);
         } else {
             socket.emit("createChat", chatID);
-            console.log(`Created chat '${chatName}'`)
+            console.log(`Created chat '${chatName}'`);
         }
     });
 

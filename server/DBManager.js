@@ -7,9 +7,9 @@ var globalDB;
 var chatDBs = {};
 
 class DBManager {
-    initDatabase() {
+    initDatabase(callback) {
         let firstBoot = false;
-        let success = true;
+
         if (fs.existsSync("./db/global.db")) {
             firstBoot = false;
         } else {
@@ -26,61 +26,53 @@ class DBManager {
         });
         globalDB.serialize();
 
-        if (success == false) {
-            return false;
-        }
-
         if (firstBoot == true) {
-            globalDB
-                .run("CREATE TABLE GlobalUsers (userID INT     PRIMARY KEY      NOT NULL);", err => {
-                    if (err) {
-                        console.error(err.message);
-                        success = false;
-                    }
-                })
-                .run("CREATE TABLE GlobalChats (chatID INT     PRIMARY KEY      NOT NULL, chatName TEXT    NOT NULL);", err => {
-                    if (err) {
-                        console.error(err.message);
-                        success = false;
-                    }
-                })
-                .run("INSERT INTO GlobalUsers (userID) VALUES(0);", err => {
-                    if (err) {
-                        console.error(err.message);
-                        success = false;
-                    }
-                });
-        }
-
-        /*let dbm = this;
-        this.createUser(function(err, user) {
-            console.log("Created user " + user);
-            dbm.createChat("potato", function(err, chat) {
-                console.log("Created chat " + chat);
-                dbm.addUser(user, "Mr. Person", chat, function(err, chatName) {
-                    var cb = function(err, result) {
-                        console.log("callback");
+            globalDB.run("CREATE TABLE GlobalUsers (userID INT     PRIMARY KEY      NOT NULL);", err => {
+                if (err) {
+                    return callback(err, false);
+                } else {
+                    globalDB.run("CREATE TABLE GlobalChats (chatID INT     PRIMARY KEY      NOT NULL, chatName TEXT    NOT NULL);", err => {
                         if (err) {
-                            console.error(err);
+                            return callback(err, false);
+                        } else {
+                            globalDB.run("INSERT INTO GlobalUsers (userID) VALUES(0);", err => {
+                                if (err) {
+                                    return callback(err, false);
+                                } else {
+                                    /*let dbm = this;
+                                    this.createUser(function(err, user) {
+                                        console.log("Created user " + user);
+                                        dbm.createChat("potato", function(err, chat) {
+                                            console.log("Created chat " + chat);
+                                            dbm.addUser(user, "Mr. Person", chat, function(err, chatName) {
+                                                var cb = function(err, result) {
+                                                    console.log("callback");
+                                                    if (err) {
+                                                        console.error(err);
+                                                    }
+                                                    console.log("result: " + result);
+                                                };
+                                                console.log("Added user " + user + ' to chat "' + chatName + '"');
+                                                dbm.addMessage("Hi!", user, chat, function(err, status) {
+                                                    console.log("this.checkUser(" + user + ", " + chat + "): " + dbm.checkUser(user, chat, cb));
+                                                    console.log(
+                                                        "this.verifyUser(" + 0 + ', "Mr. Server", ' + chat + "): " + dbm.verifyUser(0, "Mr. Server", chat, cb)
+                                                    );
+                                                    console.log("this.verifyUser(" + 0 + ', "Server", ' + chat + "): " + dbm.verifyUser(0, "Server", chat, cb));
+                                                    dbm.getAllUsers(chat, console.log);
+                                                    dbm.getMessages(chat, console.log);
+                                                });
+                                            });
+                                        });
+                                    });*/
+                                }
+                            });
                         }
-                        console.log("result: " + result);
-                    };
-                    console.log("Added user " + user + ' to chat "' + chatName + '"');
-                    dbm.addMessage("Hi!", user, chat, function(err, status) {
-                        console.log("this.checkUser(" + user + ", " + chat + "): " + dbm.checkUser(user, chat, cb));
-                        console.log("this.verifyUser(" + 0 + ', "Mr. Server", ' + chat + "): " + dbm.verifyUser(0, "Mr. Server", chat, cb));
-                        console.log("this.verifyUser(" + 0 + ', "Server", ' + chat + "): " + dbm.verifyUser(0, "Server", chat, cb));
-                        dbm.getAllUsers(chat, console.log);
-                        dbm.getMessages(chat, console.log);
                     });
-                });
+                }
             });
-        });*/
-
-        if (success == true) {
-            return true;
         } else {
-            return false;
+            // Reload old stored chats here.
         }
     }
 
@@ -95,11 +87,11 @@ class DBManager {
         this.createChatInner(
             function(err, chatID) {
                 if (err) {
-                    return callback(err, null);
+                    return callback(err, false);
                 } else {
                     let newChatDB = new sqlite3.Database("./db/" + chatID + ".db", err => {
                         if (err) {
-                            return callback(err, null);
+                            return callback(err, false);
                         }
                     });
                     chatDBs[chatID] = newChatDB;
@@ -109,24 +101,24 @@ class DBManager {
                         "CREATE TABLE Users(userID         INT     UNIQUE  NOT NULL, userName             TEXT            NOT NULL, online           INT             NOT NULL, lastOnline       INT             NOT NULL);",
                         err => {
                             if (err) {
-                                return callback(err, null);
+                                return callback(err, false);
                             } else {
                                 newChatDB.run('INSERT INTO Users    VALUES(0, "Server", 1, (?));', [Date.now()], err => {
                                     if (err) {
-                                        return callback(err, null);
+                                        return callback(err, false);
                                     } else {
                                         newChatDB.run(
                                             "CREATE TABLE Messages(     userID         INT     UNIQUE  NOT NULL,       message  TEXT,       time     INT            NOT NULL);",
                                             err => {
                                                 if (err) {
-                                                    return callback(err, null);
+                                                    return callback(err, false);
                                                 } else {
                                                     newChatDB.run(
                                                         "INSERT INTO Messages    VALUES(0, 'Chat \"" + chatName + "\" created.', (?));",
                                                         [Date.now()],
                                                         err => {
                                                             if (err) {
-                                                                return callback(err, null);
+                                                                return callback(err, false);
                                                             } else {
                                                                 return callback(null, chatID);
                                                             }
@@ -163,7 +155,7 @@ class DBManager {
                 }
             });
         } else {
-            return callback(Error("DBM_Error: Could not add new ID to GlobalUsers, maxTries (" + maxTries + ") exceeded"), null);
+            return callback(Error("DBM_Error: Could not add new ID to GlobalUsers, maxTries (" + maxTries + ") exceeded"), false);
         }
     }
 
@@ -276,14 +268,14 @@ class DBManager {
                 }
             });
         } else {
-            return callback(Error("DBM_Error: Could not add new ID to GlobalUsers, maxTries (" + maxTries + ") exceeded"), null);
+            return callback(Error("DBM_Error: Could not add new ID to GlobalUsers, maxTries (" + maxTries + ") exceeded"), false);
         }
     }
 
     createUser_debug(userID, callback) {
         globalDB.run("INSERT INTO GlobalUsers (userID) VALUES(?);", [userID], err => {
             if (err) {
-                return callback(err, null);
+                return callback(err, false);
             } else {
                 return callback(null, UserID);
             }
