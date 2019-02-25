@@ -39,7 +39,7 @@ class DBManager {
                                 if (err) {
                                     return callback(err, false);
                                 } else {
-                                    /*let dbm = this;
+                                    let dbm = this;
                                     this.createUser(function(err, user) {
                                         if (err) {
                                             return callback(err, false);
@@ -58,7 +58,7 @@ class DBManager {
                                                                 return callback(err, false);
                                                             } else {
                                                                 console.log("Added user " + user + ' to chat "' + chatName + '"');
-                                                                dbm.addMessage("Hi!", user, chat, function(err, status) {
+                                                                dbm.addMessage("Hi!", user, chat, Date.now(), function(err, status) {
                                                                     if (err) {
                                                                         return callback(err, false);
                                                                     } else {
@@ -137,7 +137,7 @@ class DBManager {
                                                 }
                                             });
                                         }
-                                    });*/
+                                    });
                                     // Test code ends here
                                     return callback(null, true);
                                 }
@@ -466,7 +466,7 @@ class DBManager {
         return success;
     }
 
-    addMessage(message, userID, chatID, callback) {
+    addMessage(message, userID, chatID, time, callback) {
         if (chatDBs[chatID] == undefined) {
             return callback(Error("DBM_ERROR: Chat " + chatID + " does not exist"), null);
         } else {
@@ -474,7 +474,7 @@ class DBManager {
                 if (err) {
                     return callback(err, null);
                 } /*if (result == true)*/ else {
-                    chatDBs[chatID].run("INSERT INTO Messages (userID, message, time) VALUES ((?), (?), (?));", [userID, message, Date.now()], err => {
+                    chatDBs[chatID].run("INSERT INTO Messages (userID, message, time) VALUES ((?), (?), (?));", [userID, message, time], err => {
                         if (err) {
                             return callback(err, null);
                         }

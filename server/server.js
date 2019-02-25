@@ -124,7 +124,7 @@ io.on("connection", socket => {
             socket.emit("err", "The message sent has no username");
         } else {
             console.log(`Received message: '${messageWrapper.message}' from userID ${messageWrapper.author.userID}`);
-            database.addMessage(messageWrapper.message, messageWrapper.author.userID, messageWrapper.chatID, function(err, status) {
+            database.addMessage(messageWrapper.message, messageWrapper.author.userID, messageWrapper.chatID, Date.now(), function(err, status) {
                 if (err) {
                     console.error(err);
                     socket.emit("err", `Could not store message in server database`);
