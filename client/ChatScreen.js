@@ -21,6 +21,7 @@ class ChatScreen extends React.Component {
     }
 
     _onSendButtonPressed() {
+        console.log('Pressing submit');
         if (this.state.newText.length != 0) {
             const messageWrapper = {
                 userID: this.state.currentState.userID,
@@ -59,12 +60,12 @@ class ChatScreen extends React.Component {
         socket.emit("fetchMessages", this.state.chatID);
 
         socket.on("message", data => {
-            console.log(data);
+            console.log('Received '+ data);
             messages.push(data);
         });
 
         socket.on("err", err => {
-            console.log(err);
+            console.log('Error: ' + err);
         });
 
         return (
