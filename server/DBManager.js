@@ -52,7 +52,7 @@ class DBManager {
                 });
         }
 
-        /*let dbm = this;
+        let dbm = this;
         let user = this.createUser(function(err, user) {
             console.log("Created user " + user);
             let chat = dbm.createChat("potato");
@@ -65,14 +65,15 @@ class DBManager {
                     console.log("result: " + result);
                 };
                 console.log("Added user " + user + ' to chat "' + chatName + '"');
-                dbm.addMessage("Hi!", user, chat);
-                console.log("this.checkUser(" + user + ", " + chat + "): " + dbm.checkUser(user, chat, cb));
-                console.log("this.verifyUser(" + 0 + ', "Mr. Server", ' + chat + "): " + dbm.verifyUser(0, "Mr. Server", chat, cb));
-                console.log("this.verifyUser(" + 0 + ', "Server", ' + chat + "): " + dbm.verifyUser(0, "Server", chat, cb));
-                dbm.getAllUsers(chat, console.log);
-                dbm.getMessages(chat, console.log);
+                dbm.addMessage("Hi!", user, chat, function(err, status) {
+                    console.log("this.checkUser(" + user + ", " + chat + "): " + dbm.checkUser(user, chat, cb));
+                    console.log("this.verifyUser(" + 0 + ', "Mr. Server", ' + chat + "): " + dbm.verifyUser(0, "Mr. Server", chat, cb));
+                    console.log("this.verifyUser(" + 0 + ', "Server", ' + chat + "): " + dbm.verifyUser(0, "Server", chat, cb));
+                    dbm.getAllUsers(chat, console.log);
+                    dbm.getMessages(chat, console.log);
+                });
             });
-        });*/
+        });
 
         if (success == true) {
             return true;
@@ -409,35 +410,23 @@ class DBManager {
         return success;
     }
 
-    addMessage(message, userID, chatID) {
-        var success = true;
-
+    addMessage(message, userID, chatID, callback) {
         if (chatDBs[chatID] == undefined) {
-            console.error("Error: Chat " + chatID + " does not exist");
-            success = false;
-            return false;
+            return callback(Error("DBM_ERROR: Chat " + chatID + " does not exist"), null);
+        } else {
+            this.checkUser(userID, chatID, function(err, result) {
+                if (err) {
+                    return callback(err, null);
+                } /*if (result == true)*/ else {
+                    chatDBs[chatID].run("INSERT INTO Messages (userID, message, time) VALUES ((?), (?), (?));", [userID, message, Date.now()], err => {
+                        if (err) {
+                            return callback(err, null);
+                        }
+                        return callback(null, true);
+                    });
+                }
+            });
         }
-
-        if (success == false) {
-            return false;
-        }
-
-        this.checkUser(userID, chatID, function(err, result) {
-            if (result == true) {
-                chatDBs[chatID].run("INSERT INTO Messages (userID, message, time) VALUES ((?), (?), (?));", [userID, message, Date.now()], err => {
-                    if (err) {
-                        console.error(err.message);
-                        success = false;
-                        return false;
-                    }
-                });
-            } else {
-                success = false;
-                return false;
-            }
-        });
-
-        return success;
     }
 
     getMessages(chatID, callback) {
