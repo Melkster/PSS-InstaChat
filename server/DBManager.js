@@ -90,7 +90,7 @@ class DBManager {
         var tries = 0;
         while (success == false) {
             success = true;
-            chatID = DBManager.sRandomBigValue();
+            chatID = DBManager.sRandomBigValue(6);
             globalDB.run("INSERT INTO GlobalChats (CHATHASH, CHATNAME) VALUES(?, ?);", [chatID, chatName], err => {
                 if (err) {
                     success = false;
@@ -268,7 +268,7 @@ class DBManager {
         var tries = 0;
         while (success == false) {
             success = true;
-            userID = DBManager.sRandomBigValue();
+            userID = DBManager.sRandomBigValue(6);
             globalDB.run("INSERT INTO GlobalUsers (USERHASH) VALUES(?);", [userID], err => {
                 if (err) {
                     success = false;
@@ -457,21 +457,13 @@ class DBManager {
 
     /* Utility functions below */
 
-    static sRandomBigValue() {
-        var array = crypto.randomBytes(32);
-        var stringArray = [];
-        for (var i = 0; i < array.length; i++) {
-            stringArray.push(DBManager.U8ToHexString(array[i]));
-        }
-        return stringArray.join("");
-    }
-
-    static U8ToHexString(byte) {
-        var string = "";
-        var hiNybble = byte >> 4;
-        var loNybble = byte - (hiNybble << 4);
-        string = hiNybble.toString(16);
-        return string.concat(loNybble.toString(16));
+    static sRandomBigValue(len) {
+        return crypto
+            .randomBytes(Math.ceil((len * 3) / 4))
+            .toString("base64") // convert to base64 format
+            .slice(0, len); // return required number of characters
+        //.replace(/\+/g, '0') // replace '+' with '0'
+        //.replace(/\//g, '0') // replace '/' with '0'
     }
 }
 
