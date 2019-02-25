@@ -56,21 +56,22 @@ class DBManager {
         let user = this.createUser(function(err, user) {
             console.log("Created user " + user);
             let chat = dbm.createChat("potato");
-            let newuser = dbm.addUser(user, "Mr. Person", chat, console.log);
-            var cb = function(err, result) {
-                console.log("callback");
-                if (err) {
-                    console.error(err);
-                }
-                console.log("result: " + result);
-            };
-            console.log("Added user " + user + " to chat " + chat);
-            dbm.addMessage("Hi!", user, chat);
-            console.log("this.checkUser(" + user + ", " + chat + "): " + dbm.checkUser(user, chat, cb));
-            console.log("this.verifyUser(" + 0 + ', "Mr. Server", ' + chat + "): " + dbm.verifyUser(0, "Mr. Server", chat, cb));
-            console.log("this.verifyUser(" + 0 + ', "Server", ' + chat + "): " + dbm.verifyUser(0, "Server", chat, cb));
-            dbm.getAllUsers(chat, console.log);
-            dbm.getMessages(chat, console.log);
+            let newuser = dbm.addUser(user, "Mr. Person", chat, function(err, chatName) {
+                var cb = function(err, result) {
+                    console.log("callback");
+                    if (err) {
+                        console.error(err);
+                    }
+                    console.log("result: " + result);
+                };
+                console.log("Added user " + user + ' to chat "' + chatName + '"');
+                dbm.addMessage("Hi!", user, chat);
+                console.log("this.checkUser(" + user + ", " + chat + "): " + dbm.checkUser(user, chat, cb));
+                console.log("this.verifyUser(" + 0 + ', "Mr. Server", ' + chat + "): " + dbm.verifyUser(0, "Mr. Server", chat, cb));
+                console.log("this.verifyUser(" + 0 + ', "Server", ' + chat + "): " + dbm.verifyUser(0, "Server", chat, cb));
+                dbm.getAllUsers(chat, console.log);
+                dbm.getMessages(chat, console.log);
+            });
         });*/
 
         if (success == true) {
@@ -273,13 +274,12 @@ class DBManager {
     createUserInner(callback, maxTries, tries) {
         var userID;
         if (tries < maxTries) {
-            console.log("WTF tries: " + tries);
             userID = DBManager.sRandomBigValue(6);
             globalDB.run("INSERT INTO GlobalUsers (userID) VALUES(?);", [userID], err => {
                 if (err) {
                     tries++;
-                    console.log("tries: " + tries);
-                    console.error(err);
+                    //console.log("tries: " + tries);
+                    //console.error(err);
                     return this.createUserInner(callback, maxTries, tries);
                 } else {
                     return callback(null, userID);
@@ -308,12 +308,13 @@ class DBManager {
 
     addUser(userID, userName, chatID, callback) {
         if (chatDBs[chatID] == undefined) {
-            //console.error("Error: Chat " + chatID + " does not exist");
-            success = false;
-            return callback(err, false);
+            console.error();
+            return callback(Error("DBM_ERROR: Chat " + chatID + " does not exist"), false);
         } else {
-            this.checkUser(userID, chatID, function(err, status) {
-                if (status == true) {
+            globalDB.get("SELECT * FROM GlobalUsers WHERE userID = (?)", [userID], function(err, row) {
+                if (err) {
+                    return callback(err, null);
+                } else if (row) {
                     chatDBs[chatID].get("SELECT * FROM Users WHERE userID = (?)", [userID], (err, row) => {
                         if (err) {
                             return callback(err, false);
