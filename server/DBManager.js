@@ -347,12 +347,22 @@ class DBManager {
             console.error("Error: Chat " + chatID + " does not exist");
             return callback(Error("DBM_ERROR: Chat " + chatID + " does not exist"), false);
         } else {
-            globalDB.get("SELECT * FROM GlobalUsers WHERE userID = (?)", [userID], function(err, row) {
+            globalDB.get("SELECT * FROM GlobalUsers WHERE userID = (?)", [userID], (err, row) => {
                 if (err) {
                     console.error(err.message);
                     return callback(err, false);
                 }
-                return row ? callback(null, true) : callback(Error("DBM_ERROR: User " + userID + " does not exist"), false);
+                return row
+                    ? chatDBs[chatID].get("SELECT * FROM Users WHERE userID = (?)", [userID], (err, row) => {
+                          if (err) {
+                              console.error(err.message);
+                              return callback(err, false);
+                          }
+                          return row
+                              ? callback(null, row.userName)
+                              : callback(Error("DBM_ERROR: User  " + userID + " does not exist in chat " + chatID), false);
+                      })
+                    : callback(Error("DBM_ERROR: User " + userID + " does not exist"), false);
             });
         }
     }
