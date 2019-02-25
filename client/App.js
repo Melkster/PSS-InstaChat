@@ -26,7 +26,7 @@ class HomeScreen extends React.Component {
         'name': null,
         'userID': null, // the server should give this
         'chats': [] // {'name': 'BestChat', 'chatID': 'ABC123'}
-    }
+    };
 
     /* This section is performed every time the application starts, it tries to load saved information
     and if that information is not found, the information is requested from the server */

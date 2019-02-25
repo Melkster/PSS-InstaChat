@@ -10,6 +10,7 @@ import socket from './socket';
 class CreateScreen extends React.Component {
     constructor(props) {
         super(props);
+        this.state = { 'chatRoomName' : '' };
     }
 
     onSubmitButtonPressed(chatRoomName, state) {
@@ -41,21 +42,24 @@ class CreateScreen extends React.Component {
         }
     }
 
+    setName = (value) => {
+        this.setState({'chatRoomName': value});
+    };
+
     render() {
         const { navigation } = this.props;
         const state = navigation.getParam('currentState', 'unknown');
-        let chatRoomName = '';
         return (
             <View style={styles.createScreenView}>
                 <TextInput
                     style={styles.chatRoomName}
                     placeholder="Enter Chatroom Name"
-                    onChangeText={(value) =>  { chatRoomName = value }}
+                    onChangeText={this.setName}
                 />
 
                 <TouchableHighlight
                     style={styles.chatRoomNameSubmit}
-                    onPress={() => this.onSubmitButtonPressed(chatRoomName, state)}
+                    onPress={() => this.onSubmitButtonPressed(this.state.chatRoomName, state)}
                 >
                     <Text style={{color: 'white'}}>Submit</Text>
                 </TouchableHighlight>
