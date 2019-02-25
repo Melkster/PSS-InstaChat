@@ -312,9 +312,8 @@ class DBManager {
 
     addUser(userID, userName, chatID, callback) {
         if (chatDBs[chatID] == undefined) {
-            //console.error("Error: Chat " + chatID + " does not exist");
             success = false;
-            return callback(err, false);
+            return callback("Error: Chat " + chatID + " does not exist", false);
         } else {
             this.checkUser(userID, chatID, function(err, status) {
                 if (status == true) {

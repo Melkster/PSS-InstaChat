@@ -28,7 +28,6 @@ io.on("connection", socket => {
         if (userID == null) {
             userID = DBManager.sRandomBigValue(10); // generate new userID here
             socket.emit("identification", userID);
-            // TODO: should users be saved in the database if they haven't joined any chat room?
         } else {
             if (chatIDs != null && chatIDs.length > 0) {
                 for (chatID of chatIDs) {
@@ -46,21 +45,16 @@ io.on("connection", socket => {
      * `chatID` of the joined chat.
      */
     socket.on("joinChat", (userID, userName, chatID) => {
-        result = database.addUser(userID, userName, chatID, (err, name) => {
+        database.addUser(userID, userName, chatID, (err, name) => {
             if (err) {
-                console.error(err.message);
-                success = false;
-                return false;
+                socket.emit("err", `Could not join chat with chat ID "${chatID}"`);
+                console.log(err);
             } else {
+                socket.join(chatID);
                 socket.emit("joinChat", name);
+                console.log(`User with userID ${userID} joined chat ${chatID}`);
             }
         });
-        if (result == false) {
-            socket.emit("err", `Could not join chat with chat ID "${chatID}"`);
-        } else {
-            socket.join(chatID);
-            console.log(`User with userID ${userID} joined chat ${chatID}`);
-        }
     });
 
     socket.on("leaveChat", () => {
@@ -79,7 +73,7 @@ io.on("connection", socket => {
             socket.emit("err", `Could not create chat "${chatName}"`);
         } else {
             socket.emit("createChat", chatID);
-            console.log(`Created chat '${chatName}'`)
+            console.log(`Created chat '${chatName}'`);
         }
     });
 
