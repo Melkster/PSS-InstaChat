@@ -25,34 +25,30 @@ class HomeScreen extends React.Component {
     state = {
         'name': null,
         'userID': null, // the server should give this
-        'chats': []
-    }
+        'chats': [] // {'name': 'BestChat', 'chatID': 'ABC123'}
+    };
 
     /* This section is performed every time the application starts, it tries to load saved information
     and if that information is not found, the information is requested from the server */
     componentDidMount = () => {
         AsyncStorage.getItem('name').then((value) => this.setState({'name': value}));
-        AsyncStorage.getItem('userID').then((value) => {
-            if(value === null) {
-                socket.emit('identification', null);
-                socket.on('identification', (value) => {
-                    if (value == null) {
-                        alert('Server returned null');
-                    } else {
-                        alert('Received ' + value + ' from server');
-                        AsyncStorage.setItem('userID', value);
-                        this.setState({'userID': value});
-                    }
-                });
-            } else {
-                this.setState({'userID': value});
-            }
-        });
         AsyncStorage.getItem('chats').then((value) => {
             if(value !== null) {
-                this.setState({'chats': value});
-                socket.emit('identification', this.state.chats);
+                this.setState({'chats': JSON.parse(value)});
             }
+        });
+        AsyncStorage.getItem('userID').then((value) => {
+            socket.emit('identification', value, this.chats);
+            socket.on('identification', (value) => {
+                if (value == null) {
+                    alert('Server returned. null');
+                } else {
+                    alert('Received ' + value + ' from server');
+                    AsyncStorage.setItem('userID', value);
+                    this.setState({'userID': value});
+                }
+            });
+            this.setState({'userID': value});
         });
     };
 
@@ -71,14 +67,6 @@ class HomeScreen extends React.Component {
         // An example of how information can be stored in client
         AsyncStorage.setItem('name', value);
         this.setState({'name': value});
-    };
-
-    onPressCreate() {
-        Alert.alert('This should create a chatroom')
-    };
-
-    onPressJoin() {
-        Alert.alert('This should join a chatroom')
     };
 
     render() {

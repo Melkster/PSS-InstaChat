@@ -1,79 +1,96 @@
 import React from "react";
 import {
-    Keyboard, TouchableHighlight, View,
+    AsyncStorage, Keyboard, TouchableHighlight, View,
     Text, TextInput, FlatList, KeyboardAvoidingView, Picker
 } from "react-native";
 import styles from './styles';
-import chatRoomsList from './ChatRoomsList';
 import socket from './socket';
-//import console = require("console");
-//import console = require("console");
 
 class CreateScreen extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
             chatRoomName: '',
-            chatID: 'TEST0001', // This should be the hashcode.
-        }
+            nickname: '',
+            currentState: this.props.navigation.getParam('currentState', 'unknown'),
+        };
+
+        socket.on("createChat", this.handleCreateChat);
     }
+
+    componentWillUnmount() {
+        socket.removeListener("createChat");
+    }
+
+    handleCreateChat = (chatID) => {
+        console.log(`Received chatID: '${chatID}'`);
+        var chatRoom = {
+            name: this.state.chatRoomName,
+            chatID: chatID
+        };
+        this.state.currentState.chats.push(chatRoom);
+        AsyncStorage.setItem('chats', JSON.stringify(this.state.currentState.chats));
+
+        // also need to join the newly created chat, this a good place to do it?
+        console.log('Joining ' + chatID + 'as' + this.state.nickname);
+        socket.emit("joinChat", this.state.currentState.userID, this.state.nickname, chatID);
+
+        this.props.navigation.navigate('Chatroom', {
+            currentState: this.state.currentState,
+            chatID: chatID, // from server
+            chatName: this.state.chatRoomName
+        })
+
+    };
 
     onSubmitButtonPressed() {
-        const { navigation } = this.props;
-        const state = navigation.getParam('currentState', 'unknown');
-
-        // Here we need to update the current state.chats (not ChatRoomsList?)
-        // and also update AsyncStorage so that the newly added chatroom is permanently stored
-        // Communication is required with the server, the server expects the chatroom name
-        // and returns a chatID.
-
-        if (this.state.chatRoomName.length != 0) {
-            // Sends a request to the server to create a chat with the namn this.state.chatRoomName
+        if (this.state.chatRoomName.length != 0 && this.state.nickname.length != 0) {
+            console.log('submit pressed:' + this.state.chatRoomName);
             socket.emit("createChat", this.state.chatRoomName);
-
-            // Receives the chatID from the server
-            socket.on("createChat", chatID => {
-                this.state.chatID = chatID;
-                console.log(`Created chat with id '${chatID}'`);
-            });
-
-            const chatRoom = {
-                name: this.state.chatRoomName,
-                ChatID: this.state.chatID,
-            }
-            chatRoomsList.push(chatRoom);
-            this.setState((prevState) => {
-                return {chatRoomName: ''};
-            });
-            this.textInput.clear();
-            Keyboard.dismiss();
-            this.props.navigation.navigate('Chatroom', {
-                name: state.name,
-                chatId: this.state.chatID,
-                chatName: this.state.chatRoomName,
-            })
-        } else {
-            Keyboard.dismiss();
         }
     }
+
+    setChatName = (value) => {
+        this.setState({'chatRoomName': value});
+    };
+
+    setNick = (value) => {
+        this.setState({'nickname': value});
+    };
+
+    printChats = (chats) => {
+        var s = '';
+        for(var i = 0; i < chats.length; i++) {
+            s = s + chats[i].name + '(' + chats[i].chatID + ')' + "\n";
+        }
+        return s;
+
+    };
 
     render() {
         return (
-            <View style={styles.createScreenView}>
-                <TextInput
-                    style={styles.chatRoomName}
-                    placeholder="Enter Chatroom Name"
-                    onChangeText={(text) => this.setState({chatRoomName: text})}
-                    ref={input => {this.textInput = input;}}
-                />
 
+            <KeyboardAvoidingView style={styles.createScreenView} keyboardVerticalOffset={85} behavior="padding">
+                <Text>
+                    Current chats: { '\n' + this.printChats(this.state.currentState.chats) }
+                </Text>
+                <TextInput
+                    style={styles.chatRoomName2}
+                    placeholder="Enter chatroom name"
+                    onChangeText={this.setChatName}
+                />
+                <TextInput
+                    style={styles.chatRoomName2}
+                    placeholder="Enter desired nickname"
+                    onChangeText={this.setNick}
+                />
                 <TouchableHighlight
                     style={styles.chatRoomNameSubmit}
                     onPress={this.onSubmitButtonPressed.bind(this)}
                 >
                     <Text style={{color: 'white'}}>Submit</Text>
                 </TouchableHighlight>
-            </View>
+            </KeyboardAvoidingView>
         );
     }
 }
