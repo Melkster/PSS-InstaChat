@@ -27,7 +27,6 @@ io.on("connection", socket => {
         if (userID == null) {
             userID = DBManager.sRandomBigValue(10); // generate new userID here
             socket.emit("identification", userID);
-            // TODO: should users be saved in the database if they haven't joined any chat room?
         } else {
             if (chatIDs != null && chatIDs.length > 0) {
                 for (chatID of chatIDs) {
@@ -47,23 +46,16 @@ io.on("connection", socket => {
      * `chatID` of the joined chat.
      */
     socket.on("joinChat", (userID, userName, chatID) => {
-        result = database.addUser(userID, userName, chatID, (err, name) => {
+        database.addUser(userID, userName, chatID, (err, name) => {
             if (err) {
-                console.error(err.message);
-                success = false;
-                return false;
+                socket.emit("err", `Could not join chat with chat ID "${chatID}"`);
+                console.log(err);
             } else {
+                socket.join(chatID);
                 socket.emit("joinChat", name);
+                console.log(`User with userID ${userID} joined chat ${chatID}`);
             }
         });
-        if (result == false) {
-            socket.emit("err", `Could not join chat with chat ID "${chatID}"`);
-        } else {
-            socket.join(chatID);
-            // TODO: emit the `chatName` instead
-            socket.emit("joinChat", chatID);
-            console.log(`User with userID ${userID} joined chat ${chatID}`);
-        }
     });
 
     socket.on("leaveChat", () => {
@@ -136,25 +128,8 @@ io.on("connection", socket => {
                 socket.emit("err", err);
                 console.log(err);
             } else {
-                if (!messageWrapper.hasOwnProperty("message")) {
-                    socket.emit("err", "The message sent contains no 'message' field");
-                } else if (!messageWrapper.hasOwnProperty("chatID")) {
-                    socket.emit("err", "The message sent has no userID");
-                } else if (!messageWrapper.hasOwnProperty("userID")) {
-                    socket.emit("err", "The message sent has no userID");
-                } else if (!messageWrapper.hasOwnProperty("username")) {
-                    socket.emit("err", "The message sent has no username");
-                } else {
-                    console.log(`Received message: '${messageWrapper.message}' from userID ${messageWrapper.userID}`);
-                    result = database.addMessage(messageWrapper.message, messageWrapper.userID, messageWrapper.chatID);
-                    if (result == false) {
-                        socket.emit("err", `Could not store message in server database`);
-                    } else {
-                        messageWrapper.username = username;
-                        delete messageWrapper.userID;
-                        io.to(messageWrapper.chatID).emit("message", JSON.stringify(messageWrapper));
-                    }
-                }
+
+                io.to(messageWrapper.chatID).emit("message", JSON.stringify(messageWrapper));
             }
         });
     });
