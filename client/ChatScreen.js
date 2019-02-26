@@ -17,7 +17,22 @@ class ChatScreen extends React.Component {
             currentState: this.props.navigation.getParam('currentState', 'unknown'),
             chatID: this.props.navigation.getParam('chatID', 'unknown'),
             chatName: this.props.navigation.getParam('chatName', 'unknown'), // Make sure the drop-down list will select the right chatroom's name
-        }
+            messages: []
+        };
+
+        socket.on("message", data => {
+            console.log('Received '+ data);
+            this.messages.push(data);
+        });
+
+        socket.on("err", err => {
+            console.log('Error: ' + err);
+        });
+    }
+
+    componentWillUnmount() {
+        socket.removeListener("message");
+        socket.removeListener("err");
     }
 
     _onSendButtonPressed() {
@@ -55,18 +70,7 @@ class ChatScreen extends React.Component {
 
 
     render() {
-        let messages = [];
-
         socket.emit("fetchMessages", this.state.chatID);
-
-        socket.on("message", data => {
-            console.log('Received '+ data);
-            messages.push(data);
-        });
-
-        socket.on("err", err => {
-            console.log('Error: ' + err);
-        });
 
         return (
             // maybe better fix than to hardcode 90
@@ -77,7 +81,7 @@ class ChatScreen extends React.Component {
                 <FlatList
                     ref={"flatList"}
                     inverted
-                    data={messages}
+                    data={this.state.messages}
                     renderItem={this.renderChatItem}
                     keyExtractor={this.keyExtractor}
                     ListFooterComponent={this.renderFooter}
