@@ -27,11 +27,11 @@ class DBManager {
         globalDB.serialize();
 
         if (firstBoot == true) {
-            globalDB.run("CREATE TABLE GlobalUsers (userID INT     PRIMARY KEY      NOT NULL);", err => {
+            globalDB.run("CREATE TABLE GlobalUsers (userID INT PRIMARY KEY NOT NULL);", err => {
                 if (err) {
                     return callback(err, false);
                 } else {
-                    globalDB.run("CREATE TABLE GlobalChats (chatID INT     PRIMARY KEY      NOT NULL, chatName TEXT    NOT NULL);", err => {
+                    globalDB.run("CREATE TABLE GlobalChats (chatID INT PRIMARY KEY NOT NULL, chatName TEXT NOT NULL);", err => {
                         if (err) {
                             return callback(err, false);
                         } else {
@@ -173,7 +173,7 @@ class DBManager {
                     console.log("Created database for chat " + chatID + ".");
                     newChatDB.serialize();
                     newChatDB.run(
-                        "CREATE TABLE Users(userID         INT     UNIQUE  NOT NULL, userName             TEXT            NOT NULL, online           INT             NOT NULL, lastOnline       INT             NOT NULL);",
+                        "CREATE TABLE Users(userID INT UNIQUE NOT NULL, username TEXT NOT NULL, online INT NOT NULL, lastOnline INT NOT NULL);",
                         err => {
                             if (err) {
                                 return callback(err, false);
@@ -183,7 +183,7 @@ class DBManager {
                                         return callback(err, false);
                                     } else {
                                         newChatDB.run(
-                                            "CREATE TABLE Messages(     userID         INT     UNIQUE  NOT NULL,       message  TEXT,       time     INT            NOT NULL);",
+                                            "CREATE TABLE Messages( userID INT UNIQUE NOT NULL, message TEXT, time INT NOT NULL);",
                                             err => {
                                                 if (err) {
                                                     return callback(err, false);
@@ -273,7 +273,7 @@ class DBManager {
         newChatDB.serialize(() => {
             newChatDB
                 .run(
-                    "CREATE TABLE Users(userID         INT     UNIQUE  NOT NULL, userName             TEXT            NOT NULL, online           INT             NOT NULL, lastOnline       INT             NOT NULL);",
+                    "CREATE TABLE Users(userID INT UNIQUE NOT NULL, username TEXT NOT NULL, online INT NOT NULL, lastOnline INT NOT NULL);",
                     err => {
                         if (err) {
                             console.error(err.message);
@@ -282,7 +282,7 @@ class DBManager {
                         }
                     }
                 )
-                .run('INSERT INTO Users    VALUES(0, "Server", 1, (?));', [Date.now()], err => {
+                .run('INSERT INTO Users VALUES(0, "Server", 1, (?));', [Date.now()], err => {
                     if (err) {
                         console.error(err.message);
                         success = false;
@@ -290,7 +290,7 @@ class DBManager {
                     }
                 })
                 .run(
-                    "CREATE TABLE Messages(     userID         INT     UNIQUE  NOT NULL,       message  TEXT,       time     INT            NOT NULL);",
+                    "CREATE TABLE Messages( userID INT UNIQUE NOT NULL, message TEXT, time INT NOT NULL);",
                     err => {
                         if (err) {
                             console.error(err.message);
@@ -363,7 +363,7 @@ class DBManager {
         // low priority
     }
 
-    addUser(userID, userName, chatID, callback) {
+    addUser(userID, username, chatID, callback) {
         if (chatDBs[chatID] == undefined) {
             console.error();
             return callback(Error("DBM_ERROR: Chat " + chatID + " does not exist"), false);
@@ -378,7 +378,7 @@ class DBManager {
                         }
                         return row
                             ? callback(Error("DBM_ERROR: User " + userID + " is already a member of chat " + chatID))
-                            : chatDBs[chatID].run("INSERT INTO Users    VALUES((?), (?), 1, (?));", [userID, userName, Date.now()], err => {
+                            : chatDBs[chatID].run("INSERT INTO Users    VALUES((?), (?), 1, (?));", [userID, username, Date.now()], err => {
                                   if (err) {
                                       return callback(err, false);
                                   } else {
@@ -411,7 +411,7 @@ class DBManager {
                               return callback(err, false);
                           }
                           return row
-                              ? callback(null, row.userName)
+                              ? callback(null, row.username)
                               : callback(Error("DBM_ERROR: User  " + userID + " does not exist in chat " + chatID), false);
                       })
                     : callback(Error("DBM_ERROR: User " + userID + " does not exist"), false);
@@ -419,7 +419,7 @@ class DBManager {
         }
     }
 
-    verifyUser(userID, userName, chatID, callback) {
+    verifyUser(userID, username, chatID, callback) {
         if (chatDBs[chatID] == undefined) {
             console.error("Error: Chat " + chatID + " does not exist");
             return callback(Error("DBM_ERROR: Chat " + chatID + " does not exist"), false);
@@ -434,7 +434,7 @@ class DBManager {
                               return callback(err, false);
                           }
                           return row
-                              ? callback(null, row.userName == userName)
+                              ? callback(null, row.username == username)
                               : callback(Error("DBM_ERROR: User  " + userID + " does not exist in chat " + chatID), false);
                       })
                     : callback(Error("DBM_ERROR: User " + userID + " does not exist"), false);

@@ -38,7 +38,7 @@ VALUES
 ATTACH '{chatID}.db' as 'chatID';
 CREATE TABLE {chatID}.Users(
        userID           INT     UNIQUE  NOT NULL,
-       userName         TEXT            NOT NULL,
+       username         TEXT            NOT NULL,
        online           INT             NOT NULL,
        lastOnline       INT             NOT NULL,
        FOREIGN KEY(userID) REFERENCES GlobalUsers(userID)
