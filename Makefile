@@ -11,9 +11,7 @@ install:
 	$(SERVER) npm install --no-optional
 	$(CLIENT) npm install --no-optional
 
-clean:
-	$(SERVER) rm -f db/
-	$(CLIENT) rm -f client/
+clean: clean_db
 	$(SERVER) rm -rf node_modules/
 	$(CLIENT) rm -rf node_modules/
 
