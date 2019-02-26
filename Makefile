@@ -16,3 +16,6 @@ clean:
 	$(CLIENT) rm -f client/
 	$(SERVER) rm -rf node_modules/
 	$(CLIENT) rm -rf node_modules/
+
+clean_db:
+	$(SERVER) rm -f db/*

@@ -65,6 +65,14 @@ const styles = StyleSheet.create({
         paddingHorizontal: 10,
         marginVertical: 50,
     },
+    chatRoomName2: {
+        borderWidth: 2,
+        borderColor: 'black',
+        width: 300,
+        height: 50,
+        paddingHorizontal: 20,
+        marginVertical: 10,
+    },
     chatRoomNameSubmit: {
         width: 150,
         height: 50,

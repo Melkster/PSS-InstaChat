@@ -12,7 +12,7 @@ class InfoScreen extends React.Component {
     printChats = (chats) => {
         var s = '';
         for(var i = 0; i < chats.length; i++) {
-            s = s + chats[i].ChatID + "\n";
+            s = s + chats[i].name + '(' + chats[i].chatID + ')' + "\n";
         }
         return s;
 
