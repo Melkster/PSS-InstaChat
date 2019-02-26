@@ -10,7 +10,13 @@ app.get("/", (req, res) => {
 });
 
 const database = new DBManager();
-database.initDatabase();
+database.initDatabase(function(err, status) {
+    if (err) {
+        console.error(err);
+    } else {
+        console.log("Database manager initialized successfully.");
+    }
+});
 
 io.on("connection", socket => {
     // TODO: add time stamp to messages when received
@@ -49,7 +55,7 @@ io.on("connection", socket => {
         database.addUser(userID, userName, chatID, (err, name) => {
             if (err) {
                 socket.emit("err", `Could not join chat with chat ID "${chatID}"`);
-                console.log(err);
+                console.error(err.message);
             } else {
                 socket.join(chatID);
                 socket.emit("joinChat", name);
@@ -89,13 +95,15 @@ io.on("connection", socket => {
      * with the `chatID` of the created chat.
      */
     socket.on("createChat", chatName => {
-        chatID = database.createChat(chatName);
-        if (chatID == false) {
-            socket.emit("err", `Could not create chat "${chatName}"`);
-        } else {
-            socket.emit("createChat", chatID);
-            console.log(`Created chat '${chatName}'`);
-        }
+        database.createChat(chatName, (err, chatID) => {
+            if (err) {
+                console.error(err);
+                socket.emit("err", `Could not create chat "${chatName}"`);
+            } else {
+                socket.emit("createChat", chatID);
+                console.log(`Created chat '${chatName}'`);
+            }
+        });
     });
 
     /**
@@ -138,13 +146,16 @@ io.on("connection", socket => {
                 } else {
                     console.log(`Received message: '${messageWrapper.message}' from userID ${messageWrapper.userID}`);
                     result = database.addMessage(messageWrapper.message, messageWrapper.userID, messageWrapper.chatID);
-                    if (result == false) {
-                        socket.emit("err", `Could not store message in server database`);
-                    } else {
-                        messageWrapper.username = username;
-                        delete messageWrapper.userID;
-                        io.to(messageWrapper.chatID).emit("message", JSON.stringify(messageWrapper));
-                    }
+                    database.addMessage(messageWrapper.message, messageWrapper.author.userID, messageWrapper.chatID, Date.now(), (err, status) => {
+                        if (err) {
+                            console.error(err.message);
+                            socket.emit("err", `Could not store message in server database`);
+                        } else {
+                            messageWrapper.username = username;
+                            delete messageWrapper.userID;
+                            io.to(messageWrapper.chatID).emit("message", JSON.stringify(messageWrapper));
+                        }
+                    });
                 }
             }
         });

@@ -7,9 +7,9 @@ var globalDB;
 var chatDBs = {};
 
 class DBManager {
-    initDatabase() {
+    initDatabase(callback) {
         let firstBoot = false;
-        let success = true;
+
         if (fs.existsSync("./db/global.db")) {
             firstBoot = false;
         } else {
@@ -26,55 +26,128 @@ class DBManager {
         });
         globalDB.serialize();
 
-        if (success == false) {
-            return false;
-        }
-
         if (firstBoot == true) {
-            globalDB
-                .run("CREATE TABLE GlobalUsers (USERHASH INT     PRIMARY KEY      NOT NULL);", err => {
-                    if (err) {
-                        console.error(err.message);
-                        success = false;
-                    }
-                })
-                .run("CREATE TABLE GlobalChats (CHATHASH INT     PRIMARY KEY      NOT NULL, CHATNAME TEXT    NOT NULL);", err => {
-                    if (err) {
-                        console.error(err.message);
-                        success = false;
-                    }
-                })
-                .run("INSERT INTO GlobalUsers (USERHASH) VALUES(0);", err => {
-                    if (err) {
-                        console.error(err.message);
-                        success = false;
-                    }
-                });
-        }
-
-        /*let user = this.createUser();
-        console.log("Created user " + user);
-        let chat = this.createChat("potato");
-        let newuser = this.addUser(user, "Mr. Person", chat, console.log);
-        var cb = function(err, result) {
-            console.log("callback");
-            if (err) {
-                console.error(err);
-            }
-            console.log("result: " + result);
-        };
-        console.log("Added user " + newuser + " to chat " + chat);
-        this.addMessage("Hi!", user, chat);
-        console.log("this.checkUser(" + user + ", " + chat + "): " + this.checkUser(user, chat, cb));
-        console.log("this.verifyUser(" + 0 + ', "Mr. Server", ' + chat + "): " + this.verifyUser(0, "Mr. Server", chat, cb));
-        console.log("this.verifyUser(" + 0 + ', "Server", ' + chat + "): " + this.verifyUser(0, "Server", chat, cb));
-        this.getAllUsers(chat, console.log);
-        this.getMessages(chat, console.log);*/
-
-        if (success == true) {
-            return true;
+            globalDB.run("CREATE TABLE GlobalUsers (userID INT     PRIMARY KEY      NOT NULL);", err => {
+                if (err) {
+                    return callback(err, false);
+                } else {
+                    globalDB.run("CREATE TABLE GlobalChats (chatID INT     PRIMARY KEY      NOT NULL, chatName TEXT    NOT NULL);", err => {
+                        if (err) {
+                            return callback(err, false);
+                        } else {
+                            globalDB.run("INSERT INTO GlobalUsers (userID) VALUES(0);", err => {
+                                if (err) {
+                                    return callback(err, false);
+                                } else {
+                                    let dbm = this;
+                                    this.createUser(function(err, user) {
+                                        if (err) {
+                                            return callback(err, false);
+                                        } else {
+                                            console.log("Created user " + user);
+                                            dbm.createChat("potato", function(err, chat) {
+                                                if (err) {
+                                                    return callback(err, false);
+                                                } else {
+                                                    console.log("Created chat " + chat);
+                                                    if (err) {
+                                                        return callback(err, false);
+                                                    } else {
+                                                        dbm.addUser(user, "Mr. Person", chat, function(err, chatName) {
+                                                            if (err) {
+                                                                return callback(err, false);
+                                                            } else {
+                                                                console.log("Added user " + user + ' to chat "' + chatName + '"');
+                                                                dbm.addMessage("Hi!", user, chat, Date.now(), function(err, status) {
+                                                                    if (err) {
+                                                                        return callback(err, false);
+                                                                    } else {
+                                                                        console.log('Added message "Hi!" to chat ' + chat);
+                                                                        dbm.checkUser(user, chat, function(err, status) {
+                                                                            if (err) {
+                                                                                return callback(err, false);
+                                                                            } else {
+                                                                                console.log("this.checkUser(" + user + ", " + chat + "): " + status);
+                                                                                dbm.verifyUser(0, "Mr. Server", chat, function(err, status) {
+                                                                                    if (err) {
+                                                                                        return callback(err, false);
+                                                                                    } else {
+                                                                                        if (status == true) {
+                                                                                            return callback(
+                                                                                                Error(
+                                                                                                    "Test failed: this.verifyUser(" +
+                                                                                                        0 +
+                                                                                                        ', "Mr. Server", ' +
+                                                                                                        chat +
+                                                                                                        "): " +
+                                                                                                        status
+                                                                                                ),
+                                                                                                false
+                                                                                            );
+                                                                                        } else {
+                                                                                            console.log(
+                                                                                                "this.verifyUser(" +
+                                                                                                    0 +
+                                                                                                    ', "Mr. Server", ' +
+                                                                                                    chat +
+                                                                                                    "): " +
+                                                                                                    status
+                                                                                            );
+                                                                                            dbm.verifyUser(0, "Server", chat, function(err, status) {
+                                                                                                if (err) {
+                                                                                                    return callback(err, false);
+                                                                                                } else {
+                                                                                                    if (status == false) {
+                                                                                                        return callback(
+                                                                                                            Error(
+                                                                                                                "Test failed: this.verifyUser(" +
+                                                                                                                    0 +
+                                                                                                                    ', "Server", ' +
+                                                                                                                    chat +
+                                                                                                                    "): " +
+                                                                                                                    status
+                                                                                                            ),
+                                                                                                            false
+                                                                                                        );
+                                                                                                    } else {
+                                                                                                        console.log(
+                                                                                                            "this.verifyUser(" +
+                                                                                                                0 +
+                                                                                                                ', "Server", ' +
+                                                                                                                chat +
+                                                                                                                "): " +
+                                                                                                                status
+                                                                                                        );
+                                                                                                        dbm.getAllUsers(chat, console.log);
+                                                                                                        dbm.getMessages(chat, console.log);
+                                                                                                        return callback(null, true);
+                                                                                                    }
+                                                                                                }
+                                                                                            });
+                                                                                        }
+                                                                                    }
+                                                                                });
+                                                                            }
+                                                                        });
+                                                                    }
+                                                                });
+                                                            }
+                                                        });
+                                                    }
+                                                }
+                                            });
+                                        }
+                                    });
+                                    // Test code ends here
+                                    return callback(null, true);
+                                }
+                            });
+                        }
+                    });
+                }
+            });
         } else {
-            return false;
+            // Reload old stored chats here.
         }
     }
 
@@ -84,100 +157,87 @@ class DBManager {
         // low priority
     }
 
-    createChat(chatName) {
-        var success = false;
-        var chatID;
-        var tries = 0;
-        while (success == false) {
-            success = true;
-            chatID = DBManager.sRandomBigValue(6);
-            globalDB.run("INSERT INTO GlobalChats (CHATHASH, CHATNAME) VALUES(?, ?);", [chatID, chatName], err => {
+    createChat(chatName, callback) {
+        var maxTries = 16;
+        this.createChatInner(
+            function(err, chatID) {
                 if (err) {
-                    success = false;
-                    if (tries > 16) {
-                        return false;
-                    }
+                    return callback(err, false);
+                } else {
+                    let newChatDB = new sqlite3.Database("./db/" + chatID + ".db", err => {
+                        if (err) {
+                            return callback(err, false);
+                        }
+                    });
+                    chatDBs[chatID] = newChatDB;
+                    console.log("Created database for chat " + chatID + ".");
+                    newChatDB.serialize();
+                    newChatDB.run(
+                        "CREATE TABLE Users(userID         INT     UNIQUE  NOT NULL, userName             TEXT            NOT NULL, online           INT             NOT NULL, lastOnline       INT             NOT NULL);",
+                        err => {
+                            if (err) {
+                                return callback(err, false);
+                            } else {
+                                newChatDB.run('INSERT INTO Users    VALUES(0, "Server", 1, (?));', [Date.now()], err => {
+                                    if (err) {
+                                        return callback(err, false);
+                                    } else {
+                                        newChatDB.run(
+                                            "CREATE TABLE Messages(     userID         INT     UNIQUE  NOT NULL,       message  TEXT,       time     INT            NOT NULL);",
+                                            err => {
+                                                if (err) {
+                                                    return callback(err, false);
+                                                } else {
+                                                    newChatDB.run(
+                                                        "INSERT INTO Messages    VALUES(0, 'Chat \"" + chatName + "\" created.', (?));",
+                                                        [Date.now()],
+                                                        err => {
+                                                            if (err) {
+                                                                return callback(err, false);
+                                                            } else {
+                                                                return callback(null, chatID);
+                                                            }
+                                                        }
+                                                    );
+                                                }
+                                            }
+                                        );
+                                    }
+                                });
+                            }
+                        }
+                    );
+                }
+            },
+            chatName,
+            maxTries,
+            0
+        );
+    }
+
+    createChatInner(callback, chatName, maxTries, tries) {
+        var chatID;
+        if (tries < maxTries) {
+            chatID = DBManager.sRandomBigValue(6);
+            globalDB.run("INSERT INTO GlobalChats (chatID, chatName) VALUES(?, ?);", [chatID, chatName], err => {
+                if (err) {
                     tries++;
+                    //console.log("tries: " + tries);
+                    console.error(err);
+                    return this.createChatInner(callback, chatName, maxTries, tries);
+                } else {
+                    return callback(null, chatID);
                 }
             });
-        }
-
-        if (success == false) {
-            return false;
-        }
-
-        let newChatDB = new sqlite3.Database("./db/" + chatID + ".db", err => {
-            if (err) {
-                console.error(err.message);
-                success = false;
-            } else {
-                console.log("Created database for chat " + chatID + ".");
-            }
-        });
-        newChatDB.serialize();
-
-        if (success == false) {
-            return false;
-        }
-
-        newChatDB.run("ATTACH './db/global.db' as 'Global';", err => {
-            if (err) {
-                console.error(err.message);
-                success = false;
-                return false;
-            }
-        });
-
-        newChatDB.serialize(() => {
-            newChatDB
-                .run(
-                    "CREATE TABLE Users(USERHASH         INT     UNIQUE  NOT NULL, NAME             TEXT            NOT NULL, ONLINE           INT             NOT NULL, LASTONLINE       INT             NOT NULL);",
-                    err => {
-                        if (err) {
-                            console.error(err.message);
-                            success = false;
-                            return false;
-                        }
-                    }
-                )
-                .run('INSERT INTO Users    VALUES(0, "Server", 1, (?));', [Date.now()], err => {
-                    if (err) {
-                        console.error(err.message);
-                        success = false;
-                        return false;
-                    }
-                })
-                .run(
-                    "CREATE TABLE Messages(     USERHASH         INT     UNIQUE  NOT NULL,       MESSAGE  TEXT,       TIME     INT            NOT NULL);",
-                    err => {
-                        if (err) {
-                            console.error(err.message);
-                            success = false;
-                            return false;
-                        }
-                    }
-                )
-                .run("INSERT INTO Messages    VALUES(0, 'Chat \"" + chatName + "\" created.', (?));", [Date.now()], err => {
-                    if (err) {
-                        console.error(err.message);
-                        success = false;
-                        return false;
-                    }
-                });
-        });
-
-        if (success == true) {
-            chatDBs[chatID] = newChatDB;
-            return chatID;
         } else {
-            return false;
+            return callback(Error("DBM_Error: Could not add new ID to GlobalUsers, maxTries (" + maxTries + ") exceeded"), false);
         }
     }
 
     createChat_debug(chatName, chatID) {
         var success = false;
         success = true;
-        globalDB.run("INSERT INTO GlobalChats (CHATHASH, CHATNAME) VALUES(?, ?);", [chatID, chatName], err => {
+        globalDB.run("INSERT INTO GlobalChats (chatID, chatName) VALUES(?, ?);", [chatID, chatName], err => {
             if (err) {
                 success = false;
                 return false;
@@ -213,7 +273,7 @@ class DBManager {
         newChatDB.serialize(() => {
             newChatDB
                 .run(
-                    "CREATE TABLE Users(USERHASH         INT     UNIQUE  NOT NULL, NAME             TEXT            NOT NULL, ONLINE           INT             NOT NULL, LASTONLINE       INT             NOT NULL);",
+                    "CREATE TABLE Users(userID         INT     UNIQUE  NOT NULL, userName             TEXT            NOT NULL, online           INT             NOT NULL, lastOnline       INT             NOT NULL);",
                     err => {
                         if (err) {
                             console.error(err.message);
@@ -230,7 +290,7 @@ class DBManager {
                     }
                 })
                 .run(
-                    "CREATE TABLE Messages(     USERHASH         INT     UNIQUE  NOT NULL,       MESSAGE  TEXT,       TIME     INT            NOT NULL);",
+                    "CREATE TABLE Messages(     userID         INT     UNIQUE  NOT NULL,       message  TEXT,       time     INT            NOT NULL);",
                     err => {
                         if (err) {
                             console.error(err.message);
@@ -262,46 +322,39 @@ class DBManager {
         // low priority
     }
 
-    createUser() {
+    createUser(callback) {
         var success = false;
+        var maxTries = 16;
+        return this.createUserInner(callback, maxTries, 0);
+    }
+
+    createUserInner(callback, maxTries, tries) {
         var userID;
-        var tries = 0;
-        while (success == false) {
-            success = true;
+        if (tries < maxTries) {
             userID = DBManager.sRandomBigValue(6);
-            globalDB.run("INSERT INTO GlobalUsers (USERHASH) VALUES(?);", [userID], err => {
+            globalDB.run("INSERT INTO GlobalUsers (userID) VALUES(?);", [userID], err => {
                 if (err) {
-                    success = false;
-                    if (tries > 16) {
-                        return false;
-                    }
                     tries++;
+                    //console.log("tries: " + tries);
+                    console.error(err);
+                    return this.createUserInner(callback, maxTries, tries);
+                } else {
+                    return callback(null, userID);
                 }
             });
-        }
-
-        if (success == true) {
-            return userID;
         } else {
-            return false;
+            return callback(Error("DBM_Error: Could not add new ID to GlobalUsers, maxTries (" + maxTries + ") exceeded"), false);
         }
     }
 
-    createUser_debug(userID) {
-        var success = false;
-        success = true;
-        globalDB.run("INSERT INTO GlobalUsers (USERHASH) VALUES(?);", [userID], err => {
+    createUser_debug(userID, callback) {
+        globalDB.run("INSERT INTO GlobalUsers (userID) VALUES(?);", [userID], err => {
             if (err) {
-                success = false;
-                return false;
+                return callback(err, false);
+            } else {
+                return callback(null, UserID);
             }
         });
-
-        if (success == true) {
-            return userID;
-        } else {
-            return false;
-        }
     }
 
     deleteUser(userID) {
@@ -312,12 +365,14 @@ class DBManager {
 
     addUser(userID, userName, chatID, callback) {
         if (chatDBs[chatID] == undefined) {
-            success = false;
-            return callback("Error: Chat " + chatID + " does not exist", false);
+            console.error();
+            return callback(Error("DBM_ERROR: Chat " + chatID + " does not exist"), false);
         } else {
-            this.checkUser(userID, chatID, function(err, status) {
-                if (status == true) {
-                    chatDBs[chatID].get("SELECT * FROM Users WHERE USERHASH = (?)", [userID], (err, row) => {
+            globalDB.get("SELECT * FROM GlobalUsers WHERE userID = (?)", [userID], function(err, row) {
+                if (err) {
+                    return callback(err, null);
+                } else if (row) {
+                    chatDBs[chatID].get("SELECT * FROM Users WHERE userID = (?)", [userID], (err, row) => {
                         if (err) {
                             return callback(err, false);
                         }
@@ -327,11 +382,11 @@ class DBManager {
                                   if (err) {
                                       return callback(err, false);
                                   } else {
-                                      globalDB.get("SELECT * FROM GlobalChats WHERE CHATHASH == (?)", [userID], function(err, row) {
+                                      globalDB.get("SELECT * FROM GlobalChats WHERE chatID == (?)", [chatID], function(err, row) {
                                           if (err) {
                                               return callback(err, false);
                                           }
-                                          return callback(null, row.CHATNAME);
+                                          return callback(null, row.chatName);
                                       });
                                   }
                               });
@@ -346,12 +401,20 @@ class DBManager {
             console.error("Error: Chat " + chatID + " does not exist");
             return callback(Error("DBM_ERROR: Chat " + chatID + " does not exist"), false);
         } else {
-            globalDB.get("SELECT * FROM GlobalUsers WHERE USERHASH = (?)", [userID], function(err, row) {
+            globalDB.get("SELECT * FROM GlobalUsers WHERE userID = (?)", [userID], (err, row) => {
                 if (err) {
-                    console.error(err.message);
                     return callback(err, false);
                 }
-                return row ? callback(null, true) : callback(Error("DBM_ERROR: User " + userID + " does not exist"), false);
+                return row
+                    ? chatDBs[chatID].get("SELECT * FROM Users WHERE userID = (?)", [userID], (err, row) => {
+                          if (err) {
+                              return callback(err, false);
+                          }
+                          return row
+                              ? callback(null, row.userName)
+                              : callback(Error("DBM_ERROR: User  " + userID + " does not exist in chat " + chatID), false);
+                      })
+                    : callback(Error("DBM_ERROR: User " + userID + " does not exist"), false);
             });
         }
     }
@@ -361,19 +424,17 @@ class DBManager {
             console.error("Error: Chat " + chatID + " does not exist");
             return callback(Error("DBM_ERROR: Chat " + chatID + " does not exist"), false);
         } else {
-            globalDB.get("SELECT * FROM GlobalUsers WHERE USERHASH = (?)", [userID], (err, row) => {
+            globalDB.get("SELECT * FROM GlobalUsers WHERE userID = (?)", [userID], (err, row) => {
                 if (err) {
-                    console.error(err.message);
                     return callback(err, false);
                 }
                 return row
-                    ? chatDBs[chatID].get("SELECT * FROM Users WHERE USERHASH = (?)", [userID], (err, row) => {
+                    ? chatDBs[chatID].get("SELECT * FROM Users WHERE userID = (?)", [userID], (err, row) => {
                           if (err) {
-                              console.error(err.message);
                               return callback(err, false);
                           }
                           return row
-                              ? callback(null, row.NAME == userName)
+                              ? callback(null, row.userName == userName)
                               : callback(Error("DBM_ERROR: User  " + userID + " does not exist in chat " + chatID), false);
                       })
                     : callback(Error("DBM_ERROR: User " + userID + " does not exist"), false);
@@ -405,35 +466,23 @@ class DBManager {
         return success;
     }
 
-    addMessage(message, userID, chatID) {
-        var success = true;
-
+    addMessage(message, userID, chatID, time, callback) {
         if (chatDBs[chatID] == undefined) {
-            console.error("Error: Chat " + chatID + " does not exist");
-            success = false;
-            return false;
+            return callback(Error("DBM_ERROR: Chat " + chatID + " does not exist"), null);
+        } else {
+            this.checkUser(userID, chatID, function(err, result) {
+                if (err) {
+                    return callback(err, null);
+                } /*if (result == true)*/ else {
+                    chatDBs[chatID].run("INSERT INTO Messages (userID, message, time) VALUES ((?), (?), (?));", [userID, message, time], err => {
+                        if (err) {
+                            return callback(err, null);
+                        }
+                        return callback(null, true);
+                    });
+                }
+            });
         }
-
-        if (success == false) {
-            return false;
-        }
-
-        this.checkUser(userID, chatID, function(err, result) {
-            if (result == true) {
-                chatDBs[chatID].run("INSERT INTO Messages (USERHASH, MESSAGE, TIME) VALUES ((?), (?), (?));", [userID, message, Date.now()], err => {
-                    if (err) {
-                        console.error(err.message);
-                        success = false;
-                        return false;
-                    }
-                });
-            } else {
-                success = false;
-                return false;
-            }
-        });
-
-        return success;
     }
 
     getMessages(chatID, callback) {
@@ -461,8 +510,6 @@ class DBManager {
             .randomBytes(Math.ceil((len * 3) / 4))
             .toString("base64") // convert to base64 format
             .slice(0, len); // return required number of characters
-        //.replace(/\+/g, '0') // replace '+' with '0'
-        //.replace(/\//g, '0') // replace '/' with '0'
     }
 }
 

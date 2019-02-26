@@ -3,14 +3,14 @@ Init:
 sqlite3
 ATTACH 'global.db' as 'Global';
 CREATE TABLE Global.GlobalUsers(
-       USERHASH INT     PRIMARY KEY      NOT NULL        
+       userID INT       PRIMARY KEY      NOT NULL        
 );
 CREATE TABLE Global.GlobalChats(
-       CHATHASH INT     PRIMARY KEY      NOT NULL,
-       CHATNAME TEXT                     NOT NULL
+       chatID INT       PRIMARY KEY      NOT NULL,
+       chatName TEXT                     NOT NULL
 );
 
-INSERT INTO Global.GlobalUsers (USERHASH)
+INSERT INTO Global.GlobalUsers (userID)
 VALUES
 (0);
 
@@ -18,66 +18,66 @@ Startup:
 
 sqlite3
 ATTACH 'global.db' as 'Global';
-(for each chat (wih hash CHATHASH))
-ATTACH '{CHATHASH}.db' as 'CHATHASH';
+(for each chat (wih hash chatID))
+ATTACH '{chatID}.db' as 'chatID';
 
 
-Init new user with hash USERHASH:
+Init new user with hash userID:
 
-INSERT INTO Global.GlobalUsers (USERHASH)
+INSERT INTO Global.GlobalUsers (userID)
 VALUES
-('{USERHASH}');
+('{userID}');
 
 
-Init new chat with hash CHATHASH and creator USERHASH:
+Init new chat with hash chatID and creator userID:
 
-INSERT INTO Global.GlobalChats (CHATHASH)
+INSERT INTO Global.GlobalChats (chatID)
 VALUES
-('{CHATHASH}');
+('{chatID}');
 
-ATTACH '{CHATHASH}.db' as 'CHATHASH';
-CREATE TABLE {CHATHASH}.Users(
-       USERHASH         INT     UNIQUE  NOT NULL,
-       NAME             TEXT            NOT NULL,
-       ONLINE           INT             NOT NULL,
-       LASTONLINE       INT             NOT NULL,
-       FOREIGN KEY(USERHASH) REFERENCES GlobalUsers(USERHASH)
+ATTACH '{chatID}.db' as 'chatID';
+CREATE TABLE {chatID}.Users(
+       userID           INT     UNIQUE  NOT NULL,
+       userName         TEXT            NOT NULL,
+       online           INT             NOT NULL,
+       lastOnline       INT             NOT NULL,
+       FOREIGN KEY(userID) REFERENCES GlobalUsers(userID)
 );
 
-INSERT INTO {CHATHASH}.Users
+INSERT INTO {chatID}.Users
 VALUES
 (0, "Server", 1, 0),
-({USERHASH}, "name", 1, {gettimeofday});
+({userID}, "name", 1, {gettimeofday});
 
-CREATE TABLE {CHATHASH}.Messages(
-       USERHASH         INT     UNIQUE  NOT NULL,
+CREATE TABLE {chatID}.Messages(
+       userID         INT     UNIQUE  NOT NULL,
        MESSAGE  TEXT,
-       TIME     INT            NOT NULL
+       time     INT            NOT NULL
 );
 
 
-Post new message "message" to chat {CHATHASH} as {USERHASH}:
+Post new message "message" to chat {chatID} as {userID}:
 
-INSERT INTO {CHATHASH}.Messages (USERHASH, MESSAGE, TIME)
+INSERT INTO {chatID}.Messages (userID, MESSAGE, time)
 VALUES
-({USERHASH}, 'message', {gettimeofday});
+({userID}, 'message', {gettimeofday});
 
 
 Select all global chats:
 
-SELECT ROWID, CHATHASH FROM Global.GlobalChats;
+SELECT ROWID, chatID FROM Global.GlobalChats;
 
 
 Select all global users:
 
-SELECT ROWID, USERHASH FROM Global.GlobalUsers;
+SELECT ROWID, userID FROM Global.GlobalUsers;
 
 
-Select all users in chat {CHATHASH}:
+Select all users in chat {chatID}:
 
-SELECT ROWID, USERHASH, NAME, ONLINE, LASTONLINE FROM {CHATHASH}.Users;
+SELECT ROWID, userID, NAME, ONLINE, LASTONLINE FROM {chatID}.Users;
 
 
-Select all messages in chat {CHATHASH}:
+Select all messages in chat {chatID}:
 
-SELECT ROWID, USERHASH, MESSAGE, TIME FROM {CHATHASH}.Messages;
+SELECT ROWID, userID, MESSAGE, time FROM {chatID}.Messages;
