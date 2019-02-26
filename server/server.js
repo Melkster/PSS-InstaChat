@@ -13,7 +13,6 @@ const database = new DBManager();
 database.initDatabase();
 
 io.on("connection", socket => {
-    // TODO: redownload history when user enters a chat
     // TODO: add time stamp to messages when received
 
     console.log(`A user connected, socket ID ${socket.id}`);
@@ -28,11 +27,12 @@ io.on("connection", socket => {
         if (userID == null) {
             userID = DBManager.sRandomBigValue(10); // generate new userID here
             socket.emit("identification", userID);
-            // TODO: should users be saved in the database if they haven't joined any chat room?
         } else {
             if (chatIDs != null && chatIDs.length > 0) {
                 for (chatID of chatIDs) {
+                    // TODO: check that `userID` is in `chatID` exists in db using `checkUser()`
                     socket.join(chatID);
+                    // TODO: handle errors
                 }
             }
         }
@@ -46,25 +46,40 @@ io.on("connection", socket => {
      * `chatID` of the joined chat.
      */
     socket.on("joinChat", (userID, userName, chatID) => {
-        result = database.addUser(userID, userName, chatID, (err, name) => {
+        database.addUser(userID, userName, chatID, (err, name) => {
             if (err) {
-                console.error(err.message);
-                success = false;
-                return false;
+                socket.emit("err", `Could not join chat with chat ID "${chatID}"`);
+                console.log(err);
             } else {
+                socket.join(chatID);
                 socket.emit("joinChat", name);
+                console.log(`User with userID ${userID} joined chat ${chatID}`);
             }
         });
-        if (result == false) {
-            socket.emit("err", `Could not join chat with chat ID "${chatID}"`);
-        } else {
-            socket.join(chatID);
-            console.log(`User with userID ${userID} joined chat ${chatID}`);
-        }
     });
 
     socket.on("leaveChat", () => {
         // TODO
+    });
+
+    /**
+     * The `fetchMessages` event is used to retrieve all old messages for a chat
+     * with `chatID`. The server will transmit all old messages chronologically,
+     * one by one, using the `message` event.
+     */
+    socket.on("fetchMessages", chatID => {
+        database.getMessages(chatID, (err, messages) => {
+            if (err) {
+                console.log(err.message);
+                socket.emit("err", "An occurred while fetching old messages.")
+            } else {
+                for (message of messages) {
+                    // TODO: should chatID be added to every message? Doesn't seem to be actually needed.
+                    // TODO: replace `userID` with `username` in all messages
+                    io.to(chatID).emit("message", message);
+                }
+            }
+        });
     });
 
     /**
@@ -88,13 +103,16 @@ io.on("connection", socket => {
      * be a stringified JSON object with the following structure:
      * ```
      * {
-     *     author: {
-     *         userID: *userID*,
-     *         username: *username*
-     *     },
+     *     userID: *userID*,
      *     chatID: *chatID*,
      *     message: *message*,
-     *     time: *time*
+     * }
+     * The transmitted message looks like this:
+     * {
+     *    username: *username*,
+     *    chatID: *chatID*,
+     *    message: *message*,
+     *    time: *time*
      * }
      * ```
      * If the message could not be stored in the database, the server will
@@ -125,7 +143,7 @@ io.on("connection", socket => {
                     } else {
                         messageWrapper.username = username;
                         delete messageWrapper.userID;
-                        io.to(messageWrapper.chatID).emit("message", messageWrapper);
+                        io.to(messageWrapper.chatID).emit("message", JSON.stringify(messageWrapper));
                     }
                 }
             }
@@ -137,6 +155,6 @@ io.on("connection", socket => {
     });
 });
 
-http.listen(port, () => {
+http.listen(port, "0.0.0.0", () => {
     console.log(`Listening on localhost:${port}`);
 });
