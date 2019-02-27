@@ -20,9 +20,10 @@ class ChatScreen extends React.Component {
             messages: []
         };
 
-        socket.on("message", data => {
-            console.log('Received '+ data);
-            this.messages.push(data);
+        socket.on("message", messageWrapper => {
+            messageWrapper = JSON.parse(messageWrapper);
+            console.log('Received '+ messageWrapper);
+            this.messages.push(messageWrapper);
         });
 
         socket.on("err", err => {

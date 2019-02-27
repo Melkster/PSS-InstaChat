@@ -32,7 +32,7 @@ class CreateScreen extends React.Component {
         AsyncStorage.setItem('chats', JSON.stringify(this.state.currentState.chats));
 
         // also need to join the newly created chat, this a good place to do it?
-        console.log('Joining ' + chatID + 'as' + this.state.nickname);
+        console.log(`Joining ${chatID} as ${this.state.nickname}`);
         socket.emit("joinChat", this.state.currentState.userID, this.state.nickname, chatID);
 
         this.props.navigation.navigate('Chatroom', {
