@@ -76,9 +76,18 @@ io.on("connection", socket => {
                 socket.emit("err", "An occurred while fetching old messages.")
             } else {
                 for (message of messages) {
-                    // TODO: should chatID be added to every message? Doesn't seem to be actually needed.
-                    // TODO: replace `userID` with `username` in all messages
-                    io.to(chatID).emit("message", message);
+                    console.log(message);
+                    database.checkUser(message.userID, chatID, (err, username) => {
+                        if (err) {
+                            socket.emit("err", err.message);
+                            console.error(err);
+                        } else {
+                            message.chatID = chatID; // TODO: should chatID be added to every message? Doesn't seem to be actually needed.
+                            message.username = username;
+                            delete message.userID;
+                            io.to(chatID).emit("message", JSON.stringify(message));
+                        }
+                    });
                 }
             }
         });
@@ -128,7 +137,7 @@ io.on("connection", socket => {
 
         database.checkUser(messageWrapper.userID, messageWrapper.chatID, (err, username) => {
             if (err) {
-                socket.emit("err", err);
+                socket.emit("err", err.message);
                 console.log(err);
             } else {
                 if (!messageWrapper.hasOwnProperty("message")) {
