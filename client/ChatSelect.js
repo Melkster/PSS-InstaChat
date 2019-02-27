@@ -26,6 +26,7 @@ class ChatSelect extends React.Component {
                                     onPress={() => this.props.navigation.navigate('Chatroom', {
                                         currentState: state,
                                         chatID: item.chatID,
+                                        nickname: item.nickname,
                                         chatName: item.name})
                                     }
                                 />

@@ -26,7 +26,8 @@ class CreateScreen extends React.Component {
         console.log(`Received chatID: '${chatID}'`);
         var chatRoom = {
             name: this.state.chatRoomName,
-            chatID: chatID
+            chatID: chatID,
+            nickname: this.state.nickname
         };
         this.state.currentState.chats.push(chatRoom);
         AsyncStorage.setItem('chats', JSON.stringify(this.state.currentState.chats));
@@ -38,7 +39,8 @@ class CreateScreen extends React.Component {
         this.props.navigation.navigate('Chatroom', {
             currentState: this.state.currentState,
             chatID: chatID, // from server
-            chatName: this.state.chatRoomName
+            chatName: this.state.chatRoomName,
+            nickname: this.state.nickname
         })
 
     };
