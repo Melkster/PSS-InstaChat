@@ -1,7 +1,5 @@
 import io from "socket.io-client";
-import {
-    Alert
-} from "react-native";
+import { Alert } from "react-native";
 
 socket = io("http://192.168.0.104:3000/"); // You need to change this to your server ip
 
@@ -20,7 +18,7 @@ socket.on("connect", () => {
         Alert.alert("Reconnected with server");
         connect_error = false;
     }
-})
+});
 
 // Error event handler, prints an Alert with the provided message
 socket.on("err", data => {

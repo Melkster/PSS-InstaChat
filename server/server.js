@@ -151,7 +151,7 @@ io.on("connection", socket => {
                 } else {
                     console.log(`Received message: '${messageWrapper.message}' from userID ${messageWrapper.userID}`);
                     result = database.addMessage(messageWrapper.message, messageWrapper.userID, messageWrapper.chatID);
-                    database.addMessage(messageWrapper.message, messageWrapper.author.userID, messageWrapper.chatID, Date.now(), (err, status) => {
+                    database.addMessage(messageWrapper.message, messageWrapper.userID, messageWrapper.chatID, Date.now(), (err, status) => {
                         if (err) {
                             console.error(err.message);
                             socket.emit("err", `Could not store message in server database`);

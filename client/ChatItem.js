@@ -11,7 +11,7 @@ import {StyleSheet, Text, View} from 'react-native';
 class ChatItem extends Component {
     render() {
         const message = this.props.message;
-        const isMyMessage = message.author.id == 2; // needs fix
+        const isMyMessage = true; // needs fix
         const textContainerExtra = isMyMessage ? styles.textContainerRight : styles.textContainerLeft;
         return (
             <View style={styles.messageContainer} >
