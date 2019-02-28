@@ -179,7 +179,7 @@ class DBManager {
                                     if (err) {
                                         return callback(err, false);
                                     } else {
-                                        newChatDB.run("CREATE TABLE Messages( userID INT UNIQUE NOT NULL, message TEXT, time INT NOT NULL);", err => {
+                                        newChatDB.run("CREATE TABLE Messages(userID INT NOT NULL, message TEXT, time INT NOT NULL);", err => {
                                             if (err) {
                                                 return callback(err, false);
                                             } else {
@@ -280,7 +280,7 @@ class DBManager {
                         return false;
                     }
                 })
-                .run("CREATE TABLE Messages( userID INT UNIQUE NOT NULL, message TEXT, time INT NOT NULL);", err => {
+                .run("CREATE TABLE Messages(userID INT NOT NULL, message TEXT, time INT NOT NULL);", err => {
                     if (err) {
                         console.error(err.message);
                         success = false;

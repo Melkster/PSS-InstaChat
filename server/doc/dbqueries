@@ -50,7 +50,7 @@ VALUES
 ({userID}, "name", 1, {gettimeofday});
 
 CREATE TABLE {chatID}.Messages(
-       userID         INT     UNIQUE  NOT NULL,
+       userID         INT      NOT NULL,
        MESSAGE  TEXT,
        time     INT            NOT NULL
 );
