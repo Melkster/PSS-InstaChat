@@ -21,6 +21,8 @@ class ChatScreen extends React.Component {
             messages: []
         };
 
+        socket.emit("fetchMessages", this.state.chatID);
+
         socket.on("message", messageWrapper => {
             console.log('Received '+ messageWrapper);
             this.state.messages.push(JSON.parse(messageWrapper));
@@ -67,7 +69,6 @@ class ChatScreen extends React.Component {
 
 
     render() {
-        socket.emit("fetchMessages", this.state.chatID);
 
         return (
             // maybe better fix than to hardcode 90
