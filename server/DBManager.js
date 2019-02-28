@@ -379,6 +379,8 @@ class DBManager {
                                   }
                               });
                     });
+                } else {
+                    return callback(Error("DBM_ERROR: User " + userID + " does not exist"), false);
                 }
             });
         }
