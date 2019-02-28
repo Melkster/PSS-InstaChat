@@ -8,21 +8,21 @@ var connect_error = false; // Ensures that an error connecting only is alerted o
 // Alerts the user if they can't connect to the server
 socket.on("connect_error", error => {
     if (connect_error == false) {
-        Alert.alert("Couldn't connect to server");
+        Alert.alert("Error", "Could not connect to server");
         connect_error = true;
     }
 });
 
 socket.on("connect", () => {
     if (connect_error == true) {
-        Alert.alert("Reconnected with server");
+        Alert.alert("Success", "Reconnected with server");
         connect_error = false;
     }
 });
 
 // Error event handler, prints an Alert with the provided message
 socket.on("err", data => {
-    Alert.alert(data);
+    Alert.alert("Server error", data);
 });
 
 module.exports = socket;

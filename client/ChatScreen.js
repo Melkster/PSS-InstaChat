@@ -41,6 +41,7 @@ class ChatScreen extends React.Component {
                 userID: this.state.currentState.userID,
                 chatID: this.state.chatID,
                 message: this.state.newText,
+                username: this.state.nickname,
             };
             this.textInput.clear();
             Keyboard.dismiss();

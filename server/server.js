@@ -27,8 +27,14 @@ io.on("connection", socket => {
      */
     socket.on("identification", (userID, chatIDs) => {
         if (userID == null) {
-            userID = DBManager.sRandomBigValue(10); // generate new userID here
-            socket.emit("identification", userID);
+            database.createUser((err, userID) => {
+                if (err) {
+                    socket.emit("err", "Could not store user in database");
+                    console.error(err.message);
+                } else {
+                    socket.emit("identification", userID);
+                }
+            });
         } else {
             if (chatIDs != null && chatIDs.length > 0) {
                 for (chatID of chatIDs) {
@@ -73,7 +79,7 @@ io.on("connection", socket => {
         database.getMessages(chatID, (err, messages) => {
             if (err) {
                 console.log(err.message);
-                socket.emit("err", "An occurred while fetching old messages.")
+                socket.emit("err", "An occurred while fetching old messages.");
             } else {
                 for (message of messages) {
                     console.log(message);
@@ -136,6 +142,7 @@ io.on("connection", socket => {
         messageWrapper = JSON.parse(messageWrapper);
 
         database.checkUser(messageWrapper.userID, messageWrapper.chatID, (err, username) => {
+            // This looks up the users's username. However it seems like the username is currently sent by the user, should this be changed?
             if (err) {
                 socket.emit("err", err.message);
                 console.log(err);
@@ -150,7 +157,6 @@ io.on("connection", socket => {
                     socket.emit("err", "The message sent has no username");
                 } else {
                     console.log(`Received message: '${messageWrapper.message}' from userID ${messageWrapper.userID}`);
-                    result = database.addMessage(messageWrapper.message, messageWrapper.userID, messageWrapper.chatID);
                     database.addMessage(messageWrapper.message, messageWrapper.userID, messageWrapper.chatID, Date.now(), (err, status) => {
                         if (err) {
                             console.error(err.message);
