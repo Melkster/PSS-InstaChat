@@ -32,7 +32,7 @@ class HomeScreen extends React.Component {
 
         socket.on("reconnect", (attempNumber) => {
             console.log('Reconnected with server');
-            socket.emit('identification', value, this.chats);
+            socket.emit('identification', this.state.userID, this.state.chats);
         });
 
     }
