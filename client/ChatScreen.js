@@ -5,7 +5,6 @@ import {
 } from "react-native";
 import styles from './styles';
 import ChatItem from './ChatItem.js';
-import messagesList from './MessagesList';
 import socket from './socket';
 import chatRoomsList from './ChatRoomsList';
 
@@ -25,9 +24,12 @@ class ChatScreen extends React.Component {
 
         socket.on("message", messageWrapper => {
             console.log('Received '+ messageWrapper);
+            this.state.messages.reverse();
             this.state.messages.push(JSON.parse(messageWrapper));
+            this.state.messages.reverse();
             this.forceUpdate();
         });
+
 
     }
 
@@ -49,6 +51,7 @@ class ChatScreen extends React.Component {
             this.refs.flatList.scrollToEnd();
             console.log('Sending ' + JSON.stringify(messageWrapper) + ' to server.');
             socket.emit("message", JSON.stringify(messageWrapper));
+            this.state.newText = '';
         } else {
             Keyboard.dismiss();
         }
@@ -78,6 +81,7 @@ class ChatScreen extends React.Component {
 
                 <Text style={styles.welcome}>Welcome to {this.state.chatName} ({this.state.chatID}), {this.state.nickname}!</Text>
 
+                <Text>{JSON.stringify(this.state.messages)}</Text>
                 <FlatList
                     ref={"flatList"}
                     inverted
@@ -108,5 +112,6 @@ class ChatScreen extends React.Component {
         );
     }
 }
+
 
 export default ChatScreen;

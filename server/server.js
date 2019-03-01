@@ -38,6 +38,7 @@ io.on("connection", socket => {
         } else {
             if (chatIDs != null && chatIDs.length > 0) {
                 for (chatID of chatIDs) {
+                    console.log(chatID);
                     // TODO: check that `userID` is in `chatID` exists in db using `checkUser()`
                     socket.join(chatID);
                     // TODO: handle errors
@@ -70,6 +71,21 @@ io.on("connection", socket => {
         // TODO
     });
 
+    function sendMessage(message, chatID) {
+        database.checkUser(message.userID, chatID, (err, username) => {
+            if (err) {
+                socket.emit("err", err.message);
+                console.error(err);
+            } else {
+                message.chatID = chatID; // TODO: should chatID be added to every message? Doesn't seem to be actually needed.
+                message.username = username;
+                delete message.userID;
+                io.to(chatID).emit("message", JSON.stringify(message));
+            }
+        });
+
+    }
+
     /**
      * The `fetchMessages` event is used to retrieve all old messages for a chat
      * with `chatID`. The server will transmit all old messages chronologically,
@@ -82,18 +98,7 @@ io.on("connection", socket => {
                 socket.emit("err", "An occurred while fetching old messages.");
             } else {
                 for (message of messages) {
-                    console.log(message);
-                    database.checkUser(message.userID, chatID, (err, username) => {
-                        if (err) {
-                            socket.emit("err", err.message);
-                            console.error(err);
-                        } else {
-                            message.chatID = chatID; // TODO: should chatID be added to every message? Doesn't seem to be actually needed.
-                            message.username = username;
-                            delete message.userID;
-                            io.to(chatID).emit("message", JSON.stringify(message));
-                        }
-                    });
+                    sendMessage(message, chatID);
                 }
             }
         });
