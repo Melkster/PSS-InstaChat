@@ -3,6 +3,7 @@ import {
     Alert, View, Text, TextInput, TouchableHighlight,
 } from "react-native";
 import styles from './styles';
+import socket from './socket';
 
 class JoinScreen extends React.Component {
     constructor(props) {
@@ -15,29 +16,22 @@ class JoinScreen extends React.Component {
         socket.on("joinChat", this.handleJoinChat);
     }
 
-    handleCreateChat = (name) => {
+    handleJoinChat = (name) => {
+        console.log(`Received ChatRoom Name: '${name}'`);
+
         this.props.navigation.navigate('Chatroom', {
             currentState: this.state.currentState,
             chatID: this.state.chatID,
             chatName: name,
-            nickname: this.state.nickname
+            nickname: this.state.nickname,
         })
     };
 
     onJoinButtonPressed() {
-//        var chatRoom = {
-//            name: '',
-//            chatID: '',
-//            nickname: '',
-//        };
-//        chatRoom = JSON.parse(AsyncStorage.getItem('chats'));
-//        let userID = this.state.currentState.userID;
-//        let username = chatRoom.nickname;
-//        //let chatID = chatRoom.chatID;
-//        this.setState((prevState) => {
-//            return {nickname: username,};
-//        });
-        socket.emit("joinChat", this.state.currentState.userID, this.state.currentState.username, this.state.chatID);
+        if ( this.state.chatID.length != 0 && this.state.nickname.length != 0 ) {
+            socket.emit("joinChat", this.state.currentState.userID, this.state.nickname, this.state.chatID);
+            console.log('UserID: ' + this.state.currentState.userID + ' Nickname: ' + this.state.nickname + ' enter chatID:' + this.state.chatID);
+        }
     }
 
     render() {
@@ -45,8 +39,13 @@ class JoinScreen extends React.Component {
             <View style={styles.createScreenView}>
                 <TextInput
                     style={styles.chatRoomName}
-                    placeholder="Enter Chatroom ID"
+                    placeholder="Enter the Chatroom ID"
                     onChangeText={(text) => this.setState({chatID: text})}
+                />
+                <TextInput
+                    style={styles.chatRoomName}
+                    placeholder="Enter Your NickName in this ChatRoom"
+                    onChangeText={(text) => this.setState({nickname: text})}
                 />
                 <TouchableHighlight
                     style={styles.chatRoomNameSubmit}
