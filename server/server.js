@@ -39,8 +39,8 @@ io.on("connection", socket => {
             if (chatIDs != null && chatIDs.length > 0) {
                 for (chatID of chatIDs) {
                     // TODO: check that `userID` is in `chatID` exists in db using `checkUser()`
-                    socket.join(chatID); // TODO: this doesn't seem to work on reconnection
-                    console.log(`User ${userID} joined chat ${chatID}`);
+                    socket.join(chatID);
+                    console.log(`User ${userID} connected to chat ${chatID}`);
                     // TODO: handle errors
                 }
             }

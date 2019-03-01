@@ -32,7 +32,8 @@ class HomeScreen extends React.Component {
 
         socket.on("reconnect", (attempNumber) => {
             console.log('Reconnected with server');
-            socket.emit('identification', this.state.userID, this.state.chats);
+            // Extract only chatID's from `chats´
+            socket.emit('identification', this.state.userID, this.state.chats.map(obj => obj.chatID));
         });
 
     }

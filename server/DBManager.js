@@ -353,7 +353,6 @@ class DBManager {
 
     addUser(userID, username, chatID, callback) {
         if (chatDBs[chatID] == undefined) {
-            console.error();
             return callback(Error("DBM_ERROR: Chat " + chatID + " does not exist"), false);
         } else {
             globalDB.get("SELECT * FROM GlobalUsers WHERE userID = (?)", [userID], function(err, row) {
@@ -388,7 +387,6 @@ class DBManager {
 
     checkUser(userID, chatID, callback) {
         if (chatDBs[chatID] == undefined) {
-            console.error("Error: Chat " + chatID + " does not exist");
             return callback(Error("DBM_ERROR: Chat " + chatID + " does not exist"), false);
         } else {
             globalDB.get("SELECT * FROM GlobalUsers WHERE userID = (?)", [userID], (err, row) => {
@@ -411,7 +409,6 @@ class DBManager {
 
     verifyUser(userID, username, chatID, callback) {
         if (chatDBs[chatID] == undefined) {
-            console.error("Error: Chat " + chatID + " does not exist");
             return callback(Error("DBM_ERROR: Chat " + chatID + " does not exist"), false);
         } else {
             globalDB.get("SELECT * FROM GlobalUsers WHERE userID = (?)", [userID], (err, row) => {
