@@ -22,11 +22,20 @@ YellowBox.ignoreWarnings([
 
 class HomeScreen extends React.Component {
 
-    state = {
-        'name': null,
-        'userID': null, // the server should give this
-        'chats': [] // {'name': 'BestChat', 'chatID': 'ABC123'}
-    };
+    constructor(props) {
+        super(props);
+        this.state = {
+            'name': null,
+            'userID': null, // the server should give this
+            'chats': [] // {'name': 'BestChat', 'chatID': 'ABC123'}
+        };
+
+        socket.on("reconnect", (attempNumber) => {
+            console.log('Reconnected with server');
+            socket.emit('identification', this.state.userID, this.state.chats);
+        });
+
+    }
 
     /* This section is performed every time the application starts, it tries to load saved information
     and if that information is not found, the information is requested from the server */
