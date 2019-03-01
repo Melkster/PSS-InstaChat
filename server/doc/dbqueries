@@ -40,8 +40,7 @@ CREATE TABLE {chatID}.Users(
        userID           INT     UNIQUE  NOT NULL,
        username         TEXT            NOT NULL,
        online           INT             NOT NULL,
-       lastOnline       INT             NOT NULL,
-       FOREIGN KEY(userID) REFERENCES GlobalUsers(userID)
+       lastOnline       INT             NOT NULL
 );
 
 INSERT INTO {chatID}.Users
@@ -51,7 +50,7 @@ VALUES
 
 CREATE TABLE {chatID}.Messages(
        userID         INT      NOT NULL,
-       MESSAGE  TEXT,
+       message  TEXT,
        time     INT            NOT NULL
 );
 
