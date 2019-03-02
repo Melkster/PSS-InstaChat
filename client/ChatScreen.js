@@ -67,7 +67,7 @@ class ChatScreen extends React.Component {
     }
 
     renderChatItem({item}) {
-        return <ChatItem message={item}/>
+        return <ChatItem message={item} nickname={this.state.nickname}/>
     }
 
     keyExtractor = (item, index) => index.toString();
@@ -81,12 +81,12 @@ class ChatScreen extends React.Component {
 
                 <Text style={styles.welcome}>Welcome to {this.state.chatName} ({this.state.chatID}), {this.state.nickname}!</Text>
 
-                <Text>{JSON.stringify(this.state.messages)}</Text>
                 <FlatList
+                    style={{ flex: 1 }}
                     ref={"flatList"}
                     inverted
                     data={this.state.messages}
-                    renderItem={this.renderChatItem}
+                    renderItem={this.renderChatItem.bind(this)}
                     keyExtractor={this.keyExtractor}
                     ListFooterComponent={this.renderFooter}
                 />

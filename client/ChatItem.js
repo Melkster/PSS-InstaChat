@@ -11,7 +11,8 @@ import {StyleSheet, Text, View} from 'react-native';
 class ChatItem extends Component {
     render() {
         const message = this.props.message;
-        const isMyMessage = true; // needs fix
+        const nickname = this.props.nickname;
+        const isMyMessage = message.username == nickname; // maybe this should be decided/taged by the server later
         const textContainerExtra = isMyMessage ? styles.textContainerRight : styles.textContainerLeft;
         return (
             <View style={styles.messageContainer} >
