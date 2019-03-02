@@ -38,7 +38,6 @@ io.on("connection", socket => {
         } else {
             if (chatIDs != null && chatIDs.length > 0) {
                 for (chatID of chatIDs) {
-                    console.log(chatID);
                     // TODO: check that `userID` is in `chatID` exists in db using `checkUser()`
                     socket.join(chatID);
                     // TODO: handle errors
