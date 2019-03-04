@@ -40,6 +40,7 @@ io.on("connection", socket => {
                 for (chatID of chatIDs) {
                     // TODO: check that `userID` is in `chatID` exists in db using `checkUser()`
                     socket.join(chatID);
+                    console.log(`User ${userID} connected to chat ${chatID}`);
                     // TODO: handle errors
                 }
             }
