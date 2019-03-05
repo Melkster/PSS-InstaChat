@@ -24,9 +24,7 @@ class ChatScreen extends React.Component {
 
         socket.on("message", messageWrapper => {
             console.log('Received '+ messageWrapper);
-            this.state.messages.reverse();
-            this.state.messages.push(JSON.parse(messageWrapper));
-            this.state.messages.reverse();
+            this.state.messages.unshift(JSON.parse(messageWrapper));
             this.forceUpdate();
         });
 
