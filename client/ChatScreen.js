@@ -5,7 +5,6 @@ import {
 } from "react-native";
 import styles from './styles';
 import ChatItem from './ChatItem.js';
-import messagesList from './MessagesList';
 import socket from './socket';
 import chatRoomsList from './ChatRoomsList';
 
@@ -25,9 +24,10 @@ class ChatScreen extends React.Component {
 
         socket.on("message", messageWrapper => {
             console.log('Received '+ messageWrapper);
-            this.state.messages.push(JSON.parse(messageWrapper));
+            this.state.messages.unshift(JSON.parse(messageWrapper));
             this.forceUpdate();
         });
+
 
     }
 
@@ -49,6 +49,7 @@ class ChatScreen extends React.Component {
             this.refs.flatList.scrollToEnd();
             console.log('Sending ' + JSON.stringify(messageWrapper) + ' to server.');
             socket.emit("message", JSON.stringify(messageWrapper));
+            this.state.newText = '';
         } else {
             Keyboard.dismiss();
         }
@@ -64,7 +65,7 @@ class ChatScreen extends React.Component {
     }
 
     renderChatItem({item}) {
-        return <ChatItem message={item}/>
+        return <ChatItem message={item} nickname={this.state.nickname}/>
     }
 
     keyExtractor = (item, index) => index.toString();
@@ -79,10 +80,11 @@ class ChatScreen extends React.Component {
                 <Text style={styles.welcome}>Welcome to {this.state.chatName} ({this.state.chatID}), {this.state.nickname}!</Text>
 
                 <FlatList
+                    style={{ flex: 1 }}
                     ref={"flatList"}
                     inverted
                     data={this.state.messages}
-                    renderItem={this.renderChatItem}
+                    renderItem={this.renderChatItem.bind(this)}
                     keyExtractor={this.keyExtractor}
                     ListFooterComponent={this.renderFooter}
                 />
@@ -108,5 +110,6 @@ class ChatScreen extends React.Component {
         );
     }
 }
+
 
 export default ChatScreen;
