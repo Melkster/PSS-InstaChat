@@ -11,7 +11,7 @@ import socket from "./socket";
 import styles from "./styles";
 import { Font } from "expo";
 import { Ionicons } from "@expo/vector-icons";
-import getTheme from './native-base-theme/components';
+import getTheme from "./native-base-theme/components";
 import material from "./native-base-theme/variables/material";
 
 // Ignores yellow warnings, showed up when going to view with websockets.
@@ -91,61 +91,56 @@ class HomeScreen extends React.Component {
             return null;
         }
         return (
-            // <StyleProvider style={getTheme(material)}>
-                <Container style={styles.container}>
-                    <Header>
-                        <Body>
-                            <Title style={{ alignSelf: "center" }}>InstaChat</Title>
-                        </Body>
-                        {/* <Text>InstaChat</Text> */}
-                    </Header>
-                    <Content>
-                        <Button
-                            Large
-                            primary
-                            style={{ alignSelf: "center" }}
-                            onPress={() =>
-                                this.props.navigation.navigate("Create", {
-                                    currentState: this.state
-                                })
-                            }
-                        >
-                            <Text>Create</Text>
-                        </Button>
-                        <Button
-                            style={{ alignSelf: "center" }}
-                            onPress={() =>
-                                this.props.navigation.navigate("Join", {
-                                    currentState: this.state
-                                })
-                            }
-                        >
-                            <Text>Join</Text>
-                        </Button>
+            <Container style={styles.container}>
+                <Header>
+                    <Body>
+                        <Title style={{ alignSelf: "center" }}>InstaChat</Title>
+                    </Body>
+                </Header>
+                <Content padder>
+                    <Button
+                        style={[styles.homeScreenButton, {marginTop: 150}]}
+                        onPress={() =>
+                            this.props.navigation.navigate("Create", {
+                                currentState: this.state
+                            })
+                        }
+                    >
+                        <Text style={{fontSize: 18}}>Create</Text>
+                    </Button>
+                    <Button
+                        style={styles.homeScreenButton}
+                        onPress={() =>
+                            this.props.navigation.navigate("Join", {
+                                currentState: this.state
+                            })
+                        }
+                    >
+                        <Text>Join</Text>
+                    </Button>
 
-                        <Button
-                            style={{ alignSelf: "center" }}
-                            onPress={() =>
-                                this.props.navigation.navigate("Chats", {
-                                    currentState: this.state
-                                })
-                            }
-                        >
-                            <Text>Chats</Text>
-                        </Button>
-                        <Button
-                            style={{ alignSelf: "center" }}
-                            onPress={() =>
-                                this.props.navigation.navigate("Info", {
-                                    currentState: this.state
-                                })
-                            }
-                        >
-                            <Text>Info</Text>
-                        </Button>
-                    </Content>
-                </Container>
-            // </StyleProvider>
+                    <Button
+                        style={styles.homeScreenButton}
+                        onPress={() =>
+                            this.props.navigation.navigate("Chats", {
+                                currentState: this.state
+                            })
+                        }
+                    >
+                        <Text>Chats</Text>
+                    </Button>
+                    <Button
+                        style={styles.homeScreenButton}
+                        onPress={() =>
+                            this.props.navigation.navigate("Info", {
+                                currentState: this.state
+                            })
+                        }
+                    >
+                        <Text>Info</Text>
+                    </Button>
+                </Content>
+            </Container>
         );
     }
 }
