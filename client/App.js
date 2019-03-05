@@ -30,9 +30,9 @@ class HomeScreen extends React.Component {
             'chats': [] // {'name': 'BestChat', 'chatID': 'ABC123'}
         };
 
+
         socket.on("reconnect", (attempNumber) => {
             console.log('Reconnected with server');
-            // Extract only chatID's from `chats´
             socket.emit('identification', this.state.userID, this.state.chats.map(obj => obj.chatID));
         });
 
@@ -48,7 +48,7 @@ class HomeScreen extends React.Component {
             }
         });
         AsyncStorage.getItem('userID').then((value) => {
-            socket.emit('identification', value, this.chats);
+            socket.emit('identification', value, this.state.chats.map(obj => obj.chatID));
             socket.on('identification', (value) => {
                 if (value == null) {
                     alert('Server returned. null');
