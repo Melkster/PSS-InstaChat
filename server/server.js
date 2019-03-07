@@ -8,7 +8,7 @@ const port = 3000;
 const database = new DBManager();
 database.initDatabase(function(err, status) {
     if (err) {
-        console.error(err);
+        console.error(err.message);
     } else {
         console.log("Database manager initialized successfully.");
     }
@@ -62,6 +62,7 @@ io.on("connection", socket => {
             } else {
                 socket.join(chatID);
                 socket.emit("joinChat", name);
+                sendEvent(`User ${username} joined.`, chatID, socket);
                 console.log(`User with userID ${userID} joined chat ${chatID}`);
             }
         });
@@ -71,19 +72,58 @@ io.on("connection", socket => {
         // TODO
     });
 
-    function sendMessage(message, chatID) {
-        database.checkUser(message.userID, chatID, (err, username) => {
+    /**
+     * If `socket` is `null`, `message` will be transmitted to everyone in chat
+     * `chatID`. Otherwise, if it is a socket object it will be transmitted
+     * only to `socket`.
+     */
+    function sendMessage(messageWrapper, chatID, socket) {
+        database.checkUser(messageWrapper.userID, chatID, (err, username) => {
             if (err) {
                 socket.emit("err", err.message);
-                console.error(err);
+                console.error(err.message);
             } else {
-                message.chatID = chatID; // TODO: should chatID be added to every message? Doesn't seem to be actually needed.
-                message.username = username;
-                delete message.userID;
-                io.to(chatID).emit("message", JSON.stringify(message));
+                // TODO: should chatID be added to every message? Doesn't seem to be actually needed.
+                messageWrapper.chatID = chatID;
+                messageWrapper.username = username;
+                delete messageWrapper.userID;
+                messageWrapper = JSON.stringify(messageWrapper);
+                if (socket) {
+                    socket.emit("message", messageWrapper);
+                } else {
+                    io.to(chatID).emit("message", messageWrapper);
+                }
             }
         });
+    }
 
+    /**
+     * Sends event with the string `message` to chat `chatID`.
+     * If `excludeSocket` is `null`, `message` is sent to all sockets connected to
+     * `chatID`. Otherwise, if `excludeSocket` is a socket object, `message` is
+     * sent to all sockets connected to `chatID`, except for `excludeSocket`.
+     */
+    function sendEvent(message, chatID, excludeSocket) {
+        time = Date.now();
+
+        database.addMessage(message, 0, chatID, time, err => {
+            if (err) {
+                console.error(err.message);
+            } else {
+                messageWrapper = JSON.stringify({
+                    username: "event",
+                    chatID: chatID,
+                    message: message,
+                    time: time,
+                    event: true
+                });
+                if (excludeSocket) {
+                    excludeSocket.broadcast.to(chatID).emit("message", messageWrapper);
+                } else {
+                    io.to(chatID).emit("message", messageWrapper);
+                }
+            }
+        });
     }
 
     /**
@@ -94,11 +134,11 @@ io.on("connection", socket => {
     socket.on("fetchMessages", chatID => {
         database.getMessages(chatID, (err, messages) => {
             if (err) {
-                console.log(err.message);
+                console.error(err.message);
                 socket.emit("err", "An occurred while fetching old messages.");
             } else {
                 for (message of messages) {
-                    sendMessage(message, chatID);
+                    sendMessage(message, chatID, socket);
                 }
             }
         });
@@ -113,11 +153,12 @@ io.on("connection", socket => {
     socket.on("createChat", chatName => {
         database.createChat(chatName, (err, chatID) => {
             if (err) {
-                console.error(err);
+                console.error(err.message);
                 socket.emit("err", `Could not create chat "${chatName}"`);
             } else {
                 socket.emit("createChat", chatID);
-                console.log(`Created chat '${chatName}'`);
+                // sendEvent(`Created chat ${chatName}`, chatID);
+                console.log(`Created chat '${chatName}' with chatID ${chatID}`);
             }
         });
     });
@@ -128,41 +169,45 @@ io.on("connection", socket => {
      * ```
      * {
      *     userID: *userID*,
+     *     username: *username*,
      *     chatID: *chatID*,
-     *     message: *message*,
+     *     message: *message*
      * }
+     * ```
      * The transmitted message looks like this:
+     * ```
      * {
      *    username: *username*,
      *    chatID: *chatID*,
      *    message: *message*,
-     *    time: *time*
+     *    time: *time*,
+     *    event: *true/false*,
      * }
      * ```
      * If the message could not be stored in the database, the server will
      * respond with an `err` event.
      */
     socket.on("message", messageWrapper => {
-        // messageWrapper.time = new Date(); // Adds time received to message
         messageWrapper = JSON.parse(messageWrapper);
 
-        database.checkUser(messageWrapper.userID, messageWrapper.chatID, (err, username) => {
-            // This looks up the users's username. However it seems like the username is currently sent by the user, should this be changed?
-            if (err) {
-                socket.emit("err", err.message);
-                console.log(err);
-            } else {
-                if (!messageWrapper.hasOwnProperty("message")) {
-                    socket.emit("err", "The message sent contains no 'message' field");
-                } else if (!messageWrapper.hasOwnProperty("chatID")) {
-                    socket.emit("err", "The message sent has no userID");
-                } else if (!messageWrapper.hasOwnProperty("userID")) {
-                    socket.emit("err", "The message sent has no userID");
-                } else if (!messageWrapper.hasOwnProperty("username")) {
-                    socket.emit("err", "The message sent has no username");
+        if (!messageWrapper.hasOwnProperty("message")) {
+            socket.emit("err", "The message sent contains no 'message' field");
+        } else if (!messageWrapper.hasOwnProperty("chatID")) {
+            socket.emit("err", "The message sent has no userID");
+        } else if (!messageWrapper.hasOwnProperty("userID")) {
+            socket.emit("err", "The message sent has no userID");
+        } else if (!messageWrapper.hasOwnProperty("username")) {
+            socket.emit("err", "The message sent has no username");
+        } else {
+            database.checkUser(messageWrapper.userID, messageWrapper.chatID, (err, username) => {
+                // TODO: This looks up the user's username. However it seems like the username is
+                //       currently sent by the user, should this be changed?
+                if (err) {
+                    socket.emit("err", err.message);
+                    console.error(err.message);
                 } else {
                     console.log(`Received message: '${messageWrapper.message}' from userID ${messageWrapper.userID}`);
-                    database.addMessage(messageWrapper.message, messageWrapper.userID, messageWrapper.chatID, Date.now(), (err, status) => {
+                    database.addMessage(messageWrapper.message, messageWrapper.userID, messageWrapper.chatID, Date.now(), err => {
                         if (err) {
                             console.error(err.message);
                             socket.emit("err", `Could not store message in server database`);
@@ -173,8 +218,8 @@ io.on("connection", socket => {
                         }
                     });
                 }
-            }
-        });
+            });
+        }
     });
 
     socket.on("disconnect", () => {
