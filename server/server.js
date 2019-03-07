@@ -157,7 +157,6 @@ io.on("connection", socket => {
                 socket.emit("err", `Could not create chat "${chatName}"`);
             } else {
                 socket.emit("createChat", chatID);
-                // sendEvent(`Created chat ${chatName}`, chatID);
                 console.log(`Created chat '${chatName}' with chatID ${chatID}`);
             }
         });
