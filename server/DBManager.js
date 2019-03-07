@@ -455,17 +455,17 @@ class DBManager {
 
     addMessage(message, userID, chatID, time, callback) {
         if (chatDBs[chatID] == undefined) {
-            return callback(Error("DBM_ERROR: Chat " + chatID + " does not exist"), null);
+            return callback(Error("DBM_ERROR: Chat " + chatID + " does not exist"));
         } else {
             this.checkUser(userID, chatID, function(err, result) {
                 if (err) {
-                    return callback(err, null);
+                    return callback(err);
                 } /*if (result == true)*/ else {
                     chatDBs[chatID].run("INSERT INTO Messages (userID, message, time) VALUES ((?), (?), (?));", [userID, message, time], err => {
                         if (err) {
-                            return callback(err, null);
+                            return callback(err);
                         }
-                        return callback(null, true);
+                        return callback(null);
                     });
                 }
             });
