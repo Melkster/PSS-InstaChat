@@ -46,7 +46,7 @@ class ChatScreen extends React.Component {
             };
             this.textInput.clear();
             Keyboard.dismiss();
-            this.refs.flatList.scrollToEnd();
+            //this.refs.flatList.scrollToEnd(); // this actually scrolls to top because it's inverted /Maverick
             console.log('Sending ' + JSON.stringify(messageWrapper) + ' to server.');
             socket.emit("message", JSON.stringify(messageWrapper));
             this.state.newText = '';

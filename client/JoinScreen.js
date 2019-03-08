@@ -1,6 +1,6 @@
 import React from "react";
 import {
-    Alert, View, Text, TextInput, TouchableHighlight,
+    AsyncStorage, View, Text, TextInput, TouchableHighlight,
 } from "react-native";
 import styles from './styles';
 import socket from './socket';
@@ -18,6 +18,16 @@ class JoinScreen extends React.Component {
 
     handleJoinChat = (name) => {
         console.log(`Received ChatRoom Name: '${name}'`);
+
+        /* The chatroom needs to be stored into memory */
+        var chatRoom = {
+            name: name,
+            chatID: this.state.chatID,
+            nickname: this.state.nickname
+        };
+        /* And into current state object */
+        this.state.currentState.chats.push(chatRoom);
+        AsyncStorage.setItem('chats', JSON.stringify(this.state.currentState.chats));
 
         this.props.navigation.navigate('Chatroom', {
             currentState: this.state.currentState,
