@@ -91,7 +91,7 @@ io.on("connection", socket => {
                 if (socket) {
                     socket.emit("message", messageWrapper);
                 } else {
-                    io.to(chatID).emit("message", messageWrapper);
+                    io.to(messageWrapper.userID).emit("message", messageWrapper);
                 }
             }
         });
