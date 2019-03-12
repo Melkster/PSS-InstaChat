@@ -6,17 +6,15 @@ const DBManager = require("./DBManager.js");
 const port = 3000;
 
 const database = new DBManager();
-database.initDatabase(function(err, status) {
+database.initDatabase(err => {
     if (err) {
         console.error(err.message);
     } else {
-        console.log("Database manager initialized successfully.");
+        console.log("Database initialized successfully.");
     }
 });
 
 io.on("connection", socket => {
-    // TODO: add time stamp to messages when received
-
     console.log(`A user connected, socket ID ${socket.id}`);
 
     /**
@@ -41,7 +39,6 @@ io.on("connection", socket => {
                     // TODO: check that `userID` is in `chatID` exists in db using `checkUser()`
                     socket.join(chatID);
                     console.log(`User ${userID} connected to chat ${chatID}`);
-                    // TODO: handle errors
                 }
             }
         }
@@ -86,13 +83,13 @@ io.on("connection", socket => {
                 // TODO: should chatID be added to every message? Doesn't seem to be actually needed.
                 messageWrapper.chatID = chatID;
                 messageWrapper.username = username;
-                if(messageWrapper.userID == 0) messageWrapper.event=true;
+                if (messageWrapper.userID == 0) messageWrapper.event = true;
                 delete messageWrapper.userID;
                 messageWrapper = JSON.stringify(messageWrapper);
                 if (socket) {
                     socket.emit("message", messageWrapper);
                 } else {
-                    io.to(messageWrapper.userID).emit("message", messageWrapper);
+                    io.to(chatID).emit("message", messageWrapper);
                 }
             }
         });
@@ -169,12 +166,11 @@ io.on("connection", socket => {
      * ```
      * {
      *     userID: *userID*,
-     *     username: *username*,
      *     chatID: *chatID*,
      *     message: *message*
      * }
      * ```
-     * The transmitted message looks like this:
+     * The message looks like this when the server transmits it:
      * ```
      * {
      *    username: *username*,
@@ -184,8 +180,8 @@ io.on("connection", socket => {
      *    event: *true/false*,
      * }
      * ```
-     * If the message could not be stored in the database, the server will
-     * respond with an `err` event.
+     * If the message lacks some field or could not be stored in the database,
+     * the server will respond with an `err` event.
      */
     socket.on("message", messageWrapper => {
         messageWrapper = JSON.parse(messageWrapper);
@@ -193,15 +189,11 @@ io.on("connection", socket => {
         if (!messageWrapper.hasOwnProperty("message")) {
             socket.emit("err", "The message sent contains no 'message' field");
         } else if (!messageWrapper.hasOwnProperty("chatID")) {
-            socket.emit("err", "The message sent has no userID");
+            socket.emit("err", "The message sent has no chatID");
         } else if (!messageWrapper.hasOwnProperty("userID")) {
             socket.emit("err", "The message sent has no userID");
-        } else if (!messageWrapper.hasOwnProperty("username")) {
-            socket.emit("err", "The message sent has no username");
         } else {
             database.checkUser(messageWrapper.userID, messageWrapper.chatID, (err, username) => {
-                // TODO: This looks up the user's username. However it seems like the username is
-                //       currently sent by the user, should this be changed?
                 if (err) {
                     socket.emit("err", err.message);
                     console.error(err.message);
