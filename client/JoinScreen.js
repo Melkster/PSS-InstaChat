@@ -21,9 +21,9 @@ class JoinScreen extends React.Component {
 
         /* The chatroom needs to be stored into memory */
         var chatRoom = {
-            name: name,
-            chatID: this.state.chatID,
-            nickname: this.state.nickname
+            name: name.trim(),
+            nickname: this.state.nickname.trim(),
+            chatID: this.state.chatID
         };
         /* And into current state object */
         this.state.currentState.chats.push(chatRoom);
@@ -31,16 +31,19 @@ class JoinScreen extends React.Component {
 
         this.props.navigation.navigate('Chatroom', {
             currentState: this.state.currentState,
-            chatID: this.state.chatID,
-            chatName: name,
-            nickname: this.state.nickname,
+            chatID: chatRoom.chatID,
+            chatName: chatRoom.name,
+            nickname: chatRoom.nickname,
         })
     };
 
     onJoinButtonPressed() {
-        if ( this.state.chatID.length != 0 && this.state.nickname.length != 0 ) {
-            socket.emit("joinChat", this.state.currentState.userID, this.state.nickname, this.state.chatID);
-            console.log('UserID: ' + this.state.currentState.userID + ' Nickname: ' + this.state.nickname + ' enter chatID:' + this.state.chatID);
+        chatID = this.state.chatID;
+        nickname = this.state.nickname.trim(); // `trim()` removes leading and trailing whitespace
+        userID = this.state.currentState.userID;
+        if (chatID.length > 0 && nickname.length > 0) {
+            socket.emit("joinChat", userID, nickname, chatID);
+            // console.log('UserID: ' + userID + ' Nickname: ' + nickname + ' enter chatID:' + chatID);
         }
     }
 

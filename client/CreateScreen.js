@@ -23,32 +23,33 @@ class CreateScreen extends React.Component {
     }
 
     handleCreateChat = (chatID) => {
-        console.log(`Received chatID: '${chatID}'`);
         var chatRoom = {
-            name: this.state.chatRoomName,
-            chatID: chatID,
-            nickname: this.state.nickname
+            name: this.state.chatRoomName.trim(),
+            nickname: this.state.nickname.trim(),
+            chatID: chatID
         };
         this.state.currentState.chats.push(chatRoom);
         AsyncStorage.setItem('chats', JSON.stringify(this.state.currentState.chats));
 
         // also need to join the newly created chat, this a good place to do it?
         console.log(`Joining ${chatID} as ${this.state.nickname}`);
-        socket.emit("joinChat", this.state.currentState.userID, this.state.nickname, chatID);
+        socket.emit("joinChat", this.state.currentState.userID, chatRoom.nickname, chatID);
 
         this.props.navigation.navigate('Chatroom', {
             currentState: this.state.currentState,
             chatID: chatID, // from server
-            chatName: this.state.chatRoomName,
-            nickname: this.state.nickname
+            chatName: chatRoom.name,
+            nickname: chatRoom.nickname
         })
 
     };
 
     onSubmitButtonPressed() {
-        if (this.state.chatRoomName.length != 0 && this.state.nickname.length != 0) {
-            console.log('submit pressed:' + this.state.chatRoomName);
-            socket.emit("createChat", this.state.chatRoomName);
+        // `trim()` removes leading and trailing whitespace
+        chatRoomName = this.state.chatRoomName.trim();
+        nickname = this.state.nickname.trim();
+        if (chatRoomName.length > 0 && nickname.length > 0) {
+            socket.emit("createChat", chatRoomName);
         }
     }
 

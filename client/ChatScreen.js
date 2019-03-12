@@ -36,12 +36,11 @@ class ChatScreen extends React.Component {
     }
 
     _onSendButtonPressed() {
-        console.log('Pressing submit');
         if (this.state.newText.length != 0) {
             const messageWrapper = {
                 userID: this.state.currentState.userID,
                 chatID: this.state.chatID,
-                message: this.state.newText
+                message: this.state.newText.trim() // `trim()` removes leading and trailing whitespace
             };
             this.textInput.clear();
             Keyboard.dismiss();
