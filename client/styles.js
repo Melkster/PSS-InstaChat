@@ -7,8 +7,7 @@ const styles = StyleSheet.create({
         textAlign: "center"
     },
     container: {
-        flex: 1,
-        backgroundColor: "#80dfff"
+        flex: 1
     },
     buttonContainer: {
         margin: 20

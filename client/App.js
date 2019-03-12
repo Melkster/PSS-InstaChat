@@ -1,6 +1,6 @@
 import React, { Component } from "react";
 import { AsyncStorage, Alert, Keyboard, TouchableHighlight, View, StyleSheet, TextInput, TouchableOpacity, FlatList, KeyboardAvoidingView } from "react-native";
-import { createStackNavigator, createAppContainer } from "react-navigation";
+import { createStackNavigator, createAppContainer, createBottomTabNavigator } from "react-navigation";
 import { Container, Header, Title, Content, Footer, FooterTab, Button, Left, Right, Body, Icon, Text, ActionSheet, StyleProvider } from "native-base";
 import ChatSelect from "./ChatSelect";
 import JoinScreen from "./JoinScreen";
@@ -13,8 +13,8 @@ import { Font } from "expo";
 import { Ionicons } from "@expo/vector-icons";
 import getTheme from "./native-base-theme/components";
 import material from "./native-base-theme/variables/material";
+import MainScreenNavigator from "./Footer";
 
-// Ignores yellow warnings, showed up when going to view with websockets.
 console.ignoredYellowBox = ["Remote debugger"];
 import { YellowBox } from "react-native";
 YellowBox.ignoreWarnings([
@@ -96,8 +96,38 @@ class HomeScreen extends React.Component {
                     <Body>
                         <Title style={{ alignSelf: "center" }}>InstaChat</Title>
                     </Body>
+                    <Right>
+                        <Button
+                            transparent
+                            onPress={() =>
+                                this.props.navigation.navigate("Info", {
+                                    currentState: this.state,
+                                    removeFunc: this.removeInfo
+                                })
+                            }
+                        >
+                            <Icon name="ios-settings" />
+                        </Button>
+                    </Right>
                 </Header>
-                <Content padder>
+                <Content />
+                <MainScreenNavigator />
+                {/* <Footer>
+                        <Button vertical>
+                            <Icon name="ios-create" />
+                            <Text>Create</Text>
+                        </Button>
+                        <Button vertical active>
+                            <Icon active name="md-chatboxes" />
+                            <Text>Chats</Text>
+                        </Button>
+                        <Button vertical>
+                            <Icon name="ios-chatbubbles" />
+                            <Text>Join</Text>
+                        </Button>
+                    </FooterTab>
+                </Footer> */}
+                {/* <Content padder>
                     <Button
                         style={[styles.homeScreenButton, {marginTop: 150}]}
                         onPress={() =>
@@ -138,8 +168,8 @@ class HomeScreen extends React.Component {
                         }
                     >
                         <Text>Info</Text>
-                    </Button>
-                </Content>
+                    </Button>  
+                </Content>*/}
             </Container>
         );
     }
@@ -205,6 +235,19 @@ const AppNavigator = createStackNavigator(
         initialRouteName: "Home"
     }
 );
+
+// const TabNavigator = createBottomTabNavigator(
+//     {
+//         JoinScreen: { screen: JoinScreen  },
+//         ChatScreen: { screen: ChatSelect },
+//         CreateScreen: { screen: CreateScreen }
+//     },
+    
+
+// );
+
+
+// export default createAppContainer(TabNavigator); 
 
 const AppContainer = createAppContainer(AppNavigator);
 
