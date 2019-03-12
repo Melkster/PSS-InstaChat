@@ -84,7 +84,20 @@ const styles = StyleSheet.create({
         alignSelf: "center",
         width: 120,
         justifyContent: "center",
-        marginVertical: 10,
+        marginVertical: 10
+    },
+    footerButtons: {
+        //position: "absolute",
+        flex: 1,
+        //left: 0,
+        //right: 0,
+        //bottom: -10,
+        flexDirection: "row",
+        height: 50,
+        alignItems: "center"
+    },
+    chatButtons: {
+        height: 60
     }
 });
 export default styles;

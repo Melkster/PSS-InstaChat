@@ -1,5 +1,17 @@
 import React, { Component } from "react";
-import { AsyncStorage, Alert, Keyboard, TouchableHighlight, View, StyleSheet, TextInput, TouchableOpacity, FlatList, KeyboardAvoidingView } from "react-native";
+import {
+    AsyncStorage,
+    Alert,
+    Keyboard,
+    TouchableHighlight,
+    View,
+    StyleSheet,
+    TextInput,
+    TouchableOpacity,
+    FlatList,
+    KeyboardAvoidingView,
+    ScrollView
+} from "react-native";
 import { createStackNavigator, createAppContainer, createBottomTabNavigator } from "react-navigation";
 import { Container, Header, Title, Content, Footer, FooterTab, Button, Left, Right, Body, Icon, Text, ActionSheet, StyleProvider } from "native-base";
 import ChatSelect from "./ChatSelect";
@@ -13,7 +25,6 @@ import { Font } from "expo";
 import { Ionicons } from "@expo/vector-icons";
 import getTheme from "./native-base-theme/components";
 import material from "./native-base-theme/variables/material";
-import MainScreenNavigator from "./Footer";
 
 console.ignoredYellowBox = ["Remote debugger"];
 import { YellowBox } from "react-native";
@@ -37,8 +48,14 @@ class HomeScreen extends React.Component {
         });
     }
 
+    // Re-renders the homescreen when backing from other screens
+    willFocus = this.props.navigation.addListener("willFocus", payload => {
+        this.forceUpdate();
+    });
+
     /* This section is performed every time the application starts, it tries to load saved information
     and if that information is not found, the information is requested from the server */
+
     async componentWillMount() {
         await Font.loadAsync({
             Roboto: require("native-base/Fonts/Roboto.ttf"),
@@ -91,12 +108,13 @@ class HomeScreen extends React.Component {
             return null;
         }
         return (
-            <Container style={styles.container}>
+            <Container>
                 <Header>
-                    <Body>
-                        <Title style={{ alignSelf: "center" }}>InstaChat</Title>
+                    <Left style={{ flex: 1 }} />
+                    <Body style={{ flex: 1 }}>
+                        <Title style={{ textAlign: "center", alignSelf: "center" }}>InstaChat</Title>
                     </Body>
-                    <Right>
+                    <Right style={{ flex: 1 }}>
                         <Button
                             transparent
                             onPress={() =>
@@ -110,116 +128,63 @@ class HomeScreen extends React.Component {
                         </Button>
                     </Right>
                 </Header>
-                <Content />
-                <MainScreenNavigator />
-                {/* <Footer>
-                        <Button vertical>
-                            <Icon name="ios-create" />
-                            <Text>Create</Text>
-                        </Button>
-                        <Button vertical active>
-                            <Icon active name="md-chatboxes" />
-                            <Text>Chats</Text>
-                        </Button>
-                        <Button vertical>
-                            <Icon name="ios-chatbubbles" />
-                            <Text>Join</Text>
-                        </Button>
-                    </FooterTab>
-                </Footer> */}
-                {/* <Content padder>
+                <Content>
+                    <ScrollView>
+                        {this.state.chats.map((chats, index) => (
+                            <Button
+                                full
+                                bordered
+                                dark
+                                style={styles.chatButtons}
+                                key={chats.chatID}
+                                onPress={() =>
+                                    this.props.navigation.navigate("Chatroom", {
+                                        currentState: this.state,
+                                        chatID: chats.chatID,
+                                        nickname: chats.nickname,
+                                        chatName: chats.name
+                                    })
+                                }
+                            >
+                                <Text>{chats.name}</Text>
+                            </Button>
+                        ))}
+                    </ScrollView>
+                </Content>
+                <Footer style={{ height: 50 }}>
                     <Button
-                        style={[styles.homeScreenButton, {marginTop: 150}]}
+                        full
+                        iconLeft
+                        light
+                        style={styles.footerButtons}
                         onPress={() =>
                             this.props.navigation.navigate("Create", {
                                 currentState: this.state
                             })
                         }
                     >
-                        <Text style={{fontSize: 18}}>Create</Text>
+                        <Icon name="ios-create" />
+                        <Text>Create</Text>
                     </Button>
                     <Button
-                        style={styles.homeScreenButton}
+                        full
+                        iconRight
+                        light
+                        style={styles.footerButtons}
                         onPress={() =>
                             this.props.navigation.navigate("Join", {
                                 currentState: this.state
                             })
                         }
                     >
+                        <Icon name="ios-chatbubbles" />
                         <Text>Join</Text>
                     </Button>
-
-                    <Button
-                        style={styles.homeScreenButton}
-                        onPress={() =>
-                            this.props.navigation.navigate("Chats", {
-                                currentState: this.state
-                            })
-                        }
-                    >
-                        <Text>Chats</Text>
-                    </Button>
-                    <Button
-                        style={styles.homeScreenButton}
-                        onPress={() =>
-                            this.props.navigation.navigate("Info", {
-                                currentState: this.state
-                            })
-                        }
-                    >
-                        <Text>Info</Text>
-                    </Button>  
-                </Content>*/}
+                </Footer>
             </Container>
         );
     }
 }
-
-// <View style={styles.container}>
-//     <Text style={styles.headline}>InstaChat</Text>
-//     <View style={styles.buttonContainer}>
-//         <TextInput style={styles.textInput}
-//                 placeholder='Enter your nickname'
-//                 onChangeText={this.setName}
-//                 onSubmitEditing={Keyboard.dismiss}
-//         />
-//         <Text>
-//             Your nickname is: {this.state.name}
-//         </Text>
-//     </View>
-//     <View style={styles.buttonContainer}>
-//         <Button
-//             onPress={() => this.props.navigation.navigate('Create', {
-//                 currentState: this.state })
-//             }
-//             title="Create"
-//         />
-//     </View>
-//     <View style={styles.buttonContainer}>
-//         <Button
-//             title="Join"
-//             onPress={() => this.props.navigation.navigate('Join', {
-//                 currentState: this.state })
-//             }
-//         />
-//     </View>
-//     <View style={styles.buttonContainer}>
-//         <Button
-//             title="Go to Chats"
-//             onPress={() => this.props.navigation.navigate('Chats', {
-//                 currentState: this.state })
-//             }
-//         />
-//     </View>
-//     <View style={styles.buttonContainer}>
-//         <Button
-//             title="Info"
-//             onPress={() => this.props.navigation.navigate('Info', {
-//                 currentState: this.state, removeFunc: this.removeInfo})
-//             }
-//         />
-//     </View>
-// </View>
 
 const AppNavigator = createStackNavigator(
     {
@@ -232,22 +197,11 @@ const AppNavigator = createStackNavigator(
     },
     {
         headerMode: "none",
-        initialRouteName: "Home"
+        initialRouteName: "Home",
+        headerTitleStyle: { alignSelf: "center", textAlign: "center", flex: 1 },
+        headerLeft: <View />
     }
 );
-
-// const TabNavigator = createBottomTabNavigator(
-//     {
-//         JoinScreen: { screen: JoinScreen  },
-//         ChatScreen: { screen: ChatSelect },
-//         CreateScreen: { screen: CreateScreen }
-//     },
-    
-
-// );
-
-
-// export default createAppContainer(TabNavigator); 
 
 const AppContainer = createAppContainer(AppNavigator);
 
