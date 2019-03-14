@@ -10,7 +10,7 @@ database.initDatabase(err => {
     if (err) {
         console.error(err.message);
     } else {
-        console.log("Database initialized successfully.");
+        console.log("Database initialized.");
     }
 });
 
@@ -36,9 +36,15 @@ io.on("connection", socket => {
         } else {
             if (chatIDs != null && chatIDs.length > 0) {
                 for (chatID of chatIDs) {
-                    // TODO: check that `userID` is in `chatID` exists in db using `checkUser()`
-                    socket.join(chatID);
-                    console.log(`User ${userID} connected to chat ${chatID}`);
+                    database.checkUser(userID, chatID, (err, username) => {
+                        if (err) {
+                            socket.emit("err", `Could not connect to chat with chat ID ${chatID}`);
+                            console.error(err.message);
+                        } else {
+                            socket.join(chatID);
+                            console.log(`User ${userID} connected to chat ${chatID}`);
+                        }
+                    });
                 }
             }
         }
@@ -65,8 +71,23 @@ io.on("connection", socket => {
         });
     });
 
-    socket.on("leaveChat", () => {
-        // TODO
+    /**
+     * To leave a chat use the `leaveChat` event. Provide a `userID` and the
+     * `chatID` of the chat to leave. The server will respond with a `leaveChat`
+     * event (with no additional data) if the chat was left successfully,
+     * otherwise it will respond with an `err` event.
+     */
+    socket.on("leaveChat", (userID, chatID) => {
+        // TODO: check if user `userID` is the last person in the chat, in that case call database.deleteChat
+        database.removeUser(userID, chatID, err => {
+            if (err) {
+                socket.emit("err", "Could not leave chat at this time, please try again later.");
+                console.error(err.message);
+            } else {
+                socket.emit("leaveChat");
+                socket.leave(chatID);
+            }
+        });
     });
 
     /**
