@@ -17,22 +17,19 @@ class ChatItem extends Component {
         const nickname = this.props.nickname;
         const isMyMessage = message.username == nickname; // maybe this should be decided/taged by the server later
         let textContainerExtra = isMyMessage ? styles.textContainerRight : styles.textContainerLeft;
-        let messageStyle = styles.message;
 
-        /* In case the server sends out an event this if statement should execute */
-        if(message.event) {
-            textContainerExtra = styles.textContainerServer;
-            messageStyle = styles.servermsg;
-        }
+        const eventFormat = <View style={[styles.textContainer, styles.textContainerServer]} >
+            <Text style={styles.servermsg} >{message.message}</Text>
+        </View>;
+
+        const messageFormat= <View style={[styles.textContainer, textContainerExtra]} >
+            <Text style={styles.sender} >{message.username}</Text>
+            <Text style={styles.message} >{message.message}</Text>
+        </View>;
 
         return (
             <View style={styles.messageContainer} >
-
-                <View style={[styles.textContainer, textContainerExtra]} >
-                    <Text style={styles.sender} >{message.username}</Text>
-                    <Text style={messageStyle} >{message.message}</Text>
-                </View>
-
+                {message.event ? eventFormat : messageFormat}
             </View>
         )
     }

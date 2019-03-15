@@ -1,7 +1,8 @@
 import React from "react";
 import {
-    AsyncStorage, View, Text, TextInput, TouchableHighlight,
+    AsyncStorage, View, Text, TextInput, TouchableHighlight, Dimensions
 } from "react-native";
+import { BarCodeScanner, Permissions } from 'expo';
 import styles from './styles';
 import socket from './socket';
 
@@ -9,11 +10,17 @@ class JoinScreen extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
+            hasCameraPermission: null,
             currentState: this.props.navigation.getParam('currentState', 'unknown'),
             chatID: '',
             nickname: '',
         };
         socket.on("joinChat", this.handleJoinChat);
+    }
+
+    async componentDidMount() {
+        const { status } = await Permissions.askAsync(Permissions.CAMERA);
+        this.setState({ hasCameraPermission: status === 'granted' });
     }
 
     handleJoinChat = (name) => {
@@ -47,16 +54,24 @@ class JoinScreen extends React.Component {
         }
     }
 
+    _handleBarCodeRead = result => {
+        console.log(result.data);
+        if (result.data !== this.state.chatID) {
+            this.setState({ chatID: result.data});
+        }
+    };
+
     render() {
         return (
             <View style={styles.createScreenView}>
                 <TextInput
-                    style={styles.chatRoomName}
-                    placeholder="Enter the Chatroom ID"
+                    style={styles.chatRoomName2}
+                    placeholder="Enter chatID"
+                    value = {this.state.chatID}
                     onChangeText={(text) => this.setState({chatID: text})}
                 />
                 <TextInput
-                    style={styles.chatRoomName}
+                    style={styles.chatRoomName2}
                     placeholder="Enter Your NickName in this ChatRoom"
                     onChangeText={(text) => this.setState({nickname: text})}
                 />
@@ -66,6 +81,20 @@ class JoinScreen extends React.Component {
                 >
                     <Text style={{color: 'white'}}>Join</Text>
                 </TouchableHighlight>
+
+                <View style={{
+                    overflow: 'hidden',
+                    width: Dimensions.get('window').width,
+                    height: Dimensions.get('window').height/2
+                }}>
+                    <BarCodeScanner
+                        onBarCodeRead={this._handleBarCodeRead.bind(this)}
+                        style={{
+                            flex:1
+                        }}
+                    />
+                </View>
+
             </View>
         );
     }

@@ -80,5 +80,10 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
         alignItems: 'center',
     },
+    scanWrapper: {
+        overflow: 'hidden',
+        width: 260,
+        height: 200
+    },
 });
 export default styles;
