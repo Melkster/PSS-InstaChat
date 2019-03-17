@@ -1,7 +1,8 @@
 import React from "react";
 import {
-    Alert, View, Text, TextInput, TouchableHighlight,
+    AsyncStorage, View, Text, TextInput, TouchableHighlight, Dimensions
 } from "react-native";
+import { BarCodeScanner, Permissions } from 'expo';
 import styles from './styles';
 import socket from './socket';
 
@@ -9,6 +10,7 @@ class JoinScreen extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
+            hasCameraPermission: null,
             currentState: this.props.navigation.getParam('currentState', 'unknown'),
             chatID: '',
             nickname: '',
@@ -16,34 +18,60 @@ class JoinScreen extends React.Component {
         socket.on("joinChat", this.handleJoinChat);
     }
 
+    async componentDidMount() {
+        const { status } = await Permissions.askAsync(Permissions.CAMERA);
+        this.setState({ hasCameraPermission: status === 'granted' });
+    }
+
     handleJoinChat = (name) => {
         console.log(`Received ChatRoom Name: '${name}'`);
 
+        /* The chatroom needs to be stored into memory */
+        var chatRoom = {
+            name: name.trim(),
+            nickname: this.state.nickname.trim(),
+            chatID: this.state.chatID
+        };
+        /* And into current state object */
+        this.state.currentState.chats.push(chatRoom);
+        AsyncStorage.setItem('chats', JSON.stringify(this.state.currentState.chats));
+
         this.props.navigation.navigate('Chatroom', {
             currentState: this.state.currentState,
-            chatID: this.state.chatID,
-            chatName: name,
-            nickname: this.state.nickname,
+            chatID: chatRoom.chatID,
+            chatName: chatRoom.name,
+            nickname: chatRoom.nickname,
         })
     };
 
     onJoinButtonPressed() {
-        if ( this.state.chatID.length != 0 && this.state.nickname.length != 0 ) {
-            socket.emit("joinChat", this.state.currentState.userID, this.state.nickname, this.state.chatID);
-            console.log('UserID: ' + this.state.currentState.userID + ' Nickname: ' + this.state.nickname + ' enter chatID:' + this.state.chatID);
+        chatID = this.state.chatID;
+        nickname = this.state.nickname.trim(); // `trim()` removes leading and trailing whitespace
+        userID = this.state.currentState.userID;
+        if (chatID.length > 0 && nickname.length > 0) {
+            socket.emit("joinChat", userID, nickname, chatID);
+            // console.log('UserID: ' + userID + ' Nickname: ' + nickname + ' enter chatID:' + chatID);
         }
     }
+
+    _handleBarCodeRead = result => {
+        console.log(result.data);
+        if (result.data !== this.state.chatID) {
+            this.setState({ chatID: result.data});
+        }
+    };
 
     render() {
         return (
             <View style={styles.createScreenView}>
                 <TextInput
-                    style={styles.chatRoomName}
-                    placeholder="Enter the Chatroom ID"
+                    style={styles.chatRoomName2}
+                    placeholder="Enter chatID"
+                    value = {this.state.chatID}
                     onChangeText={(text) => this.setState({chatID: text})}
                 />
                 <TextInput
-                    style={styles.chatRoomName}
+                    style={styles.chatRoomName2}
                     placeholder="Enter Your NickName in this ChatRoom"
                     onChangeText={(text) => this.setState({nickname: text})}
                 />
@@ -53,6 +81,20 @@ class JoinScreen extends React.Component {
                 >
                     <Text style={{color: 'white'}}>Join</Text>
                 </TouchableHighlight>
+
+                <View style={{
+                    overflow: 'hidden',
+                    width: Dimensions.get('window').width,
+                    height: Dimensions.get('window').height/2
+                }}>
+                    <BarCodeScanner
+                        onBarCodeRead={this._handleBarCodeRead.bind(this)}
+                        style={{
+                            flex:1
+                        }}
+                    />
+                </View>
+
             </View>
         );
     }

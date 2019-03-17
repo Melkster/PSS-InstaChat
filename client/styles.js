@@ -98,6 +98,11 @@ const styles = StyleSheet.create({
     },
     chatButtons: {
         height: 60
-    }
+    },
+    scanWrapper: {
+        overflow: 'hidden',
+        width: 260,
+        height: 200
+    },
 });
 export default styles;

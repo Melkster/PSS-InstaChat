@@ -2,11 +2,18 @@
 const fs = require("fs");
 const sqlite3 = require("sqlite3").verbose();
 const crypto = require("crypto");
+const DBMTests = require("./DBMTests.js");
 
 var globalDB;
 var chatDBs = {};
 
 class DBManager {
+    /* initDatabase:
+     * Initializes global database, creating global.db if it doesn't exist, reloading existing
+     * chat DBs otherwise (WIP).
+     * return: callback(null, true) if deleted successfully, callback(err, false) otherwise.
+     */
+
     initDatabase(callback) {
         let firstBoot = true;
 
@@ -33,106 +40,7 @@ class DBManager {
                                         if (err) {
                                             return callback(err, false);
                                         } else {
-                                            /*let dbm = this;
-                                            this.createUser(function(err, user) {
-                                                if (err) {
-                                                    return callback(err, false);
-                                                } else {
-                                                    console.log("Created user " + user);
-                                                    dbm.createChat("potato", function(err, chat) {
-                                                        if (err) {
-                                                            return callback(err, false);
-                                                        } else {
-                                                            console.log("Created chat " + chat);
-                                                            if (err) {
-                                                                return callback(err, false);
-                                                            } else {
-                                                                dbm.addUser(user, "Mr. Person", chat, function(err, chatName) {
-                                                                    if (err) {
-                                                                        return callback(err, false);
-                                                                    } else {
-                                                                        console.log("Added user " + user + ' to chat "' + chatName + '"');
-                                                                        dbm.addMessage("Hi!", user, chat, Date.now(), function(err, status) {
-                                                                            if (err) {
-                                                                                return callback(err, false);
-                                                                            } else {
-                                                                                console.log('Added message "Hi!" to chat ' + chat);
-                                                                                dbm.checkUser(user, chat, function(err, status) {
-                                                                                    if (err) {
-                                                                                        return callback(err, false);
-                                                                                    } else {
-                                                                                        console.log("this.checkUser(" + user + ", " + chat + "): " + status);
-                                                                                        dbm.verifyUser(0, "Mr. Server", chat, function(err, status) {
-                                                                                            if (err) {
-                                                                                                return callback(err, false);
-                                                                                            } else {
-                                                                                                if (status == true) {
-                                                                                                    return callback(
-                                                                                                        Error(
-                                                                                                            "Test failed: this.verifyUser(" +
-                                                                                                                0 +
-                                                                                                                ', "Mr. Server", ' +
-                                                                                                                chat +
-                                                                                                                "): " +
-                                                                                                                status
-                                                                                                        ),
-                                                                                                        false
-                                                                                                    );
-                                                                                                } else {
-                                                                                                    console.log(
-                                                                                                        "this.verifyUser(" +
-                                                                                                            0 +
-                                                                                                            ', "Mr. Server", ' +
-                                                                                                            chat +
-                                                                                                            "): " +
-                                                                                                            status
-                                                                                                    );
-                                                                                                    dbm.verifyUser(0, "Server", chat, function(err, status) {
-                                                                                                        if (err) {
-                                                                                                            return callback(err, false);
-                                                                                                        } else {
-                                                                                                            if (status == false) {
-                                                                                                                return callback(
-                                                                                                                    Error(
-                                                                                                                        "Test failed: this.verifyUser(" +
-                                                                                                                            0 +
-                                                                                                                            ', "Server", ' +
-                                                                                                                            chat +
-                                                                                                                            "): " +
-                                                                                                                            status
-                                                                                                                    ),
-                                                                                                                    false
-                                                                                                                );
-                                                                                                            } else {
-                                                                                                                console.log(
-                                                                                                                    "this.verifyUser(" +
-                                                                                                                        0 +
-                                                                                                                        ', "Server", ' +
-                                                                                                                        chat +
-                                                                                                                        "): " +
-                                                                                                                        status
-                                                                                                                );
-                                                                                                                dbm.getAllUsers(chat, console.log);
-                                                                                                                dbm.getMessages(chat, console.log);
-                                                                                                                return callback(null, true);
-                                                                                                            }
-                                                                                                        }
-                                                                                                    });
-                                                                                                }
-                                                                                            }
-                                                                                        });
-                                                                                    }
-                                                                                });
-                                                                            }
-                                                                        });
-                                                                    }
-                                                                });
-                                                            }
-                                                        }
-                                                    });
-                                                }
-                                            });*/
-                                            // Test code ends here
+                                            //return DBMTests.test(this, chatDBs, callback); // TODO: Figrue out how to make chatDBs and globalDB instance variables because they probably should be.
                                             return callback(null, true);
                                         }
                                     });
@@ -141,22 +49,64 @@ class DBManager {
                         }
                     });
                 } else {
-                    // Reload old stored chats here.
+                    globalDB.all("SELECT * FROM GlobalChats", function(err, rows) {
+                        if (err) {
+                            return callback(err, false);
+                        } else {
+                            rows.forEach(row => {
+                                let newChatDB = new sqlite3.Database("./db/" + row.chatID + ".db", err => {
+                                    if (err) {
+                                        return callback(err, false);
+                                    } else {
+                                        //console.log("Successfully reloaded database for chat " + row.chatID + ".");
+                                        chatDBs[row.chatID] = newChatDB;
+                                    }
+                                });
+                            });
+                            return callback(null, true);
+                        }
+                    });
                 }
             }
         });
         globalDB.serialize();
     }
 
+    /* deinitDatabase:
+     * Deinitializes global database.
+     * return:
+     */
     deinitDatabase() {
-        // SLQ queries to deinitialize global database
-        // return: true if deinitialized successfully, otherwise false
-        // low priority
+        // TODO: low priority
     }
 
+    /* createChat:
+     * Creates a new chat.
+     * return: callback(null, chatID) if created successfully, callback(err, false) otherwise.
+     * TODO: Improve this.
+     */
     createChat(chatName, callback) {
+        var createChatInner = function(callback, chatName, maxTries, tries) {
+            var chatID;
+            if (tries < maxTries) {
+                chatID = DBManager.sRandomBigValue(6);
+                globalDB.run("INSERT INTO GlobalChats (chatID, chatName) VALUES(?, ?);", [chatID, chatName], err => {
+                    if (err) {
+                        tries++;
+                        //console.log("tries: " + tries);
+                        console.error(err);
+                        return this.createChatInner(callback, chatName, maxTries, tries);
+                    } else {
+                        return callback(null, chatID);
+                    }
+                });
+            } else {
+                return callback(Error("DBM_Error: Could not add new ID to GlobalUsers, maxTries (" + maxTries + ") exceeded"), false);
+            }
+        };
+
         var maxTries = 16;
-        this.createChatInner(
+        createChatInner(
             function(err, chatID) {
                 if (err) {
                     return callback(err, false);
@@ -175,7 +125,7 @@ class DBManager {
                             if (err) {
                                 return callback(err, false);
                             } else {
-                                newChatDB.run('INSERT INTO Users    VALUES(0, "Server", 1, (?));', [Date.now()], err => {
+                                newChatDB.run('INSERT INTO Users VALUES(0, "event", 1, (?));', [Date.now()], err => {
                                     if (err) {
                                         return callback(err, false);
                                     } else {
@@ -209,25 +159,10 @@ class DBManager {
         );
     }
 
-    createChatInner(callback, chatName, maxTries, tries) {
-        var chatID;
-        if (tries < maxTries) {
-            chatID = DBManager.sRandomBigValue(6);
-            globalDB.run("INSERT INTO GlobalChats (chatID, chatName) VALUES(?, ?);", [chatID, chatName], err => {
-                if (err) {
-                    tries++;
-                    //console.log("tries: " + tries);
-                    console.error(err);
-                    return this.createChatInner(callback, chatName, maxTries, tries);
-                } else {
-                    return callback(null, chatID);
-                }
-            });
-        } else {
-            return callback(Error("DBM_Error: Could not add new ID to GlobalUsers, maxTries (" + maxTries + ") exceeded"), false);
-        }
-    }
-
+    /* createChat_debug:
+     * Creates a new chat with a given chatID.
+     * TODO: Delete this.
+     */
     createChat_debug(chatName, chatID) {
         var success = false;
         success = true;
@@ -304,37 +239,58 @@ class DBManager {
         }
     }
 
-    removeChat(chatID) {
-        // SQL query to remove chat with `chatID`
-        // return: true if removed successfully, otherwise false
-        // low priority
-    }
-
-    createUser(callback) {
-        var success = false;
-        var maxTries = 16;
-        return this.createUserInner(callback, maxTries, 0);
-    }
-
-    createUserInner(callback, maxTries, tries) {
-        var userID;
-        if (tries < maxTries) {
-            userID = DBManager.sRandomBigValue(6);
-            globalDB.run("INSERT INTO GlobalUsers (userID) VALUES(?);", [userID], err => {
+    /* deleteChat:
+     * Deletes chat with `chatID`
+     * return: callback(null, true) if deleted successfully, otherwise callback(err, false).
+     */
+    deleteChat(chatID, callback) {
+        if (chatDBs[chatID] == undefined) {
+            return callback(Error("DBM_ERROR: Chat " + chatID + " does not exist"), false);
+        } else {
+            globalDB.run("DELETE FROM GlobalChats WHERE chatID = (?)", [chatID], (err, row) => {
                 if (err) {
-                    tries++;
-                    //console.log("tries: " + tries);
-                    console.error(err);
-                    return this.createUserInner(callback, maxTries, tries);
+                    return callback(err, false);
                 } else {
-                    return callback(null, userID);
+                    chatDBs[chatID].close();
+                    chatDBs[chatID] = undefined;
+                    fs.unlink("./db/" + chatID + ".db", callback);
                 }
             });
-        } else {
-            return callback(Error("DBM_Error: Could not add new ID to GlobalUsers, maxTries (" + maxTries + ") exceeded"), false);
         }
     }
 
+    /* createUser:
+     * Creates a new user.
+     * return: callback(null, chatID) if created successfully, callback(err, false) otherwise.
+     */
+    createUser(callback) {
+        var createUserInner = function(callback, maxTries, tries) {
+            var userID;
+            if (tries < maxTries) {
+                userID = DBManager.sRandomBigValue(6);
+                globalDB.run("INSERT INTO GlobalUsers (userID) VALUES(?);", [userID], err => {
+                    if (err) {
+                        tries++;
+                        //console.log("tries: " + tries);
+                        console.error(err);
+                        return this.createUserInner(callback, maxTries, tries);
+                    } else {
+                        return callback(null, userID);
+                    }
+                });
+            } else {
+                return callback(Error("DBM_Error: Could not add new ID to GlobalUsers, maxTries (" + maxTries + ") exceeded"), false);
+            }
+        };
+        var success = false;
+        var maxTries = 16;
+        return createUserInner(callback, maxTries, 0);
+    }
+
+    /* createUser_debug:
+     * Creates a new user with a given userID.
+     * TODO: Delete this.
+     */
     createUser_debug(userID, callback) {
         globalDB.run("INSERT INTO GlobalUsers (userID) VALUES(?);", [userID], err => {
             if (err) {
@@ -345,12 +301,18 @@ class DBManager {
         });
     }
 
+    /* deleteUser:
+     * Deletes the user with `userID` from the global DB.
+     * return: callback(null, true) if deleted successfully, callback(err, false) otherwise.
+     */
     deleteUser(userID) {
-        // SQL query to delete global user `userID`
-        // return: true if deleted successfully, otherwise false
-        // low priority
+        // TODO: low priority
     }
 
+    /* addUser:
+     * Adds the user with `userID` to the chat with `chatID`.
+     * return: callback(null, chatName) if added successfully, callback(err, false) otherwise.
+     */
     addUser(userID, username, chatID, callback) {
         if (chatDBs[chatID] == undefined) {
             return callback(Error("DBM_ERROR: Chat " + chatID + " does not exist"), false);
@@ -385,6 +347,11 @@ class DBManager {
         }
     }
 
+    /* checkUser:
+     * Checks if the user with `userID` is in the chat with `chatID` and returns their name.
+     * return: callback(null, username) if `userID` is in the chat with `chatID`,
+     * callback(err, false) otherwise.
+     */
     checkUser(userID, chatID, callback) {
         if (chatDBs[chatID] == undefined) {
             return callback(Error("DBM_ERROR: Chat " + chatID + " does not exist"), false);
@@ -407,6 +374,13 @@ class DBManager {
         }
     }
 
+    /* verifyUser:
+     * Verifies that the user with `userID` is in the chat with `chatID` and that their name is
+     * `username`.
+     * return: callback(null, true) if `userID` is in the chat with `chatID` and their name is
+     * `username`, callback(null, false) if their name is not `username`, callback(err, false)
+     * otherwise.
+     */
     verifyUser(userID, username, chatID, callback) {
         if (chatDBs[chatID] == undefined) {
             return callback(Error("DBM_ERROR: Chat " + chatID + " does not exist"), false);
@@ -429,75 +403,96 @@ class DBManager {
         }
     }
 
-    removeUser(userID, chatID) {
-        // SQL query to remove user with `userID` from chat with `chatID`
-        // return: true if user was removed successfully, otherwise false
-        // low priority
-    }
-
-    getAllUsers(chatID, callback) {
-        var success = true;
-
+    /* removeUser:
+     * Removes user with `userID` from chat with `chatID`.
+     * return: callback(null) if removed successfully, callback(err) otherwise.
+     */
+    removeUser(userID, chatID, callback) {
         if (chatDBs[chatID] == undefined) {
-            console.error("Error: Chat " + chatID + " does not exist");
-            success = false;
-            return false;
+            return callback(Error("DBM_ERROR: Chat " + chatID + " does not exist"));
+        } else {
+            chatDBs[chatID].get("SELECT * FROM Users WHERE userID = (?)", [userID], (err, row) => {
+                if (err) {
+                    return callback(err);
+                }
+                return row
+                    ? chatDBs[chatID].run("DELETE FROM Users WHERE userID = (?)", [userID], (err, row) => {
+                          if (err) {
+                              return callback(err);
+                          } else {
+                              return callback(null);
+                          }
+                      })
+                    : callback(Error("DBM_ERROR: User  " + userID + " does not exist in chat " + chatID));
+            });
         }
-
-        if (success == false) {
-            return false;
-        }
-
-        chatDBs[chatID].all("SELECT * FROM Users", callback);
-
-        return success;
     }
 
+    /* getAllUsers:
+     * Get all users which are in chat with `chatID`.
+     * return: callback(null, rows) if retrieved successfully, callback(err, false) otherwise.
+     * TODO: Improve this.
+     */
+    getAllUsers(chatID, callback) {
+        if (chatDBs[chatID] == undefined) {
+            return callback(ERROR("DBM_ERROR: Chat " + chatID + " does not exist"), false);
+        } else {
+            chatDBs[chatID].all("SELECT * FROM Users", callback);
+        }
+    }
+
+    /* addMessage:
+     * Adds message with content `message` from user with `userID` to chat with `chatID` at
+     * time `time`.
+     * return: callback(null) if added successfully, callback(err) otherwise.
+     */
     addMessage(message, userID, chatID, time, callback) {
         if (chatDBs[chatID] == undefined) {
-            return callback(Error("DBM_ERROR: Chat " + chatID + " does not exist"), null);
+            return callback(Error("DBM_ERROR: Chat " + chatID + " does not exist"));
         } else {
             this.checkUser(userID, chatID, function(err, result) {
                 if (err) {
-                    return callback(err, null);
-                } /*if (result == true)*/ else {
+                    return callback(err);
+                } else {
                     chatDBs[chatID].run("INSERT INTO Messages (userID, message, time) VALUES ((?), (?), (?));", [userID, message, time], err => {
                         if (err) {
-                            return callback(err, null);
+                            return callback(err);
                         }
-                        return callback(null, true);
+                        return callback(null);
                     });
                 }
             });
         }
     }
 
+    /* getMessages:
+     * Get all messages from chat with `chatID`.
+     * return: callback(null, rows) if retrieved successfully, callback(err, false) otherwise.
+     * TODO: Improve this.
+     */
     getMessages(chatID, callback) {
-        var success = true;
-
         if (chatDBs[chatID] == undefined) {
-            console.error("Error: Chat " + chatID + " does not exist");
-            success = false;
-            return false;
+            return callback(Error("DBM_ERROR: Chat " + chatID + " does not exist"), false);
+        } else {
+            chatDBs[chatID].all("SELECT * FROM Messages", callback);
         }
-
-        if (success == false) {
-            return false;
-        }
-
-        chatDBs[chatID].all("SELECT * FROM Messages", callback);
-
-        return success;
     }
 
     /* Utility functions below */
 
+    /* sRandomBigValue:
+     * Generates a random modified Base64 (modified for readability) string of length `len`.
+     * return: string.
+     */
     static sRandomBigValue(len) {
         return crypto
             .randomBytes(Math.ceil((len * 3) / 4))
             .toString("base64") // convert to base64 format
             .slice(0, len) // return required number of characters
-            .replace(/\//g, "-"); // replace '/' with '-', more FS friendly, should fix occasional "CANTOPEN".
+            .replace(/\//g, "-") // replace '/' with '-', more FS friendly, should fix occasional "CANTOPEN".
+            .replace(/I/g, "=") // replace a few letters with special characters to reduce
+            .replace(/O/g, ".") // confusion between letters and numbers which look alike.
+            .replace(/l/g, ","); // When in doubt, it's a number now.
     }
 }
 
