@@ -1,7 +1,7 @@
 import React from "react";
 import {
     Modal, Keyboard, TouchableHighlight, View,
-    Text, TextInput, FlatList, KeyboardAvoidingView, Dimensions
+    Text, TextInput, FlatList, KeyboardAvoidingView, Dimensions, Alert
 
 } from "react-native";
 import QRCode from 'react-native-qrcode';
