@@ -2,7 +2,10 @@ const DBManager = require("./DBManager.js");
 const expect = require("chai").expect;
 
 describe("Database manager tests", function() {
-    const callback = console.error;
+    const callback = function(err) {
+        console.error(err);
+        expect(err).to.equal(null);
+    };
     var userID;
     var chatID;
     describe("Initialization tests", function() {
@@ -328,6 +331,98 @@ describe("Database manager tests", function() {
                         return callback(err, false);
                     } else {
                         expect(status).to.equal(false);
+                        done();
+                    }
+                });
+            });
+        });
+        describe("removeUser", function() {
+            before(function(done) {
+                dbm.initDatabase(false, function(err, status) {
+                    if (err) {
+                        return callback(err, false);
+                    } else {
+                        dbm.createUser(function(err, user) {
+                            userID = user;
+                            if (err) {
+                                return callback(err, false);
+                            } else {
+                                dbm.createChat("potato", function(err, chat) {
+                                    chatID = chat;
+                                    if (err) {
+                                        return callback(err, false);
+                                    } else {
+                                        dbm.addUser(user, "Mr. Person", chat, function(err, chatName) {
+                                            if (err) {
+                                                return callback(err, false);
+                                            } else {
+                                                done();
+                                            }
+                                        });
+                                    }
+                                });
+                            }
+                        });
+                    }
+                });
+            });
+            it("The database manager should be able to remove a user from a chat.", done => {
+                dbm.removeUser(userID, chatID, function(err, status) {
+                    if (err) {
+                        return callback(err, false);
+                    } else {
+                        dbm.getAllUsers(chatID, function(err, rows) {
+                            if (err) {
+                                return callback(err, false);
+                            } else {
+                                expect(rows.length).to.equal(1);
+                                done();
+                            }
+                        });
+                    }
+                });
+            });
+        });
+        describe("getAllUsers", function() {
+            before(function(done) {
+                dbm.initDatabase(false, function(err, status) {
+                    if (err) {
+                        return callback(err, false);
+                    } else {
+                        dbm.createUser(function(err, user) {
+                            userID = user;
+                            if (err) {
+                                return callback(err, false);
+                            } else {
+                                dbm.createChat("potato", function(err, chat) {
+                                    chatID = chat;
+                                    if (err) {
+                                        return callback(err, false);
+                                    } else {
+                                        dbm.addUser(user, "Mr. Person", chat, function(err, chatName) {
+                                            if (err) {
+                                                return callback(err, false);
+                                            } else {
+                                                done();
+                                            }
+                                        });
+                                    }
+                                });
+                            }
+                        });
+                    }
+                });
+            });
+            it("The database manager should be able to retreive all users from a chat.", done => {
+                dbm.getAllUsers(chatID, function(err, rows) {
+                    if (err) {
+                        return callback(err, false);
+                    } else {
+                        expect(rows.length).to.equal(2);
+                        expect(rows[0].userID).to.equal(0);
+                        expect(rows[0].username).to.equal("Server");
+                        expect(rows[1].userID).to.equal(userID);
+                        expect(rows[1].username).to.equal("Mr. Person");
                         done();
                     }
                 });
