@@ -125,7 +125,7 @@ class DBManager {
                             if (err) {
                                 return callback(err, false);
                             } else {
-                                newChatDB.run('INSERT INTO Users VALUES(0, "event", 1, (?));', [Date.now()], err => {
+                                newChatDB.run('INSERT INTO Users VALUES(0, "Server", 1, (?));', [Date.now()], err => {
                                     if (err) {
                                         return callback(err, false);
                                     } else {
@@ -394,6 +394,7 @@ class DBManager {
                           if (err) {
                               return callback(err, false);
                           }
+                          console.log("row.username = ", row.username);
                           return row
                               ? callback(null, row.username == username)
                               : callback(Error("DBM_ERROR: User  " + userID + " does not exist in chat " + chatID), false);
