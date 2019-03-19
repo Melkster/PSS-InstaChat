@@ -9,7 +9,7 @@ describe("Database manager tests", function() {
         const dbm = new DBManager();
         describe("First boot", function() {
             it("The database manager should be able to initialize the global database.", done => {
-                dbm.initDatabase(function(err, status) {
+                dbm.initDatabase(false, function(err, status) {
                     expect(err).to.equal(null);
                     expect(status).to.equal(true);
                     done();
@@ -18,7 +18,7 @@ describe("Database manager tests", function() {
         });
         describe("Second boot", function() {
             before(function(done) {
-                dbm.initDatabase(function(err, status) {
+                dbm.initDatabase(false, function(err, status) {
                     if (err) {
                         return callback(err, false);
                     } else {
@@ -47,7 +47,7 @@ describe("Database manager tests", function() {
                 });
             });
             it("The database manager should be able to reload chats.", done => {
-                dbm.initDatabase(function(err, status) {
+                dbm.initDatabase(false, function(err, status) {
                     expect(err).to.equal(null);
                     expect(status).to.equal(true);
                     dbm.getAllUsers(chatID, function(err, rows) {
@@ -57,7 +57,7 @@ describe("Database manager tests", function() {
                 });
             });
             it("The database manager should be able to reload users.", done => {
-                dbm.initDatabase(function(err, status) {
+                dbm.initDatabase(false, function(err, status) {
                     expect(err).to.equal(null);
                     expect(status).to.equal(true);
                     dbm.getAllUsers(chatID, function(err, rows) {
@@ -74,7 +74,7 @@ describe("Database manager tests", function() {
     describe("deleteChat", function() {
         const dbm = new DBManager();
         before(function(done) {
-            dbm.initDatabase(function(err, status) {
+            dbm.initDatabase(false, function(err, status) {
                 expect(err).to.equal(null);
                 expect(status).to.equal(true);
                 dbm.createUser(function(err, user) {

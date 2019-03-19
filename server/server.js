@@ -6,7 +6,7 @@ const DBManager = require("./DBManager.js");
 const port = 3000;
 
 const database = new DBManager();
-database.initDatabase(err => {
+database.initDatabase(true, err => {
     if (err) {
         console.error(err.message);
     } else {
