@@ -5,9 +5,9 @@ describe("Database manager tests", function() {
     const callback = console.error;
     var userID;
     var chatID;
-    describe("initDatabase", function() {
+    describe("Initialization tests", function() {
         const dbm = new DBManager();
-        describe("First boot", function() {
+        describe("initDatabase on first boot", function() {
             it("The database manager should be able to initialize the global database.", done => {
                 dbm.initDatabase(false, function(err, status) {
                     expect(err).to.equal(null);
@@ -16,7 +16,7 @@ describe("Database manager tests", function() {
                 });
             });
         });
-        describe("Second boot", function() {
+        describe("initDatabase on second boot", function() {
             before(function(done) {
                 dbm.initDatabase(false, function(err, status) {
                     if (err) {
@@ -71,115 +71,135 @@ describe("Database manager tests", function() {
         });
     });
 
-    describe("createChat", function() {
-        const dbm = new DBManager();
-        before(function(done) {
-            dbm.initDatabase(false, function(err, status) {
-                done();
+    describe("Chat related tests", function() {
+        describe("createChat", function() {
+            const dbm = new DBManager();
+            before(function(done) {
+                dbm.initDatabase(false, function(err, status) {
+                    done();
+                });
             });
-        });
-        it("The database manager should be able to create a chat.", done => {
-            dbm.createChat(chatID, function(err, chat) {
-                expect(err).to.equal(null);
-                done();
-            });
-        });
-    });
-
-    describe("deleteChat", function() {
-        const dbm = new DBManager();
-        before(function(done) {
-            dbm.initDatabase(false, function(err, status) {
-                expect(err).to.equal(null);
-                expect(status).to.equal(true);
-                dbm.createUser(function(err, user) {
-                    if (err) {
-                        return callback(err, false);
-                    } else {
-                        //console.log("Created user " + user);
-                        dbm.createChat("potato", function(err, chat) {
-                            //console.log("Created chat " + chat);
-                            chatID = chat;
-                            if (err) {
-                                return callback(err, false);
-                            } else {
-                                dbm.addUser(user, "Mr. Person", chat, function(err, chatName) {
-                                    if (err) {
-                                        return callback(err, false);
-                                    } else {
-                                        //console.log("Added user " + user + ' to chat "' + chatName + '"');
-                                        dbm.addMessage("Hi!", user, chat, Date.now(), function(err, status) {
-                                            if (err) {
-                                                return callback(err, false);
-                                            } else {
-                                                //console.log('Added message "Hi!" to chat ' + chat);
-                                                dbm.checkUser(user, chat, function(err, status) {
-                                                    if (err) {
-                                                        return callback(err, false);
-                                                    } else {
-                                                        //console.log("this.checkUser(" + user + ", " + chat + "): " + status);
-                                                        dbm.verifyUser(0, "Mr. Server", chat, function(err, status) {
-                                                            if (err) {
-                                                                return callback(err, false);
-                                                            } else {
-                                                                if (status == true) {
-                                                                    return callback(
-                                                                        Error("Test failed: this.verifyUser(" + 0 + ', "Mr. Server", ' + chat + "): " + status),
-                                                                        false
-                                                                    );
-                                                                } else {
-                                                                    //console.log("this.verifyUser(" + 0 + ', "Mr. Server", ' + chat + "): " + status);
-                                                                    dbm.verifyUser(0, "Server", chat, function(err, status) {
-                                                                        if (err) {
-                                                                            return callback(err, false);
-                                                                        } else {
-                                                                            if (status == false) {
-                                                                                return callback(
-                                                                                    Error(
-                                                                                        "Test failed: this.verifyUser(" +
-                                                                                            0 +
-                                                                                            ', "Server", ' +
-                                                                                            chat +
-                                                                                            "): " +
-                                                                                            status
-                                                                                    ),
-                                                                                    false
-                                                                                );
-                                                                            } else {
-                                                                                //console.log("this.verifyUser(" + 0 + ', "Server", ' + chat + "): " + status);
-                                                                                //dbm.getAllUsers(chat, console.log);
-                                                                                //dbm.getMessages(chat, console.log);
-                                                                                dbm.removeUser(user, chat, function(err, status) {
-                                                                                    if (err) {
-                                                                                        return callback(err, false);
-                                                                                    } else {
-                                                                                        //dbm.getAllUsers(chat, console.log);
-                                                                                        done();
-                                                                                    }
-                                                                                });
-                                                                            }
-                                                                        }
-                                                                    });
-                                                                }
-                                                            }
-                                                        });
-                                                    }
-                                                });
-                                            }
-                                        });
-                                    }
-                                });
-                            }
-                        });
-                    }
+            it("The database manager should be able to create a chat.", done => {
+                dbm.createChat(chatID, function(err, chat) {
+                    expect(err).to.equal(null);
+                    done();
                 });
             });
         });
-        it("The database manager should be able to delete a chat.", done => {
-            dbm.deleteChat(chatID, function(err, status) {
-                expect(err).to.equal(null);
+
+        describe("deleteChat", function() {
+            const dbm = new DBManager();
+            before(function(done) {
+                dbm.initDatabase(false, function(err, status) {
+                    expect(err).to.equal(null);
+                    expect(status).to.equal(true);
+                    dbm.createUser(function(err, user) {
+                        if (err) {
+                            return callback(err, false);
+                        } else {
+                            //console.log("Created user " + user);
+                            dbm.createChat("potato", function(err, chat) {
+                                //console.log("Created chat " + chat);
+                                chatID = chat;
+                                if (err) {
+                                    return callback(err, false);
+                                } else {
+                                    dbm.addUser(user, "Mr. Person", chat, function(err, chatName) {
+                                        if (err) {
+                                            return callback(err, false);
+                                        } else {
+                                            //console.log("Added user " + user + ' to chat "' + chatName + '"');
+                                            dbm.addMessage("Hi!", user, chat, Date.now(), function(err, status) {
+                                                if (err) {
+                                                    return callback(err, false);
+                                                } else {
+                                                    //console.log('Added message "Hi!" to chat ' + chat);
+                                                    dbm.checkUser(user, chat, function(err, status) {
+                                                        if (err) {
+                                                            return callback(err, false);
+                                                        } else {
+                                                            //console.log("this.checkUser(" + user + ", " + chat + "): " + status);
+                                                            dbm.verifyUser(0, "Mr. Server", chat, function(err, status) {
+                                                                if (err) {
+                                                                    return callback(err, false);
+                                                                } else {
+                                                                    if (status == true) {
+                                                                        return callback(
+                                                                            Error(
+                                                                                "Test failed: this.verifyUser(" + 0 + ', "Mr. Server", ' + chat + "): " + status
+                                                                            ),
+                                                                            false
+                                                                        );
+                                                                    } else {
+                                                                        //console.log("this.verifyUser(" + 0 + ', "Mr. Server", ' + chat + "): " + status);
+                                                                        dbm.verifyUser(0, "Server", chat, function(err, status) {
+                                                                            if (err) {
+                                                                                return callback(err, false);
+                                                                            } else {
+                                                                                if (status == false) {
+                                                                                    return callback(
+                                                                                        Error(
+                                                                                            "Test failed: this.verifyUser(" +
+                                                                                                0 +
+                                                                                                ', "Server", ' +
+                                                                                                chat +
+                                                                                                "): " +
+                                                                                                status
+                                                                                        ),
+                                                                                        false
+                                                                                    );
+                                                                                } else {
+                                                                                    //console.log("this.verifyUser(" + 0 + ', "Server", ' + chat + "): " + status);
+                                                                                    //dbm.getAllUsers(chat, console.log);
+                                                                                    //dbm.getMessages(chat, console.log);
+                                                                                    dbm.removeUser(user, chat, function(err, status) {
+                                                                                        if (err) {
+                                                                                            return callback(err, false);
+                                                                                        } else {
+                                                                                            //dbm.getAllUsers(chat, console.log);
+                                                                                            done();
+                                                                                        }
+                                                                                    });
+                                                                                }
+                                                                            }
+                                                                        });
+                                                                    }
+                                                                }
+                                                            });
+                                                        }
+                                                    });
+                                                }
+                                            });
+                                        }
+                                    });
+                                }
+                            });
+                        }
+                    });
+                });
+            });
+            it("The database manager should be able to delete a chat.", done => {
                 dbm.deleteChat(chatID, function(err, status) {
-                    expect(status).to.equal(false);
+                    expect(err).to.equal(null);
+                    dbm.deleteChat(chatID, function(err, status) {
+                        expect(status).to.equal(false);
+                        done();
+                    });
+                });
+            });
+        });
+    });
+    describe("User related tests", function() {
+        describe("createUser", function() {
+            const dbm = new DBManager();
+            before(function(done) {
+                dbm.initDatabase(false, function(err, status) {
+                    done();
+                });
+            });
+            it("The database manager should be able to create a user.", done => {
+                dbm.createUser(function(err) {
+                    expect(err).to.equal(null);
                     done();
                 });
             });
