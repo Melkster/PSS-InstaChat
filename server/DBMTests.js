@@ -429,6 +429,100 @@ describe("Database manager tests", function() {
             });
         });
     });
+    describe("Message related tests", function() {
+        const dbm = new DBManager();
+        describe("addMessage", function() {
+            before(function(done) {
+                dbm.initDatabase(false, function(err, status) {
+                    if (err) {
+                        return callback(err, false);
+                    } else {
+                        dbm.createUser(function(err, user) {
+                            userID = user;
+                            if (err) {
+                                return callback(err, false);
+                            } else {
+                                dbm.createChat("potato", function(err, chat) {
+                                    chatID = chat;
+                                    if (err) {
+                                        return callback(err, false);
+                                    } else {
+                                        dbm.addUser(user, "Mr. Person", chat, function(err, chatName) {
+                                            if (err) {
+                                                return callback(err, false);
+                                            } else {
+                                                done();
+                                            }
+                                        });
+                                    }
+                                });
+                            }
+                        });
+                    }
+                });
+            });
+            it("The database manager should be able to add a message to a chat.", done => {
+                dbm.addMessage("Hi!", userID, chatID, Date.now(), function(err, status) {
+                    if (err) {
+                        return callback(err, false);
+                    } else {
+                        done();
+                    }
+                });
+            });
+        });
+        describe("getMessages", function() {
+            before(function(done) {
+                dbm.initDatabase(false, function(err, status) {
+                    if (err) {
+                        return callback(err, false);
+                    } else {
+                        dbm.createUser(function(err, user) {
+                            userID = user;
+                            if (err) {
+                                return callback(err, false);
+                            } else {
+                                dbm.createChat("potato", function(err, chat) {
+                                    chatID = chat;
+                                    if (err) {
+                                        return callback(err, false);
+                                    } else {
+                                        dbm.addUser(user, "Mr. Person", chat, function(err, chatName) {
+                                            if (err) {
+                                                return callback(err, false);
+                                            } else {
+                                                dbm.addMessage("Hi!", userID, chatID, Date.now(), function(err, status) {
+                                                    if (err) {
+                                                        return callback(err, false);
+                                                    } else {
+                                                        done();
+                                                    }
+                                                });
+                                            }
+                                        });
+                                    }
+                                });
+                            }
+                        });
+                    }
+                });
+            });
+            it("The database manager should be able to retreive all users from a chat.", done => {
+                dbm.getMessages(chatID, function(err, rows) {
+                    if (err) {
+                        return callback(err, false);
+                    } else {
+                        expect(rows.length).to.equal(2);
+                        expect(rows[0].userID).to.equal(0);
+                        expect(rows[0].message).to.equal('Chat "potato" created.');
+                        expect(rows[1].userID).to.equal(userID);
+                        expect(rows[1].message).to.equal("Hi!");
+                        done();
+                    }
+                });
+            });
+        });
+    });
 });
 
 class DBMTests {
