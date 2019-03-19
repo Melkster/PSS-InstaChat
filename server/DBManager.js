@@ -357,6 +357,7 @@ class DBManager {
     /* checkUser:
      * Checks if the user with `userID` is in the chat with `chatID` and returns their name.
      * return: callback(null, username) if `userID` is in the chat with `chatID`,
+     * callback(null, false) if `userID` is not in the chat with `chatID`,
      * callback(err, false) otherwise.
      */
     checkUser(userID, chatID, callback) {
@@ -372,9 +373,7 @@ class DBManager {
                           if (err) {
                               return callback(err, false);
                           }
-                          return row
-                              ? callback(null, row.username)
-                              : callback(Error("DBM_ERROR: User  " + userID + " does not exist in chat " + chatID), false);
+                          return row ? callback(null, row.username) : callback(null, false);
                       })
                     : callback(Error("DBM_ERROR: User " + userID + " does not exist"), false);
             });
