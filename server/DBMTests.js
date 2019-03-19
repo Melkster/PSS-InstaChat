@@ -2,11 +2,77 @@ const DBManager = require("./DBManager.js");
 const expect = require("chai").expect;
 
 describe("Database manager tests", function() {
+    const callback = console.error;
+    var userID;
+    var chatID;
+    describe("initDatabase", function() {
+        const dbm = new DBManager();
+        describe("First boot", function() {
+            it("The database manager should be able to initialize the global database.", done => {
+                dbm.initDatabase(function(err, status) {
+                    expect(err).to.equal(null);
+                    expect(status).to.equal(true);
+                    done();
+                });
+            });
+        });
+        describe("Second boot", function() {
+            before(function(done) {
+                dbm.initDatabase(function(err, status) {
+                    if (err) {
+                        return callback(err, false);
+                    } else {
+                        dbm.createUser(function(err, user) {
+                            if (err) {
+                                return callback(err, false);
+                            } else {
+                                userID = user;
+                                dbm.createChat("potato", function(err, chat) {
+                                    if (err) {
+                                        return callback(err, false);
+                                    } else {
+                                        chatID = chat;
+                                        dbm.addUser(user, "Mr. Person", chat, function(err, chatName) {
+                                            if (err) {
+                                                return callback(err, false);
+                                            } else {
+                                                done();
+                                            }
+                                        });
+                                    }
+                                });
+                            }
+                        });
+                    }
+                });
+            });
+            it("The database manager should be able to reload chats.", done => {
+                dbm.initDatabase(function(err, status) {
+                    expect(err).to.equal(null);
+                    expect(status).to.equal(true);
+                    dbm.getAllUsers(chatID, function(err, rows) {
+                        expect(err).to.equal(null);
+                        done();
+                    });
+                });
+            });
+            it("The database manager should be able to reload users.", done => {
+                dbm.initDatabase(function(err, status) {
+                    expect(err).to.equal(null);
+                    expect(status).to.equal(true);
+                    dbm.getAllUsers(chatID, function(err, rows) {
+                        expect(err).to.equal(null);
+                        expect(rows[0].userID).to.equal(0);
+                        expect(rows[1].userID).to.equal(userID);
+                        done();
+                    });
+                });
+            });
+        });
+    });
+
     describe("deleteChat", function() {
         const dbm = new DBManager();
-        const callback = console.error;
-        var userID;
-        var chatID;
         before(function(done) {
             dbm.initDatabase(function(err, status) {
                 expect(err).to.equal(null);
