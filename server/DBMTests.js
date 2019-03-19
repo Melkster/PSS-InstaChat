@@ -1,13 +1,13 @@
 const DBManager = require("./DBManager.js");
 const expect = require("chai").expect;
 
-describe("DBMTests", function() {
-    describe("Database manager test", function() {
-        it("The database manager should work. [WIP]", done => {
-            const dbm = new DBManager();
-            //var globalDB;
-            //var chatDBs = {};
-            var callback = console.error;
+describe("Database manager tests", function() {
+    describe("deleteChat", function() {
+        const dbm = new DBManager();
+        const callback = console.error;
+        var userID;
+        var chatID;
+        before(function(done) {
             dbm.initDatabase(function(err, status) {
                 expect(err).to.equal(null);
                 expect(status).to.equal(true);
@@ -15,9 +15,10 @@ describe("DBMTests", function() {
                     if (err) {
                         return callback(err, false);
                     } else {
-                        console.log("Created user " + user);
+                        //console.log("Created user " + user);
                         dbm.createChat("potato", function(err, chat) {
-                            console.log("Created chat " + chat);
+                            //console.log("Created chat " + chat);
+                            chatID = chat;
                             if (err) {
                                 return callback(err, false);
                             } else {
@@ -25,17 +26,17 @@ describe("DBMTests", function() {
                                     if (err) {
                                         return callback(err, false);
                                     } else {
-                                        console.log("Added user " + user + ' to chat "' + chatName + '"');
+                                        //console.log("Added user " + user + ' to chat "' + chatName + '"');
                                         dbm.addMessage("Hi!", user, chat, Date.now(), function(err, status) {
                                             if (err) {
                                                 return callback(err, false);
                                             } else {
-                                                console.log('Added message "Hi!" to chat ' + chat);
+                                                //console.log('Added message "Hi!" to chat ' + chat);
                                                 dbm.checkUser(user, chat, function(err, status) {
                                                     if (err) {
                                                         return callback(err, false);
                                                     } else {
-                                                        console.log("this.checkUser(" + user + ", " + chat + "): " + status);
+                                                        //console.log("this.checkUser(" + user + ", " + chat + "): " + status);
                                                         dbm.verifyUser(0, "Mr. Server", chat, function(err, status) {
                                                             if (err) {
                                                                 return callback(err, false);
@@ -46,7 +47,7 @@ describe("DBMTests", function() {
                                                                         false
                                                                     );
                                                                 } else {
-                                                                    console.log("this.verifyUser(" + 0 + ', "Mr. Server", ' + chat + "): " + status);
+                                                                    //console.log("this.verifyUser(" + 0 + ', "Mr. Server", ' + chat + "): " + status);
                                                                     dbm.verifyUser(0, "Server", chat, function(err, status) {
                                                                         if (err) {
                                                                             return callback(err, false);
@@ -64,22 +65,19 @@ describe("DBMTests", function() {
                                                                                     false
                                                                                 );
                                                                             } else {
-                                                                                console.log("this.verifyUser(" + 0 + ', "Server", ' + chat + "): " + status);
-                                                                                dbm.getAllUsers(chat, console.log);
-                                                                                dbm.getMessages(chat, console.log);
+                                                                                //console.log("this.verifyUser(" + 0 + ', "Server", ' + chat + "): " + status);
+                                                                                //dbm.getAllUsers(chat, console.log);
+                                                                                //dbm.getMessages(chat, console.log);
                                                                                 dbm.removeUser(user, chat, function(err, status) {
                                                                                     if (err) {
                                                                                         return callback(err, false);
                                                                                     } else {
-                                                                                        dbm.getAllUsers(chat, console.log);
+                                                                                        //dbm.getAllUsers(chat, console.log);
                                                                                         dbm.deleteChat(chat, function(err, status) {
                                                                                             if (err) {
                                                                                                 return callback(err, false);
                                                                                             } else {
-                                                                                                dbm.deleteChat(chat, function(err, status) {
-                                                                                                    expect(status).to.equal(false);
-                                                                                                    done();
-                                                                                                });
+                                                                                                done();
                                                                                             }
                                                                                         });
                                                                                     }
@@ -100,6 +98,12 @@ describe("DBMTests", function() {
                         });
                     }
                 });
+            });
+        });
+        it("The database manager should be able to delete a chat.", done => {
+            dbm.deleteChat(chatID, function(err, status) {
+                expect(status).to.equal(false);
+                done();
             });
         });
     });
