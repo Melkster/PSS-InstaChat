@@ -254,6 +254,85 @@ describe("Database manager tests", function() {
                 });
             });
         });
+        describe("checkUser", function() {
+            before(function(done) {
+                dbm.initDatabase(false, function(err, status) {
+                    if (err) {
+                        return callback(err, false);
+                    } else {
+                        dbm.createUser(function(err, user) {
+                            userID = user;
+                            if (err) {
+                                return callback(err, false);
+                            } else {
+                                dbm.createChat("potato", function(err, chat) {
+                                    chatID = chat;
+                                    if (err) {
+                                        return callback(err, false);
+                                    } else {
+                                        dbm.addUser(userID, "Mr. Person", chatID, function(err, chatName) {
+                                            if (err) {
+                                                return callback(err, false);
+                                            } else {
+                                                done();
+                                            }
+                                        });
+                                    }
+                                });
+                            }
+                        });
+                    }
+                });
+            });
+            it("The database manager should be able to check if a user is in a chat.", done => {
+                dbm.checkUser(userID, chatID, function(err, username) {
+                    if (err) {
+                        return callback(err, false);
+                    } else {
+                        expect(username).to.equal("Mr. Person");
+                        done();
+                    }
+                });
+            });
+        });
+        describe("verifyUser", function() {
+            before(function(done) {
+                dbm.initDatabase(false, function(err, status) {
+                    if (err) {
+                        return callback(err, false);
+                    } else {
+                        dbm.createChat("potato", function(err, chat) {
+                            chatID = chat;
+                            if (err) {
+                                return callback(err, false);
+                            } else {
+                                done();
+                            }
+                        });
+                    }
+                });
+            });
+            it("The database manager should be able to verify that a user is in a chat.", done => {
+                dbm.verifyUser(0, "Server", chatID, function(err, status) {
+                    if (err) {
+                        return callback(err, false);
+                    } else {
+                        expect(status).to.equal(true);
+                        done();
+                    }
+                });
+            });
+            it("The database manager should be able to verify that a user is not lying about their username in a chat.", done => {
+                dbm.verifyUser(0, "Mr. Server", chatID, function(err, status) {
+                    if (err) {
+                        return callback(err, false);
+                    } else {
+                        expect(status).to.equal(false);
+                        done();
+                    }
+                });
+            });
+        });
     });
 });
 
