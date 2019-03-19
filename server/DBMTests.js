@@ -71,6 +71,21 @@ describe("Database manager tests", function() {
         });
     });
 
+    describe("createChat", function() {
+        const dbm = new DBManager();
+        before(function(done) {
+            dbm.initDatabase(false, function(err, status) {
+                done();
+            });
+        });
+        it("The database manager should be able to create a chat.", done => {
+            dbm.createChat(chatID, function(err, chat) {
+                expect(err).to.equal(null);
+                done();
+            });
+        });
+    });
+
     describe("deleteChat", function() {
         const dbm = new DBManager();
         before(function(done) {
@@ -139,13 +154,7 @@ describe("Database manager tests", function() {
                                                                                         return callback(err, false);
                                                                                     } else {
                                                                                         //dbm.getAllUsers(chat, console.log);
-                                                                                        dbm.deleteChat(chat, function(err, status) {
-                                                                                            if (err) {
-                                                                                                return callback(err, false);
-                                                                                            } else {
-                                                                                                done();
-                                                                                            }
-                                                                                        });
+                                                                                        done();
                                                                                     }
                                                                                 });
                                                                             }
@@ -168,8 +177,11 @@ describe("Database manager tests", function() {
         });
         it("The database manager should be able to delete a chat.", done => {
             dbm.deleteChat(chatID, function(err, status) {
-                expect(status).to.equal(false);
-                done();
+                expect(err).to.equal(null);
+                dbm.deleteChat(chatID, function(err, status) {
+                    expect(status).to.equal(false);
+                    done();
+                });
             });
         });
     });

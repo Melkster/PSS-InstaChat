@@ -248,7 +248,7 @@ class DBManager {
 
     /* deleteChat:
      * Deletes chat with `chatID`
-     * return: callback(null, true) if deleted successfully, otherwise callback(err, false).
+     * return: callback(null) if deleted successfully, otherwise callback(err, false).
      */
     deleteChat(chatID, callback) {
         if (chatDBs[chatID] == undefined) {
