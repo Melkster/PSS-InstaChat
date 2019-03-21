@@ -185,10 +185,15 @@ class HomeScreen extends React.Component {
         );
     }
 }
-
 const AppNavigator = createStackNavigator(
     {
-        Home: HomeScreen,
+        Home: {
+            screen: HomeScreen,
+            navigationOptions: {
+                title: 'Home',
+                header: null //this will hide the header
+            },
+        },
         Create: CreateScreen,
         Join: JoinScreen,
         Chats: ChatSelect,
@@ -196,7 +201,7 @@ const AppNavigator = createStackNavigator(
         Info: InfoScreen
     },
     {
-        headerMode: "none",
+        headerMode: "float",
         initialRouteName: "Home",
         headerTitleStyle: { alignSelf: "center", textAlign: "center", flex: 1 },
         headerLeft: <View />

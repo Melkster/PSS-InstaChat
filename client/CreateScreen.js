@@ -1,7 +1,7 @@
 import React from "react";
 import {
     AsyncStorage, Keyboard, TouchableHighlight, View,
-    Text, TextInput, FlatList, KeyboardAvoidingView, Picker
+    Text, TextInput, FlatList, KeyboardAvoidingView, Platform
 } from "react-native";
 import styles from './styles';
 import socket from './socket';
@@ -61,22 +61,12 @@ class CreateScreen extends React.Component {
         this.setState({'nickname': value});
     };
 
-    printChats = (chats) => {
-        var s = '';
-        for(var i = 0; i < chats.length; i++) {
-            s = s + chats[i].name + '(' + chats[i].chatID + ')' + "\n";
-        }
-        return s;
-
-    };
-
     render() {
         return (
 
-            <KeyboardAvoidingView style={styles.createScreenView} keyboardVerticalOffset={85} behavior="padding">
-                <Text>
-                    Current chats: { '\n' + this.printChats(this.state.currentState.chats) }
-                </Text>
+            <KeyboardAvoidingView style={styles.createScreenView}
+                                  behavior={Platform.OS === "ios" ? "padding" : null}
+                                  keyboardVerticalOffset={Platform.OS === "ios" ? 64 : 0}>
                 <TextInput
                     style={styles.chatRoomName2}
                     placeholder="Enter chatroom name"
