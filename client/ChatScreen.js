@@ -2,7 +2,6 @@ import React from "react";
 import {
     Modal, Keyboard, TouchableHighlight, View,
     Text, TextInput, FlatList, KeyboardAvoidingView, Dimensions, Platform, Alert, AsyncStorage
-
 } from "react-native";
 import QRCode from 'react-native-qrcode';
 import styles from './styles';

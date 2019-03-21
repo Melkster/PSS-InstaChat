@@ -5,11 +5,14 @@
     "start": "expo start",
     "android": "expo start --android",
     "ios": "expo start --ios",
-    "eject": "expo eject"
+    "eject": "expo eject",
+    "test": "node_modules/.bin/jest",
+    "test:debug": "node --inspect-brk node_modules/jest/bin/jest.js --runInBand"
   },
   "dependencies": {
     "expo": "^32.0.0",
     "expo-cli": "^2.10.1",
+    "expo-react-native-adapter": "^3.0.1",
     "native-base": "^2.12.0",
     "react": "16.5.0",
     "react-native": "https://github.com/expo/react-native/archive/sdk-32.0.0.tar.gz",
@@ -19,13 +22,21 @@
   },
   "devDependencies": {
     "@expo/vector-icons": "^9.0.0",
-    "babel-preset-expo": "^5.0.0"
+    "babel-preset-expo": "^5.0.0",
+    "jest": "^24.5.0",
+    "jest-expo": "^32.0.0"
   },
   "prettier": {
     "useTabs": false,
     "printWidth": 160,
     "tabWidth": 4,
     "singleQuote": false
+  },
+  "jest": {
+    "preset": "jest-expo",
+    "transformIgnorePatterns": [
+      "/node_modules/(?!native-base)/"
+    ]
   },
   "private": true
 }
