@@ -64,7 +64,7 @@ io.on("connection", socket => {
             } else {
                 socket.join(chatID);
                 socket.emit("joinChat", name);
-                sendEvent(`${username} joined.`, chatID, socket);
+                sendEvent(`${username} joined.`, chatID);
                 console.log(`User with userID ${userID} joined chat ${chatID}`);
             }
         });
