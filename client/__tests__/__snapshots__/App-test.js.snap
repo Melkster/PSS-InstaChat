@@ -2,74 +2,281 @@
 
 exports[`renders correctly 1`] = `
 <View
-  onLayout={[Function]}
   style={
     Object {
+      "backgroundColor": "#fff",
       "flex": 1,
+      "height": 1334,
     }
   }
 >
   <View
-    enabled={false}
-    hitSlop={
-      Object {
-        "right": 50,
-      }
-    }
-    maxDeltaY={20}
-    minOffsetX={5}
-    onGestureEvent={[Function]}
-    onHandlerStateChange={[Function]}
+    onLayout={[Function]}
   >
     <View
       style={
         Object {
-          "backgroundColor": "#eee",
-          "flex": 1,
-          "flexDirection": "column-reverse",
-          "overflow": "hidden",
+          "backgroundColor": "#F8F8F8",
+          "borderBottomColor": "#a7a6ab",
+          "borderBottomWidth": 0.5,
+          "elevation": 3,
+          "flexDirection": "row",
+          "height": 64,
+          "justifyContent": "center",
+          "left": 0,
+          "paddingLeft": 6,
+          "paddingRight": 10,
+          "paddingTop": 18,
+          "right": 0,
+          "shadowColor": undefined,
+          "shadowOffset": undefined,
+          "shadowOpacity": undefined,
+          "shadowRadius": undefined,
+          "top": 0,
         }
       }
     >
       <View
         style={
-          Object {
-            "flex": 1,
+          Array [
+            Object {
+              "alignItems": "flex-start",
+              "alignSelf": "center",
+              "flex": 1,
+            },
+            Object {
+              "flex": 1,
+            },
+          ]
+        }
+      />
+      <View
+        style={
+          Array [
+            Object {
+              "alignItems": "center",
+              "alignSelf": "center",
+              "flex": 1,
+            },
+            Object {
+              "flex": 1,
+            },
+          ]
+        }
+      >
+        <Text
+          numberOfLines={1}
+          style={
+            Array [
+              Object {
+                "color": "#000",
+                "fontFamily": "System",
+                "fontSize": 17,
+                "fontWeight": "700",
+                "marginLeft": undefined,
+                "paddingLeft": 4,
+                "paddingTop": 1,
+                "textAlign": "center",
+              },
+              Object {
+                "alignSelf": "center",
+                "textAlign": "center",
+              },
+            ]
           }
+        >
+          InstaChat
+        </Text>
+      </View>
+      <View
+        style={
+          Array [
+            Object {
+              "alignItems": "flex-end",
+              "alignSelf": "center",
+              "flex": 1,
+              "flexDirection": "row",
+              "justifyContent": "flex-end",
+            },
+            Object {
+              "flex": 1,
+            },
+          ]
         }
       >
         <View
-          pointerEvents="auto"
+          accessible={true}
+          isTVSelectable={true}
+          onResponderGrant={[Function]}
+          onResponderMove={[Function]}
+          onResponderRelease={[Function]}
+          onResponderTerminate={[Function]}
+          onResponderTerminationRequest={[Function]}
+          onStartShouldSetResponder={[Function]}
           style={
             Object {
-              "bottom": 0,
-              "left": 0,
+              "alignItems": "center",
+              "alignSelf": null,
+              "backgroundColor": "transparent",
+              "borderBottomWidth": null,
+              "borderColor": null,
+              "borderLeftWidth": null,
+              "borderRadius": 50,
+              "borderRightWidth": null,
+              "borderTopWidth": null,
+              "borderWidth": undefined,
+              "elevation": 0,
+              "flexDirection": "row",
+              "height": 45,
+              "justifyContent": "space-between",
+              "marginRight": -9,
               "opacity": 1,
-              "position": "absolute",
-              "right": 0,
-              "top": 0,
-              "transform": Array [
-                Object {
-                  "translateX": 0,
-                },
-                Object {
-                  "translateY": 0,
-                },
-              ],
+              "paddingBottom": 6,
+              "paddingLeft": 15,
+              "paddingRight": 15,
+              "paddingTop": 6,
+              "shadowColor": null,
+              "shadowOffset": null,
+              "shadowOpacity": null,
+              "shadowRadius": null,
             }
           }
         >
-          <View
-            accessibilityElementsHidden={false}
-            style={
-              Object {
-                "backgroundColor": "#fff",
-                "flex": 1,
-              }
-            }
-          />
+          <Text />
         </View>
       </View>
+    </View>
+  </View>
+  <View
+    style={
+      Array [
+        Object {
+          "backgroundColor": "#F8F8F8",
+          "borderColor": "#cbcbcb",
+          "borderTopWidth": 0.5,
+          "elevation": 3,
+          "flexDirection": "row",
+          "height": 55,
+          "justifyContent": "center",
+          "left": 0,
+          "paddingBottom": 0,
+          "right": 0,
+        },
+        Object {
+          "height": 50,
+        },
+      ]
+    }
+  >
+    <View
+      accessible={true}
+      isTVSelectable={true}
+      onResponderGrant={[Function]}
+      onResponderMove={[Function]}
+      onResponderRelease={[Function]}
+      onResponderTerminate={[Function]}
+      onResponderTerminationRequest={[Function]}
+      onStartShouldSetResponder={[Function]}
+      style={
+        Object {
+          "alignItems": "center",
+          "alignSelf": "stretch",
+          "backgroundColor": "#f4f4f4",
+          "borderBottomWidth": null,
+          "borderColor": "#007aff",
+          "borderLeftWidth": null,
+          "borderRadius": 0,
+          "borderRightWidth": null,
+          "borderTopWidth": null,
+          "borderWidth": undefined,
+          "elevation": 2,
+          "flex": 1,
+          "flexDirection": "row",
+          "height": 50,
+          "justifyContent": "center",
+          "opacity": 1,
+          "paddingBottom": 6,
+          "paddingTop": 6,
+          "shadowColor": undefined,
+          "shadowOffset": undefined,
+          "shadowOpacity": undefined,
+          "shadowRadius": undefined,
+        }
+      }
+    >
+      <Text />
+      <Text
+        style={
+          Object {
+            "backgroundColor": "transparent",
+            "color": "#000",
+            "fontFamily": "System",
+            "fontSize": 16.5,
+            "marginLeft": 0,
+            "marginRight": 0,
+            "paddingLeft": 16,
+            "paddingRight": 16,
+          }
+        }
+        uppercase={false}
+      >
+        Create
+      </Text>
+    </View>
+    <View
+      accessible={true}
+      isTVSelectable={true}
+      onResponderGrant={[Function]}
+      onResponderMove={[Function]}
+      onResponderRelease={[Function]}
+      onResponderTerminate={[Function]}
+      onResponderTerminationRequest={[Function]}
+      onStartShouldSetResponder={[Function]}
+      style={
+        Object {
+          "alignItems": "center",
+          "alignSelf": "stretch",
+          "backgroundColor": "#f4f4f4",
+          "borderBottomWidth": null,
+          "borderColor": "#007aff",
+          "borderLeftWidth": null,
+          "borderRadius": 0,
+          "borderRightWidth": null,
+          "borderTopWidth": null,
+          "borderWidth": undefined,
+          "elevation": 2,
+          "flex": 1,
+          "flexDirection": "row",
+          "height": 50,
+          "justifyContent": "center",
+          "opacity": 1,
+          "paddingBottom": 6,
+          "paddingTop": 6,
+          "shadowColor": undefined,
+          "shadowOffset": undefined,
+          "shadowOpacity": undefined,
+          "shadowRadius": undefined,
+        }
+      }
+    >
+      <Text />
+      <Text
+        style={
+          Object {
+            "backgroundColor": "transparent",
+            "color": "#000",
+            "fontFamily": "System",
+            "fontSize": 16.5,
+            "marginLeft": 0,
+            "marginRight": 0,
+            "paddingLeft": 16,
+            "paddingRight": 16,
+          }
+        }
+        uppercase={false}
+      >
+        Join
+      </Text>
     </View>
   </View>
 </View>
