@@ -65,7 +65,7 @@ io.on("connection", socket => {
             } else {
                 socket.join(chatID);
                 socket.emit("joinChat", name);
-                sendEvent(`User ${username} joined.`, chatID, socket);
+                sendEvent(`${username} joined.`, chatID, socket);
                 console.log(`User with userID ${userID} joined chat ${chatID}`);
             }
         });
@@ -79,13 +79,22 @@ io.on("connection", socket => {
      */
     socket.on("leaveChat", (userID, chatID) => {
         // TODO: check if user `userID` is the last person in the chat, in that case call database.deleteChat
-        database.removeUser(userID, chatID, err => {
+        database.checkUser(userID, chatID, (err, username) => {
             if (err) {
-                socket.emit("err", "Could not leave chat at this time, please try again later.");
+                socket.emit("err", err.message);
                 console.error(err.message);
             } else {
-                socket.emit("leaveChat");
-                socket.leave(chatID);
+                database.removeUser(userID, chatID, err => {
+                    if (err) {
+                        socket.emit("err", "Could not leave chat at this time, please try again later.");
+                        console.error(err.message);
+                    } else {
+                        socket.leave(chatID);
+                        socket.emit("leaveChat");
+                        sendEvent(`${username} left.`, chatID, socket);
+                        console.log("User left chat");
+                    }
+                });
             }
         });
     });
