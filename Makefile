@@ -14,6 +14,9 @@ install:
 test_client:
 	$(CLIENT) npm test
 
+test_db: clean_db
+	$(SERVER) npm run test_db
+
 clean: clean_db
 	$(SERVER) rm -rf node_modules/
 	$(CLIENT) rm -rf node_modules/

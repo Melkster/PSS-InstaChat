@@ -6,7 +6,7 @@ const DBManager = require("./DBManager.js");
 const port = 3000;
 
 const database = new DBManager();
-database.initDatabase(err => {
+database.initDatabase(true, err => {
     if (err) {
         console.error(err.message);
     } else {
@@ -112,7 +112,11 @@ io.on("connection", socket => {
             } else {
                 // TODO: should chatID be added to every message? Doesn't seem to be actually needed.
                 messageWrapper.chatID = chatID;
-                messageWrapper.username = username;
+                if (username == false) {
+                    messageWrapper.username = "Removed user";
+                } else {
+                    messageWrapper.username = username;
+                }
                 if (messageWrapper.userID == 0) messageWrapper.event = true;
                 delete messageWrapper.userID;
                 messageWrapper = JSON.stringify(messageWrapper);
