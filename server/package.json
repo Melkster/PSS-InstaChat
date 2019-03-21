@@ -5,6 +5,8 @@
     "scripts": {
         "install": "mkdir -p db",
         "test_db": "mocha DBMTests",
+        "test_server": "mocha test_server --exit",
+        "debugTest": "DEBUG=* mocha test",
         "start": "nodemon server.js"
     },
     "author": "Axel Nygårds, Melker Österberg, Robert Markovski",

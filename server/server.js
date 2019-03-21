@@ -2,10 +2,9 @@ const app = require("express")();
 const http = require("http").Server(app);
 const io = require("socket.io")(http);
 const DBManager = require("./DBManager.js");
-
 const port = 3000;
-
 const database = new DBManager();
+
 database.initDatabase(true, err => {
     if (err) {
         console.error(err.message);
@@ -232,7 +231,6 @@ io.on("connection", socket => {
                     socket.emit("err", err.message);
                     console.error(err.message);
                 } else {
-                    console.log(`Received message: '${messageWrapper.message}' from userID ${messageWrapper.userID}`);
                     database.addMessage(messageWrapper.message, messageWrapper.userID, messageWrapper.chatID, Date.now(), err => {
                         if (err) {
                             console.error(err.message);
