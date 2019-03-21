@@ -1,6 +1,6 @@
 import React from "react";
 import {
-    AsyncStorage, View, Text, TextInput, TouchableHighlight, Dimensions
+    AsyncStorage, View, Text, TextInput, TouchableHighlight, Modal, Platform, KeyboardAvoidingView
 } from "react-native";
 import { BarCodeScanner, Permissions } from 'expo';
 import styles from './styles';
@@ -14,6 +14,7 @@ class JoinScreen extends React.Component {
             currentState: this.props.navigation.getParam('currentState', 'unknown'),
             chatID: '',
             nickname: '',
+            modalVisible: false
         };
         socket.on("joinChat", this.handleJoinChat);
     }
@@ -21,6 +22,10 @@ class JoinScreen extends React.Component {
     async componentDidMount() {
         const { status } = await Permissions.askAsync(Permissions.CAMERA);
         this.setState({ hasCameraPermission: status === 'granted' });
+    }
+
+    componentWillUnmount() {
+        socket.removeListener("joinChat");
     }
 
     handleJoinChat = (name) => {
@@ -45,9 +50,9 @@ class JoinScreen extends React.Component {
     };
 
     onJoinButtonPressed() {
-        chatID = this.state.chatID;
-        nickname = this.state.nickname.trim(); // `trim()` removes leading and trailing whitespace
-        userID = this.state.currentState.userID;
+        let chatID = this.state.chatID;
+        let nickname = this.state.nickname.trim(); // `trim()` removes leading and trailing whitespace
+        let userID = this.state.currentState.userID;
         if (chatID.length > 0 && nickname.length > 0) {
             socket.emit("joinChat", userID, nickname, chatID);
             // console.log('UserID: ' + userID + ' Nickname: ' + nickname + ' enter chatID:' + chatID);
@@ -59,11 +64,22 @@ class JoinScreen extends React.Component {
         if (result.data !== this.state.chatID) {
             this.setState({ chatID: result.data});
         }
+        this.setModalVisible(!this.state.modalVisible);
     };
+
+    setModalVisible(visible) {
+        this.setState({modalVisible: visible});
+    }
+
+    tryAgain() {
+        alert("hej");
+    }
 
     render() {
         return (
-            <View style={styles.createScreenView}>
+            <KeyboardAvoidingView behavior={(Platform.OS === 'ios') ? 'padding' : null}
+                                  keyboardVerticalOffset={Platform.select({ ios: 0, android: 500 })}
+                                      style={styles.createScreenView}>
                 <TextInput
                     style={styles.chatRoomName2}
                     placeholder="Enter chatID"
@@ -82,20 +98,56 @@ class JoinScreen extends React.Component {
                     <Text style={{color: 'white'}}>Join</Text>
                 </TouchableHighlight>
 
-                <View style={{
-                    overflow: 'hidden',
-                    width: Dimensions.get('window').width,
-                    height: Dimensions.get('window').height/2
-                }}>
-                    <BarCodeScanner
-                        onBarCodeRead={this._handleBarCodeRead.bind(this)}
-                        style={{
-                            flex:1
-                        }}
-                    />
-                </View>
+                <TouchableHighlight
+                    style={{padding:10,
+                        marginVertical: 10,
+                        backgroundColor: 'black',
+                    }}
+                    onPress={() => {
+                        this.setModalVisible(true);
+                    }}>
+                    <Text style={{
+                        fontSize:20,
+                        color: 'white'
+                    }}>QR-code</Text>
+                </TouchableHighlight>
 
-            </View>
+                <Modal
+                    animationType="slide"
+                    transparent={false}
+                    visible={this.state.modalVisible}
+                    onRequestClose={() => {
+                        this.setModalVisible(!this.state.modalVisible);
+                    }}>
+                    <View style={{
+                        flex:1,
+                        justifyContent: 'center'
+                    }}>
+                        {this.state.hasCameraPermission ?
+                        <BarCodeScanner
+                            onBarCodeRead={this._handleBarCodeRead.bind(this)}
+                            style={{
+                                flex:1
+                            }}
+                        /> : <Text>No access to camera</Text>}
+
+                        <TouchableHighlight
+                            onPress={() => {
+                                this.setModalVisible(!this.state.modalVisible);
+                            }}>
+                            <Text style={{
+                                fontSize:30,
+                                color:'white',
+                                textAlign: 'center',
+                                textAlignVertical: 'bottom',
+                                backgroundColor: 'black'
+                            }}>Go back</Text>
+                        </TouchableHighlight>
+                    </View>
+                </Modal>
+
+
+            </KeyboardAvoidingView>
         );
     }
 }

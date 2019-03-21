@@ -1,7 +1,7 @@
 import React from "react";
 import {
     Modal, Keyboard, TouchableHighlight, View,
-    Text, TextInput, FlatList, KeyboardAvoidingView, Dimensions
+    Text, TextInput, FlatList, KeyboardAvoidingView, Dimensions, Platform, Alert, AsyncStorage
 
 } from "react-native";
 import QRCode from 'react-native-qrcode';
@@ -75,6 +75,27 @@ class ChatScreen extends React.Component {
         this.setState({modalVisible: visible});
     }
 
+    _onQuitButtonPressed() {
+        console.log('Pressing Quit Button.');
+        Alert.alert(
+            'Alert',
+            'Are you sure you want to quit this chatroom?',
+            [
+                {text: 'No', onPress: () => console.log('Cancel Quit.'), style:'cancel'},
+                {text: 'Yes', onPress: () => {
+                        console.log('Confirm Quit.');
+                        console.log(`${this.state.currentState.userID} quit from (${this.state.chatID})`);
+                        let index = this.state.chatID.indexOf(this.state.chatID);
+                        this.state.currentState.chats.splice(index, 1);
+                        AsyncStorage.setItem('chats', JSON.stringify(this.state.currentState.chats));
+                        socket.emit("leaveChat", this.state.currentState.userID, this.state.chatID);
+                        this.props.navigation.navigate('Home');
+                    }},
+            ],
+            { cancelable: true }
+        );
+    }
+
     render() {
 /*
 *     welcome: {
@@ -85,7 +106,9 @@ class ChatScreen extends React.Component {
 * */
         return (
             // maybe better fix than to hardcode 90
-            <KeyboardAvoidingView style={styles.container} keyboardVerticalOffset={85} behavior="padding">
+            <KeyboardAvoidingView style={styles.container}
+                                  behavior={Platform.OS === "ios" ? "padding" : null}
+                                  keyboardVerticalOffset={Platform.OS === "ios" ? 64 : 0}>
 
                 <View style={{ flexDirection: 'row' ,justifyContent:'center'}}>
                     <Text style={{
@@ -112,7 +135,7 @@ class ChatScreen extends React.Component {
                     transparent={false}
                     visible={this.state.modalVisible}
                     onRequestClose={() => {
-                        Alert.alert('Modal has been closed.');
+                        this.setModalVisible(!this.state.modalVisible);
                     }}>
                     <View style={{
                         flex:1,
@@ -137,6 +160,16 @@ class ChatScreen extends React.Component {
                                 textAlignVertical: 'bottom',
                                 backgroundColor: 'black'
                             }}>Go back</Text>
+                        </TouchableHighlight>
+                        <TouchableHighlight
+                            onPress={this._onQuitButtonPressed.bind(this)}>
+                            <Text style={{
+                                marginVertical: 20,
+                                fontSize:30,
+                                textAlign: 'center',
+                                textAlignVertical: 'bottom',
+                                backgroundColor: 'black',
+                                color: 'white'}}>Leave chatroom</Text>
                         </TouchableHighlight>
                     </View>
                 </Modal>
