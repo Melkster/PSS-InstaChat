@@ -4,6 +4,7 @@
     "main": "server/server.js",
     "scripts": {
         "install": "mkdir -p db",
+        "test_db": "mocha DBMTests",
         "start": "nodemon server.js"
     },
     "author": "Axel Nygårds, Melker Österberg, Robert Markovski",
@@ -14,6 +15,8 @@
         "sqlite3": ""
     },
     "devDependencies": {
+        "mocha": "^6.0.2",
+        "chai": "^1.10.0",
         "nodemon": "^1.18.9"
     },
     "prettier": {

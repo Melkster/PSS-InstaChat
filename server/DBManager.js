@@ -2,21 +2,21 @@
 const fs = require("fs");
 const sqlite3 = require("sqlite3").verbose();
 const crypto = require("crypto");
-const DBMTests = require("./DBMTests.js");
 
 var globalDB;
 var chatDBs = {};
+var verbose;
 
 class DBManager {
     /* initDatabase:
-     * Initializes global database, creating global.db if it doesn't exist, reloading existing
-     * chat DBs otherwise (WIP).
+     * Initializes global database, in verbose mode if verbose_mode is true, in quiet mode otherwise,
+     * creating global.db if it doesn't exist, reloading existing chat DBs otherwise.
      * return: callback(null, true) if deleted successfully, callback(err, false) otherwise.
      */
 
-    initDatabase(callback) {
+    initDatabase(verbose_mode, callback) {
         let firstBoot = true;
-
+        verbose = verbose_mode;
         if (fs.existsSync("./db/global.db")) {
             firstBoot = false;
         }
@@ -25,7 +25,9 @@ class DBManager {
             if (err) {
                 return callback(err, null);
             } else {
-                console.log("Connected to global database.");
+                if (verbose == true) {
+                    console.log("Connected to global database.");
+                }
                 if (firstBoot == true) {
                     globalDB.run("CREATE TABLE GlobalUsers (userID INT PRIMARY KEY NOT NULL);", err => {
                         if (err) {
@@ -40,7 +42,6 @@ class DBManager {
                                         if (err) {
                                             return callback(err, false);
                                         } else {
-                                            //return DBMTests.test(this, chatDBs, callback); // TODO: Figrue out how to make chatDBs and globalDB instance variables because they probably should be.
                                             return callback(null, true);
                                         }
                                     });
@@ -58,7 +59,9 @@ class DBManager {
                                     if (err) {
                                         return callback(err, false);
                                     } else {
-                                        //console.log("Successfully reloaded database for chat " + row.chatID + ".");
+                                        if (verbose == true) {
+                                            console.log("Successfully reloaded database for chat " + row.chatID + ".");
+                                        }
                                         chatDBs[row.chatID] = newChatDB;
                                     }
                                 });
@@ -117,7 +120,9 @@ class DBManager {
                         }
                     });
                     chatDBs[chatID] = newChatDB;
-                    console.log("Created database for chat " + chatID + ".");
+                    if (verbose == true) {
+                        console.log("Created database for chat " + chatID + ".");
+                    }
                     newChatDB.serialize();
                     newChatDB.run(
                         "CREATE TABLE Users(userID INT UNIQUE NOT NULL, username TEXT NOT NULL, online INT NOT NULL, lastOnline INT NOT NULL);",
@@ -125,7 +130,7 @@ class DBManager {
                             if (err) {
                                 return callback(err, false);
                             } else {
-                                newChatDB.run('INSERT INTO Users VALUES(0, "event", 1, (?));', [Date.now()], err => {
+                                newChatDB.run('INSERT INTO Users VALUES(0, "Server", 1, (?));', [Date.now()], err => {
                                     if (err) {
                                         return callback(err, false);
                                     } else {
@@ -182,7 +187,9 @@ class DBManager {
                 console.error(err.message);
                 success = false;
             } else {
-                console.log("Created database for chat " + chatID + ".");
+                if (verbose == true) {
+                    console.log("Created database for chat " + chatID + ".");
+                }
             }
         });
         newChatDB.serialize();
@@ -241,7 +248,7 @@ class DBManager {
 
     /* deleteChat:
      * Deletes chat with `chatID`
-     * return: callback(null, true) if deleted successfully, otherwise callback(err, false).
+     * return: callback(null) if deleted successfully, otherwise callback(err, false).
      */
     deleteChat(chatID, callback) {
         if (chatDBs[chatID] == undefined) {
@@ -350,6 +357,7 @@ class DBManager {
     /* checkUser:
      * Checks if the user with `userID` is in the chat with `chatID` and returns their name.
      * return: callback(null, username) if `userID` is in the chat with `chatID`,
+     * callback(null, false) if `userID` is not in the chat with `chatID`,
      * callback(err, false) otherwise.
      */
     checkUser(userID, chatID, callback) {
@@ -365,9 +373,7 @@ class DBManager {
                           if (err) {
                               return callback(err, false);
                           }
-                          return row
-                              ? callback(null, row.username)
-                              : callback(Error("DBM_ERROR: User  " + userID + " does not exist in chat " + chatID), false);
+                          return row ? callback(null, row.username) : callback(null, false);
                       })
                     : callback(Error("DBM_ERROR: User " + userID + " does not exist"), false);
             });
