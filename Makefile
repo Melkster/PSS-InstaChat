@@ -11,6 +11,8 @@ install:
 	$(SERVER) npm install --no-optional
 	$(CLIENT) npm install --no-optional
 
+test: test_server test_db test_client
+
 test_server:
 	$(SERVER) npm run test_server
 

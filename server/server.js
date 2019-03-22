@@ -109,7 +109,6 @@ io.on("connection", socket => {
                 socket.emit("err", err.message);
                 console.error(err.message);
             } else {
-                // TODO: should chatID be added to every message? Doesn't seem to be actually needed.
                 messageWrapper.chatID = chatID;
                 if (username == false) {
                     messageWrapper.username = "Removed user";
