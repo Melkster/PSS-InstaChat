@@ -75,11 +75,14 @@ describe("Server events test", () => {
                 message: testMessage
             };
             sender.emit("message", JSON.stringify(messageWrapper));
-            sender.on("message", msg => {
-                expect(JSON.parse(msg).message).to.equal(messageWrapper.message);
-                expect(JSON.parse(msg).username).to.equal(messageWrapper.username);
-                expect(JSON.parse(msg).chatID).to.equal(messageWrapper.chatID);
-                done();
+            sender.on("message", messageWrapper => {
+                messageWrapper = JSON.parse(messageWrapper);
+                if (!messageWrapper.event) {
+                    expect(messageWrapper.message).to.equal(messageWrapper.message);
+                    expect(messageWrapper.username).to.equal(messageWrapper.username);
+                    expect(messageWrapper.chatID).to.equal(messageWrapper.chatID);
+                    done();
+                }
             });
             sender.on("err", err => {
                 console.log(err);
