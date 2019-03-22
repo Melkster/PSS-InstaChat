@@ -26,8 +26,11 @@ class ChatScreen extends React.Component {
 
         socket.on("message", messageWrapper => {
             console.log('Received '+ messageWrapper);
-            this.state.messages.unshift(JSON.parse(messageWrapper));
-            this.forceUpdate();
+            let message = JSON.parse(messageWrapper);
+            if(message.chatID===this.state.chatID) {
+                this.state.messages.unshift(message);
+                this.forceUpdate();
+            }
         });
 
 
